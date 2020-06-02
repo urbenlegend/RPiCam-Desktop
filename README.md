@@ -1,5 +1,5 @@
 # RPiCam-Desktop
-RPiCam is a security camera infrastructure project that aims to connect commodity hardware like the Raspberry Pi and regular webcams into a unified network suitable for home and small business usage. In addition to providing live feed dashboards and footage archiving/retrieval, it will also use software techniques to do object and motion detection, allowing users to easily search for and be notified of potential security incidents like theft, trespassing, and tampering. 
+RPiCam is a security camera infrastructure project that aims to connect commodity hardware like Raspberry Pis and regular webcams into a unified video network suitable for home and small business usage. In addition to providing live security feed dashboards and footage archiving/retrieval, it will also use software techniques to do object and motion detection, allowing users to easily search for and be notified of potential security incidents like theft, trespassing, and tampering. 
 
 RPiCam-Desktop serves as the central control and processing hub for this infrastructure.
 
