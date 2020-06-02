@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.benxiao.rpicam.video;
+package com.rpicam.video;
 
-import com.benxiao.rpicam.exceptions.VideoIOException;
+import com.rpicam.exceptions.VideoIOException;
 
 import javafx.scene.image.Image;
 import org.opencv.core.Mat;

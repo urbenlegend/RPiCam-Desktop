@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.benxiao.rpicam;
+package com.rpicam;
 
-import com.benxiao.rpicam.ui.*;
+import com.rpicam.ui.CameraStreamApp;
 import nu.pattern.OpenCV;
 
 public class CameraStream {

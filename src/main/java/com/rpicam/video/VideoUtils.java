@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.benxiao.rpicam.video;
+package com.rpicam.video;
 
 import java.io.ByteArrayInputStream;
 import javafx.scene.image.Image;

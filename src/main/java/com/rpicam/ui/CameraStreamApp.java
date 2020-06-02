@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.benxiao.rpicam.ui;
+package com.rpicam.ui;
 
-import com.benxiao.rpicam.video.OpenCVCamera;
+import com.rpicam.video.OpenCVCamera;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;

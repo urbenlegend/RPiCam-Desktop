@@ -41,7 +41,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.4</version>
                 <configuration>
-                    <mainClass>com.benxiao.rpicam.CameraStream</mainClass>
+                    <mainClass>com.rpicam.CameraStream</mainClass>
                 </configuration>
                 <executions>
                     <execution>

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.benxiao.rpicam.video;
+package com.rpicam.video;
 
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
@@ -23,7 +23,7 @@ public class OpenCVDetection {
     
     public OpenCVDetection() {
         cascadeClassifier = new CascadeClassifier();
-        cascadeClassifier.load("./src/main/resources/com/benxiao/rpicam/video/haarcascade_frontalface_alt.xml");
+        cascadeClassifier.load("./src/main/resources/com/rpicam/video/haarcascade_frontalface_alt.xml");
     }
     
     public Mat detectFace(Mat inputImage) {
