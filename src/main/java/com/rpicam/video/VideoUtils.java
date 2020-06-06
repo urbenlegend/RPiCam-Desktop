@@ -16,7 +16,7 @@ import org.opencv.imgcodecs.Imgcodecs;
  * @author benrx
  */
 public class VideoUtils {
-    public static Image mat2Img(Mat mat) {
+    public static Image toJFXImage(Mat mat) {
         MatOfByte bytes = new MatOfByte();
         Imgcodecs.imencode("*.bmp", mat, bytes);
         ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes.toArray());

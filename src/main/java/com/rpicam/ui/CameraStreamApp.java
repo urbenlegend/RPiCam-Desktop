@@ -5,7 +5,8 @@
  */
 package com.rpicam.ui;
 
-import com.rpicam.video.OpenCVCamera;
+import com.rpicam.video.OCVCamera;
+import com.rpicam.video.VideoUtils;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -20,7 +21,7 @@ import javafx.stage.Stage;
  * @author benrx
  */
 public class CameraStreamApp extends Application {
-    OpenCVCamera camera;
+    OCVCamera camera;
     AnimationTimer cameraTimer;
 
     public static void main(String[] args) {
@@ -29,11 +30,15 @@ public class CameraStreamApp extends Application {
     
     @Override
     public void start(Stage stage) {
-        camera = new OpenCVCamera();
+        camera = new OCVCamera();
+        //camera.addClassifier("./src/main/resources/com/rpicam/video/haarcascade_frontalface_alt.xml");
+        camera.addClassifier("./src/main/resources/com/rpicam/video/upperbody_recognition_model.xml");
+        camera.addClassifier("./src/main/resources/com/rpicam/video/facial_recognition_model.xml");
+        camera.addClassifier("./src/main/resources/com/rpicam/video/fullbody_recognition_model.xml");
         camera.open(0);
         
         // Capture a test frame to get video dimensions later
-        Image testImg = camera.getImage(false);
+        Image testImg = VideoUtils.toJFXImage(camera.getFrame(false));
 
         // Create JavaFX window
         ImageView imageView = new ImageView();
@@ -47,7 +52,7 @@ public class CameraStreamApp extends Application {
         cameraTimer = new AnimationTimer() {
             @Override
             public void handle(long l) {
-                imageView.setImage(camera.getImage(true));
+                imageView.setImage(VideoUtils.toJFXImage(camera.getFrameMultithreaded(true)));
             }
         };
         cameraTimer.start();
