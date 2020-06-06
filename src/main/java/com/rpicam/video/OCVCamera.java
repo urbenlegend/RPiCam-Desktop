@@ -6,8 +6,9 @@
 package com.rpicam.video;
 
 import com.rpicam.exceptions.VideoIOException;
+
 import java.util.*;
-import java.util.concurrent.*;
+import javafx.scene.image.Image;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
@@ -22,13 +23,11 @@ import org.opencv.videoio.Videoio;
  */
 public class OCVCamera {
     private VideoCapture capture;
-    private ExecutorService executor;
     private ArrayList<OCVClassifier> classifiers;
 
     public OCVCamera() {
         // Initialize camera
         capture = new VideoCapture();
-        executor = Executors.newCachedThreadPool();
         classifiers = new ArrayList<>();
     }
     
@@ -58,10 +57,9 @@ public class OCVCamera {
     
     public void release() {
         capture.release();
-        executor.shutdown();
     }
 
-    public Mat getFrame(boolean detect) {
+    public Image getFrame(boolean detect) {
         Mat frame = getRawFrame();
         
         if (detect) {            
@@ -73,36 +71,7 @@ public class OCVCamera {
             }
         }
         
-        return frame;
-    }
-    
-    public Mat getFrameMultithreaded(boolean detect) {
-        Mat frame = getRawFrame();
-        
-        if (detect) {
-            ArrayList<Future<Rect[]>> classResults = new ArrayList<>();
-            try {
-                for (var c : classifiers) {
-                    classResults.add(executor.submit(() -> {
-                        return c.process(frame);
-                    }));
-                }
-                for (var r : classResults) {
-                    Rect[] objArray = r.get();
-                    for (Rect obj : objArray) {
-                        Imgproc.rectangle(frame, obj.tl(), obj.br(), new Scalar(0, 0, 255), 3);
-                    }
-                }
-            }
-            catch (InterruptedException e) {
-                throw new VideoIOException("Classifier threads interrupted", e);
-            }
-            catch (ExecutionException e) {
-                throw new VideoIOException("Classifier thread error", e);
-            }
-        }
-        
-        return frame;
+        return VideoUtils.toJFXImage(frame);
     }
     
     public Mat getRawFrame() {

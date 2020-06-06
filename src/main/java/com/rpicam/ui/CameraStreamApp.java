@@ -38,7 +38,7 @@ public class CameraStreamApp extends Application {
         camera.open(0);
         
         // Capture a test frame to get video dimensions later
-        Image testImg = VideoUtils.toJFXImage(camera.getFrame(false));
+        Image testImg = camera.getFrame(false);
 
         // Create JavaFX window
         ImageView imageView = new ImageView();
@@ -52,7 +52,7 @@ public class CameraStreamApp extends Application {
         cameraTimer = new AnimationTimer() {
             @Override
             public void handle(long l) {
-                imageView.setImage(VideoUtils.toJFXImage(camera.getFrameMultithreaded(true)));
+                imageView.setImage(camera.getFrame(true));
             }
         };
         cameraTimer.start();
