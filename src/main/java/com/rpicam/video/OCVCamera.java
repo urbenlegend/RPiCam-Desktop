@@ -6,14 +6,8 @@
 package com.rpicam.video;
 
 import com.rpicam.exceptions.VideoIOException;
-
 import java.util.*;
-import javafx.scene.image.Image;
-
 import org.opencv.core.Mat;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.videoio.Videoio;
 
@@ -23,16 +17,20 @@ import org.opencv.videoio.Videoio;
  */
 public class OCVCamera {
     private VideoCapture capture;
-    private ArrayList<OCVClassifier> classifiers;
+    private ArrayList<OCVFrameHandler> handlers;
 
     public OCVCamera() {
         // Initialize camera
         capture = new VideoCapture();
-        classifiers = new ArrayList<>();
+        handlers = new ArrayList<>();
     }
     
-    public void addClassifier(String path) {
-        classifiers.add(new OCVClassifier(path));
+    public void addFrameHandler(OCVFrameHandler h) {
+        handlers.add(h);
+    }
+    
+    public void removeFrameHandler(OCVFrameHandler h) {
+        handlers.remove(h);
     }
     
     public void open(int camIndex) {
@@ -59,19 +57,14 @@ public class OCVCamera {
         capture.release();
     }
 
-    public Image getFrame(boolean detect) {
+    public Mat getFrame() {
         Mat frame = getRawFrame();
-        
-        if (detect) {            
-            for (var c : classifiers) {
-                Rect[] objArray = c.process(frame);
-                for (Rect obj : objArray) {
-                    Imgproc.rectangle(frame, obj.tl(), obj.br(), new Scalar(0, 0, 255), 3);
-                }
-            }
+                 
+        for (var c : handlers) {
+            c.handleFrame(frame);
         }
         
-        return VideoUtils.toJFXImage(frame);
+        return frame;
     }
     
     public Mat getRawFrame() {
