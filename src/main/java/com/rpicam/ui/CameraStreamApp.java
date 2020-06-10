@@ -7,14 +7,12 @@ package com.rpicam.ui;
 
 import com.rpicam.video.OCVCamera;
 import com.rpicam.video.OCVClassifier;
-import com.rpicam.video.VideoUtils;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import org.opencv.core.Mat;
 
 /**
  *
@@ -31,27 +29,15 @@ public class CameraStreamApp extends Application {
     @Override
     public void start(Stage stage) {
         camera = new OCVCamera();
+        camera.open(0);
 
-        // Register classifiers as camera frame handlers
         var upperBodyModel = new OCVClassifier("./data/upperbody_recognition_model.xml");
         var facialModel = new OCVClassifier("./data/facial_recognition_model.xml");
         var fullBodyModel = new OCVClassifier("./data/fullbody_recognition_model.xml");
-        upperBodyModel.setColor(255, 0, 0);
-        facialModel.setColor(0, 255, 0);
-        fullBodyModel.setColor(0, 0, 255);
-        camera.addFrameHandler(upperBodyModel);
-        camera.addFrameHandler(facialModel);
-        camera.addFrameHandler(fullBodyModel);
         
-        camera.open(0);
+        var cameraView = new CameraView();
         
-        // Capture a test frame to get video dimensions later
-        Image testImg = VideoUtils.toJFXImage(camera.getFrame());
-
-        // Create JavaFX window
-        ImageView imageView = new ImageView();
-        HBox hbox = new HBox(imageView);
-        Scene scene = new Scene(hbox, testImg.getWidth(), testImg.getHeight());
+        var scene = new Scene(cameraView, 640, 480);
         stage.setScene(scene);
         stage.setTitle("Camera Stream");
         stage.show();
@@ -60,7 +46,22 @@ public class CameraStreamApp extends Application {
         cameraTimer = new AnimationTimer() {
             @Override
             public void handle(long l) {
-                imageView.setImage(VideoUtils.toJFXImage(camera.getFrame()));
+                // TODO: Separate grabbing the frame from UI thread
+                var cameraModel = cameraView.getCameraModel();
+                Mat frame = camera.getFrame();
+                cameraModel.setMat(frame);
+                
+                // Apply classifiers and submit to model
+                cameraModel.clearClassifierResults();
+                for (var rect : upperBodyModel.apply(frame)) {
+                    cameraModel.addClassifierResult("Upper Body", Color.rgb(255, 0, 0), rect.x, rect.y, rect.width, rect.height);
+                }
+                for (var rect : facialModel.apply(frame)) {
+                    cameraModel.addClassifierResult("Face", Color.rgb(0, 255, 0), rect.x, rect.y, rect.width, rect.height);
+                }
+                for (var rect : fullBodyModel.apply(frame)) {
+                    cameraModel.addClassifierResult("Full Body", Color.rgb(0, 0, 255), rect.x, rect.y, rect.width, rect.height);
+                }
             }
         };
         cameraTimer.start();

@@ -6,7 +6,6 @@
 package com.rpicam.video;
 
 import com.rpicam.exceptions.VideoIOException;
-import java.util.*;
 import org.opencv.core.Mat;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.videoio.Videoio;
@@ -17,20 +16,10 @@ import org.opencv.videoio.Videoio;
  */
 public class OCVCamera {
     private VideoCapture capture;
-    private ArrayList<OCVFrameHandler> handlers;
 
     public OCVCamera() {
         // Initialize camera
         capture = new VideoCapture();
-        handlers = new ArrayList<>();
-    }
-    
-    public void addFrameHandler(OCVFrameHandler h) {
-        handlers.add(h);
-    }
-    
-    public void removeFrameHandler(OCVFrameHandler h) {
-        handlers.remove(h);
     }
     
     public void open(int camIndex) {
@@ -56,18 +45,8 @@ public class OCVCamera {
     public void release() {
         capture.release();
     }
-
-    public Mat getFrame() {
-        Mat frame = getRawFrame();
-                 
-        for (var c : handlers) {
-            c.handleFrame(frame);
-        }
-        
-        return frame;
-    }
     
-    public Mat getRawFrame() {
+    public Mat getFrame() {
         Mat frame = new Mat();
         if (!capture.read(frame)) {
             throw new VideoIOException("could not grab next frame from camera");
