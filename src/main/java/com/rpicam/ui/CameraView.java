@@ -9,6 +9,7 @@ import javafx.collections.ListChangeListener;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
+import javafx.scene.text.TextAlignment;
 
 /**
  *
@@ -39,20 +40,40 @@ public class CameraView extends StackPane {
     }
     
     public void drawClassifier(ClassifierResult result) {
+        var gc = classifierHud.getGraphicsContext2D();
+        gc.save();
+        
+        var cameraFrame = view.imageProperty().get();
+        double imageWidth = cameraFrame.getWidth();
+        double imageHeight = cameraFrame.getHeight();
         double hudWidth = classifierHud.getWidth();
         double hudHeight = classifierHud.getHeight();
-        double viewWidth = model.frameProperty().get().getWidth();
-        double viewHeight = model.frameProperty().get().getHeight();
+        
+        // Calculate aspect-ratio aware scale to match ImageView behavior
+        double scaleX = hudWidth / imageWidth;
+        double scaleY = hudHeight / imageHeight;
+        double scaleFactor = Math.min(scaleX, scaleY);
+        // Centers the HUD drawing so it draws on top of ImageView after scaling
+        if (scaleX > scaleY) {
+            double viewWidth = imageWidth / imageHeight * hudHeight;
+            gc.translate(hudWidth / 2 - viewWidth / 2, 0);
+        }
+        else {
+            double viewHeight = imageHeight / imageWidth * hudWidth;
+            gc.translate(0, hudHeight / 2 - viewHeight / 2);
+        }
+        gc.scale(scaleFactor, scaleFactor);
 
-        var gc = classifierHud.getGraphicsContext2D();
-
-        // Scale canvas drawing if image view is resized
-        double scaleX = hudWidth / viewWidth;
-        double scaleY = hudHeight / viewHeight;
-
+        // Draw classifier bounding box
         gc.setStroke(result.color);
-        // TODO: Keep aspect ratio when scaling
-        gc.strokeRect(result.x * scaleX, result.y * scaleY, result.w * scaleX, result.h * scaleY);
+        gc.strokeRect(result.x, result.y, result.w, result.h);
+        
+        // Draw classifier label
+        gc.setTextAlign(TextAlignment.RIGHT);
+        gc.setFill(result.color);
+        gc.fillText(result.title, result.x + result.w, result.y + result.h + 15);
+        
+        gc.restore();
     }
     
     public void clearClassifiers() {
@@ -60,7 +81,7 @@ public class CameraView extends StackPane {
         gc.clearRect(0, 0, classifierHud.getWidth(), classifierHud.getHeight());
     }
     
-    public void processClassifierChange(ListChangeListener.Change<? extends ClassifierResult> results) {
+    private void processClassifierChange(ListChangeListener.Change<? extends ClassifierResult> results) {
         results.next();
         if (results.wasRemoved()) {
             clearClassifiers();
