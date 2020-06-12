@@ -14,10 +14,10 @@ import org.opencv.videoio.Videoio;
  *
  * @author benrx
  */
-public class OCVCamera {
+public class OCVVideoCapture {
     private VideoCapture capture;
 
-    public OCVCamera() {
+    public OCVVideoCapture() {
         // Initialize camera
         capture = new VideoCapture();
     }
@@ -39,6 +39,12 @@ public class OCVCamera {
         
         if (!capture.open(camIndex, videoAPI)) {
             throw new VideoIOException("Could not open camera " + camIndex);
+        }
+    }
+    
+    public void open(String filename) {
+        if (!capture.open(filename)) {
+            throw new VideoIOException("Could not open video file " + filename);
         }
     }
     

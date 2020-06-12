@@ -5,22 +5,26 @@
  */
 package com.rpicam.ui;
 
-import com.rpicam.video.OCVCamera;
+import com.rpicam.video.VideoWorker;
 import com.rpicam.video.OCVClassifier;
+import com.rpicam.video.OCVVideoCapture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import org.opencv.core.Mat;
 
 /**
  *
  * @author benrx
  */
 public class CameraStreamApp extends Application {
-    OCVCamera camera;
-    AnimationTimer cameraTimer;
+    private ScheduledExecutorService schedulePool;
+    private AnimationTimer drawTimer;
+    private OCVVideoCapture camera;
+    
 
     public static void main(String[] args) {
         launch(args);
@@ -28,48 +32,50 @@ public class CameraStreamApp extends Application {
     
     @Override
     public void start(Stage stage) {
-        camera = new OCVCamera();
-        camera.open(0);
-
-        var upperBodyModel = new OCVClassifier("./data/upperbody_recognition_model.xml");
-        var facialModel = new OCVClassifier("./data/facial_recognition_model.xml");
-        var fullBodyModel = new OCVClassifier("./data/fullbody_recognition_model.xml");
+        schedulePool = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
         
-        var cameraView = new CameraView();
+        camera = new OCVVideoCapture();
+        camera.open(0);
+        
+        var upperBodyModel = new OCVClassifier("./data/upperbody_recognition_model.xml");
+        upperBodyModel.setTitle("Upper Body");
+        upperBodyModel.setRGB(255, 0, 0);
+        var facialModel = new OCVClassifier("./data/facial_recognition_model.xml");
+        facialModel.setTitle("Face");
+        facialModel.setRGB(0, 255, 0);
+        var fullBodyModel = new OCVClassifier("./data/fullbody_recognition_model.xml");
+        fullBodyModel.setTitle("Full Body");
+        fullBodyModel.setRGB(0, 0, 255);
+        
+        var cameraView = new VideoView();
+        var cameraWorker = new VideoWorker(camera, cameraView.getCameraModel());
+        cameraWorker.addClassifier(upperBodyModel);
+        cameraWorker.addClassifier(facialModel);
+        cameraWorker.addClassifier(fullBodyModel);
+
+        // Capture loop
+        schedulePool.scheduleWithFixedDelay(cameraWorker::processFrame, 0, 16, TimeUnit.MILLISECONDS);
+        
+        // Draw loop
+        drawTimer = new AnimationTimer() {
+            @Override
+            public void handle(long l) {
+                cameraWorker.sendToModel();
+            }
+        };
         
         var scene = new Scene(cameraView, 640, 480);
         stage.setScene(scene);
         stage.setTitle("Camera Stream");
         stage.show();
-
-        // Capture loop
-        cameraTimer = new AnimationTimer() {
-            @Override
-            public void handle(long l) {
-                // TODO: Separate grabbing the frame from UI thread
-                var cameraModel = cameraView.getCameraModel();
-                Mat frame = camera.getFrame();
-                cameraModel.setMat(frame);
                 
-                // Apply classifiers and submit to model
-                cameraModel.clearClassifierResults();
-                for (var rect : upperBodyModel.apply(frame)) {
-                    cameraModel.addClassifierResult("Upper Body", Color.rgb(255, 0, 0), rect.x, rect.y, rect.width, rect.height);
-                }
-                for (var rect : facialModel.apply(frame)) {
-                    cameraModel.addClassifierResult("Face", Color.rgb(0, 255, 0), rect.x, rect.y, rect.width, rect.height);
-                }
-                for (var rect : fullBodyModel.apply(frame)) {
-                    cameraModel.addClassifierResult("Full Body", Color.rgb(0, 0, 255), rect.x, rect.y, rect.width, rect.height);
-                }
-            }
-        };
-        cameraTimer.start();
+        drawTimer.start();
     }
     
     @Override
     public void stop() {
-        cameraTimer.stop();
+        schedulePool.shutdownNow();
+        drawTimer.stop();
         camera.release();
     }
 }

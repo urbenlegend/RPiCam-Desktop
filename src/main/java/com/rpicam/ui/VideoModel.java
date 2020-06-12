@@ -5,29 +5,30 @@
  */
 package com.rpicam.ui;
 
+import com.rpicam.video.ClassifierResult;
 import com.rpicam.video.VideoUtils;
+import java.util.ArrayList;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.image.Image;
-import javafx.scene.paint.Color;
 import org.opencv.core.Mat;
 
 /**
  *
  * @author benrx
  */
-public class CameraModel {
-    private SimpleObjectProperty<Image> frame;
+public class VideoModel {
+    private SimpleObjectProperty<Image> videoFrame;
     private SimpleListProperty<ClassifierResult> classifierResults;
     
-    public CameraModel() {
-        frame = new SimpleObjectProperty<>();
+    public VideoModel() {
+        videoFrame = new SimpleObjectProperty<>();
         classifierResults = new SimpleListProperty<>(FXCollections.observableArrayList());
     }
     
     public SimpleObjectProperty<Image> frameProperty() {
-        return frame;
+        return videoFrame;
     }
     
     public SimpleListProperty<ClassifierResult> classifierResultsProperty() {
@@ -35,30 +36,14 @@ public class CameraModel {
     }
     
     public void setMat(Mat mat) {
-        frame.set(VideoUtils.toJFXImage(mat));
+        videoFrame.set(VideoUtils.toJFXImage(mat));
     }
     
-    public void addClassifierResult(String title, Color color, int x, int y, int w, int h) {
-        var result = new ClassifierResult(title, color, x, y, w, h);
-        classifierResults.get().add(result);
+    public void addClassifierResults(ArrayList<ClassifierResult> results) {
+        classifierResults.get().addAll(results);
     }
     
     public void clearClassifierResults() {
         classifierResults.get().clear();
-    }
-}
-
-class ClassifierResult {
-    public final String title;
-    public final Color color;
-    public final int x, y, w, h;
-    
-    public ClassifierResult(String title, Color color, int x, int y, int w, int h) {
-        this.title = title;
-        this.color = color;
-        this.x = x;
-        this.y = y;
-        this.w = w;
-        this.h = h;
     }
 }

@@ -5,45 +5,47 @@
  */
 package com.rpicam.ui;
 
+import com.rpicam.video.ClassifierResult;
 import javafx.collections.ListChangeListener;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 
 /**
  *
  * @author benrx
  */
-public class CameraView extends StackPane {
-    private CameraModel model;
-    private ImageView view;
+public class VideoView extends StackPane {
+    private VideoModel uiModel;
+    private ImageView frameView;
     private Canvas classifierHud;
     
-    public CameraView() {
-        model = new CameraModel();
-        view = new ImageView();
+    public VideoView() {
+        uiModel = new VideoModel();
+        frameView = new ImageView();
         classifierHud = new Canvas();
-        view.imageProperty().bind(model.frameProperty());
-        view.setPreserveRatio(true);
-        view.fitWidthProperty().bind(widthProperty());
-        view.fitHeightProperty().bind(heightProperty());
+        frameView.imageProperty().bind(uiModel.frameProperty());
+        frameView.setPreserveRatio(true);
+        frameView.fitWidthProperty().bind(widthProperty());
+        frameView.fitHeightProperty().bind(heightProperty());
         classifierHud.widthProperty().bind(widthProperty());
         classifierHud.heightProperty().bind(heightProperty());
-        model.classifierResultsProperty().addListener(this::processClassifierChange);
+        uiModel.classifierResultsProperty().addListener(this::processClassifierChange);
         
-        getChildren().addAll(view, classifierHud);
+        getChildren().addAll(frameView, classifierHud);
     }
     
-    public CameraModel getCameraModel() {
-        return model;
+    public VideoModel getCameraModel() {
+        return uiModel;
     }
     
     public void drawClassifier(ClassifierResult result) {
         var gc = classifierHud.getGraphicsContext2D();
         gc.save();
         
-        var cameraFrame = view.imageProperty().get();
+        var cameraFrame = frameView.imageProperty().get();
         double imageWidth = cameraFrame.getWidth();
         double imageHeight = cameraFrame.getHeight();
         double hudWidth = classifierHud.getWidth();
@@ -65,12 +67,13 @@ public class CameraView extends StackPane {
         gc.scale(scaleFactor, scaleFactor);
 
         // Draw classifier bounding box
-        gc.setStroke(result.color);
+        Color boxColor = Color.rgb(result.r, result.g, result.b);
+        gc.setStroke(boxColor);
         gc.strokeRect(result.x, result.y, result.w, result.h);
         
         // Draw classifier label
         gc.setTextAlign(TextAlignment.RIGHT);
-        gc.setFill(result.color);
+        gc.setFill(boxColor);
         gc.fillText(result.title, result.x + result.w, result.y + result.h + 15);
         
         gc.restore();
