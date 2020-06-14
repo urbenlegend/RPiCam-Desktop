@@ -18,11 +18,11 @@ import org.opencv.core.Mat;
  *
  * @author benrx
  */
-public class VideoModel {
+public class VideoViewModel {
     private SimpleObjectProperty<Image> videoFrame;
     private SimpleListProperty<ClassifierResult> classifierResults;
     
-    public VideoModel() {
+    public VideoViewModel() {
         videoFrame = new SimpleObjectProperty<>();
         classifierResults = new SimpleListProperty<>(FXCollections.observableArrayList());
     }

@@ -18,26 +18,29 @@ import javafx.scene.text.TextAlignment;
  * @author benrx
  */
 public class VideoView extends StackPane {
-    private VideoModel uiModel;
+    private VideoViewModel uiModel;
     private ImageView frameView;
     private Canvas classifierHud;
     
     public VideoView() {
-        uiModel = new VideoModel();
+        uiModel = new VideoViewModel();
         frameView = new ImageView();
         classifierHud = new Canvas();
-        frameView.imageProperty().bind(uiModel.frameProperty());
+        
+        setMinSize(0, 0);
         frameView.setPreserveRatio(true);
         frameView.fitWidthProperty().bind(widthProperty());
         frameView.fitHeightProperty().bind(heightProperty());
         classifierHud.widthProperty().bind(widthProperty());
         classifierHud.heightProperty().bind(heightProperty());
+        
+        frameView.imageProperty().bind(uiModel.frameProperty());
         uiModel.classifierResultsProperty().addListener(this::processClassifierChange);
         
         getChildren().addAll(frameView, classifierHud);
     }
     
-    public VideoModel getCameraModel() {
+    public VideoViewModel getCameraModel() {
         return uiModel;
     }
     

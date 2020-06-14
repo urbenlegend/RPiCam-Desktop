@@ -8,11 +8,14 @@ package com.rpicam.ui;
 import com.rpicam.video.VideoWorker;
 import com.rpicam.video.OCVClassifier;
 import com.rpicam.video.OCVVideoCapture;
+import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -31,7 +34,7 @@ public class CameraStreamApp extends Application {
     }
     
     @Override
-    public void start(Stage stage) {
+    public void start(Stage stage) throws IOException {        
         schedulePool = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
         
         camera = new OCVVideoCapture();
@@ -54,7 +57,7 @@ public class CameraStreamApp extends Application {
         cameraWorker.addClassifier(fullBodyModel);
 
         // Capture loop
-        schedulePool.scheduleWithFixedDelay(cameraWorker::processFrame, 0, 16, TimeUnit.MILLISECONDS);
+        schedulePool.scheduleAtFixedRate(cameraWorker::processFrame, 0, 16, TimeUnit.MILLISECONDS);
         
         // Draw loop
         drawTimer = new AnimationTimer() {
@@ -64,9 +67,14 @@ public class CameraStreamApp extends Application {
             }
         };
         
-        var scene = new Scene(cameraView, 640, 480);
+        FXMLLoader dashboardLoader = new FXMLLoader(getClass().getResource("Dashboard.fxml"));
+        Parent dashboard = dashboardLoader.load();
+        DashboardController dashController = dashboardLoader.getController();
+        dashController.getLayout().add(cameraView, 1, 1);
+        
+        var scene = new Scene(dashboard);
         stage.setScene(scene);
-        stage.setTitle("Camera Stream");
+        stage.setTitle("RPiCam");
         stage.show();
                 
         drawTimer.start();

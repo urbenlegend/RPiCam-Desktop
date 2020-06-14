@@ -5,7 +5,7 @@
  */
 package com.rpicam.video;
 
-import com.rpicam.ui.VideoModel;
+import com.rpicam.ui.VideoViewModel;
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 import org.opencv.core.Mat;
@@ -19,12 +19,12 @@ public class VideoWorker {
     private final int QUEUE_SIZE = 60;
     
     private OCVVideoCapture camera;
-    private VideoModel uiModel;
+    private VideoViewModel uiModel;
     private ArrayList<OCVClassifier> classifiers;
     private ArrayBlockingQueue<Mat> imageQueue;
     private ArrayBlockingQueue<ArrayList<ClassifierResult>> classifierResults;
     
-    public VideoWorker(OCVVideoCapture cam, VideoModel model) {
+    public VideoWorker(OCVVideoCapture cam, VideoViewModel model) {
         camera = cam;
         uiModel = model;
         classifiers = new ArrayList<>();
@@ -48,6 +48,7 @@ public class VideoWorker {
         try {
             Mat frame = camera.getFrame();
             imageQueue.put(frame);
+            // TODO: For smoother playback consider splitting classification into a separate thread.
             ArrayList<ClassifierResult> results = new ArrayList<>();
             for (var c : classifiers) {
                 results.addAll(c.apply(frame));

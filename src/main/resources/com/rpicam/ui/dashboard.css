@@ -1,0 +1,15 @@
+.text{
+    -fx-font-smoothing-type: gray;
+}
+
+.sidebar {
+    -fx-background-color: #333645;
+}
+
+.sidebar-title {
+    -fx-background-color: #00A2D3;
+}
+
+.tabbar {
+    -fx-background-color: #ffffff;
+}
