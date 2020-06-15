@@ -18,17 +18,22 @@ import org.opencv.core.Mat;
 public class VideoWorker {
     private final int QUEUE_SIZE = 60;
     
+    private int processInterval = 1;
+    private int processCounter = 0;
+    
     private OCVVideoCapture camera;
     private VideoViewModel uiModel;
     private ArrayList<OCVClassifier> classifiers;
-    private ArrayBlockingQueue<Mat> imageQueue;
+    private ArrayBlockingQueue<Mat> displayQueue;
+    private ArrayBlockingQueue<Mat> processQueue;
     private ArrayBlockingQueue<ArrayList<ClassifierResult>> classifierResults;
     
     public VideoWorker(OCVVideoCapture cam, VideoViewModel model) {
         camera = cam;
         uiModel = model;
         classifiers = new ArrayList<>();
-        imageQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
+        displayQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
+        processQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
         classifierResults = new ArrayBlockingQueue<>(QUEUE_SIZE);
     }
     
@@ -43,12 +48,34 @@ public class VideoWorker {
     public void clearClassifiers() {
         classifiers.clear();
     }
+    
+    public void setProcessInterval(int interval) {
+        processInterval = interval;
+    }
+    
+    public void getFrame() {
+        try {
+            Mat frame = camera.getFrame();
+            displayQueue.put(frame);
+            processCounter++;
+            // Submit frame for processing if a processInterval
+            // amount of frames have been grabbed
+            if (processCounter == processInterval) {
+                processQueue.put(frame);
+                processCounter = 0;
+            }
+        }
+        catch (InterruptedException ex) {
+            // Okay for thread to be interrupted
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
 
     public void processFrame() {
         try {
-            Mat frame = camera.getFrame();
-            imageQueue.put(frame);
-            // TODO: For smoother playback consider splitting classification into a separate thread.
+            Mat frame = processQueue.take();
             ArrayList<ClassifierResult> results = new ArrayList<>();
             for (var c : classifiers) {
                 results.addAll(c.apply(frame));
@@ -63,8 +90,8 @@ public class VideoWorker {
         }
     }
     
-    public void sendToModel() {
-        Mat frame = imageQueue.poll();
+    public void updateUI() {
+        Mat frame = displayQueue.poll();
         if (frame != null) {
             uiModel.setMat(frame);
         }

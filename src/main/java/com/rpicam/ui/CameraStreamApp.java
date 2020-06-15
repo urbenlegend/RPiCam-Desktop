@@ -52,18 +52,20 @@ public class CameraStreamApp extends Application {
         
         var cameraView = new VideoView();
         var cameraWorker = new VideoWorker(camera, cameraView.getCameraModel());
+        cameraWorker.setProcessInterval(3);
         cameraWorker.addClassifier(upperBodyModel);
         cameraWorker.addClassifier(facialModel);
         cameraWorker.addClassifier(fullBodyModel);
 
         // Capture loop
-        schedulePool.scheduleAtFixedRate(cameraWorker::processFrame, 0, 16, TimeUnit.MILLISECONDS);
+        schedulePool.scheduleAtFixedRate(cameraWorker::getFrame, 0, 16, TimeUnit.MILLISECONDS);
+        schedulePool.scheduleAtFixedRate(cameraWorker::processFrame, 0, 1, TimeUnit.MILLISECONDS);
         
         // Draw loop
         drawTimer = new AnimationTimer() {
             @Override
             public void handle(long l) {
-                cameraWorker.sendToModel();
+                cameraWorker.updateUI();
             }
         };
         
