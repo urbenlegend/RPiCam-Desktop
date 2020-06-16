@@ -1,10 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.rpicam.ui;
 
+import com.rpicam.video.VideoViewModel;
 import com.rpicam.video.ClassifierResult;
 import javafx.collections.ListChangeListener;
 import javafx.scene.canvas.Canvas;
@@ -13,10 +9,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 
-/**
- *
- * @author benrx
- */
+
 public class VideoView extends StackPane {
     private VideoViewModel uiModel;
     private ImageView frameView;
