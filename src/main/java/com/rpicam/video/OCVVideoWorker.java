@@ -45,7 +45,7 @@ public class OCVVideoWorker implements VideoWorker {
     }
     
     @Override
-    public void open(int camIndex) {
+    public void open(int camIndex, int width, int height) {
         // Detect OS and use the right camera API
         // Necessary because CAP_ANY is too slow, but it is used for fallback
         String os = System.getProperty("os.name").toLowerCase();
@@ -63,6 +63,9 @@ public class OCVVideoWorker implements VideoWorker {
         if (!capture.open(camIndex, videoAPI)) {
             throw new VideoIOException("Could not open camera " + camIndex);
         }
+        
+        capture.set(Videoio.CAP_PROP_FRAME_WIDTH, width);
+        capture.set(Videoio.CAP_PROP_FRAME_HEIGHT, height);
     }
     
     @Override

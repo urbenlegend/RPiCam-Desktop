@@ -1,7 +1,7 @@
 package com.rpicam.video;
 
 public interface VideoWorker {    
-    default void open(int camIndex) {
+    default void open(int camIndex, int width, int height) {
         throw new UnsupportedOperationException("open via camera index");
     }
     
