@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -18,6 +19,8 @@ public class DashboardController implements Initializable {
     private GridPane dashboardGrid;
     @FXML
     private HBox pagePane;
+    @FXML
+    private Label pageTitle;
     
     private Parent scenesPage;
     private Parent camerasPage;
@@ -44,24 +47,28 @@ public class DashboardController implements Initializable {
     
     @FXML
     private void showScenesPage(MouseEvent event) {
+        pageTitle.setText("Scenes");
         pagePane.getChildren().clear();
         pagePane.getChildren().add(scenesPage);
     }
 
     @FXML
     private void showCamerasPage(MouseEvent event) {
+        pageTitle.setText("Cameras");
         pagePane.getChildren().clear();
         pagePane.getChildren().add(camerasPage);
     }
 
     @FXML
     private void showArchivesPage(MouseEvent event) {
+        pageTitle.setText("Archives");
         pagePane.getChildren().clear();
         pagePane.getChildren().add(archivesPage);
     }
 
     @FXML
     private void showSettingsPage(MouseEvent event) {
+        pageTitle.setText("Settings");
         pagePane.getChildren().clear();
         pagePane.getChildren().add(settingsPage);
     }

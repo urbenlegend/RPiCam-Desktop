@@ -12,7 +12,7 @@ import org.opencv.videoio.VideoCapture;
 import org.opencv.videoio.Videoio;
 
 
-public class OCVVideoWorker {
+public class OCVVideoWorker implements VideoWorker {
     private final int QUEUE_SIZE = 60;
     
     private VideoCapture capture;
@@ -25,6 +25,7 @@ public class OCVVideoWorker {
     private ScheduledExecutorService schedulePool;
     ScheduledFuture<?> grabThread;
     ScheduledFuture<?> processThread;
+    // TODO: Consider removing AnimationTimer out of worker and making updateUI func accept a uiModel
     AnimationTimer drawThread;
     
     public OCVVideoWorker(ScheduledExecutorService pool) {
@@ -34,8 +35,16 @@ public class OCVVideoWorker {
         imageQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
         processQueue = new ArrayBlockingQueue<>(1);
         classifierResults = new ArrayBlockingQueue<>(QUEUE_SIZE);
+        
+        drawThread = new AnimationTimer() {
+            @Override
+            public void handle(long l) {
+                updateUIFunc();
+            }
+        };
     }
     
+    @Override
     public void open(int camIndex) {
         // Detect OS and use the right camera API
         // Necessary because CAP_ANY is too slow, but it is used for fallback
@@ -56,40 +65,42 @@ public class OCVVideoWorker {
         }
     }
     
-    public void open(String filename) {
-        if (!capture.open(filename)) {
-            throw new VideoIOException("Could not open video file " + filename);
+    @Override
+    public void open(String path) {
+        if (!capture.open(path)) {
+            throw new VideoIOException("Could not open video file " + path);
         }
     }
     
+    @Override
     public void close() {
         capture.release();
     }
     
+    @Override
     public void start(int grabRate, int processRate) {
         grabThread = schedulePool.scheduleAtFixedRate(this::grabFrameFunc, 0, grabRate, TimeUnit.MILLISECONDS);
         processThread = schedulePool.scheduleAtFixedRate(this::processFrameFunc, 0, processRate, TimeUnit.MILLISECONDS);
-        
-        // Draw loop
-        drawThread = new AnimationTimer() {
-            @Override
-            public void handle(long l) {
-                updateUIFunc();
-            }
-        };
+        if (uiModel != null) {
+            drawThread.start();
+        }
     }
     
+    @Override
     public void stop() {
         grabThread.cancel(true);
         processThread.cancel(true);
         drawThread.stop();
     }
     
-    public void bindTo(VideoViewModel model) {
+    @Override
+    public void bind(VideoViewModel model) {
+        drawThread.stop();
         uiModel = model;
         drawThread.start();
     }
     
+    @Override
     public void unbind() {
         drawThread.stop();
         uiModel = null;

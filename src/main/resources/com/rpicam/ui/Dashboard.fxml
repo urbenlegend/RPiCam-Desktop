@@ -63,7 +63,7 @@
          </padding></VBox>
       <HBox alignment="CENTER_LEFT" styleClass="tabbar" GridPane.columnIndex="1" GridPane.columnSpan="2147483647">
          <children>
-            <Label text="Scenes" textFill="#7c8184">
+            <Label fx:id="pageTitle" text="Title" textFill="#7c8184">
                <font>
                   <Font size="28.0" />
                </font>

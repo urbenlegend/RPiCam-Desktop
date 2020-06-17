@@ -16,7 +16,7 @@ public class VideoManager {
     }
     
     private ScheduledExecutorService schedulePool;
-    private HashMap<UUID, OCVVideoWorker> workers;
+    private HashMap<UUID, VideoWorker> workers;
     
     public VideoManager() {
         schedulePool = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
@@ -41,20 +41,25 @@ public class VideoManager {
         cameraWorker.addClassifier(facialModel);
         cameraWorker.addClassifier(fullBodyModel);
         cameraWorker.open(0);
-        addWorker(UUID.fromString("dd243140-b03a-4d72-b5ce-8f31412af8a5"), cameraWorker);
+        cameraWorker.start(16, 80);
+        addWorker(cameraWorker, UUID.fromString("dd243140-b03a-4d72-b5ce-8f31412af8a5"));
     }
     
-    public void addWorker(UUID workerUUID, OCVVideoWorker worker) {
+    public void addWorker(VideoWorker worker, UUID workerUUID) {
+        if (workerUUID == null) {
+            workerUUID = UUID.randomUUID();
+        }
         workers.put(workerUUID, worker);
-        worker.start(33, 160);
     }
     
     public void removeWorker(UUID workerUUID) {
-        workers.get(workerUUID).stop();
+        var worker = workers.get(workerUUID);
+        worker.stop();
+        worker.close();
         workers.remove(workerUUID);
     }
     
-    public OCVVideoWorker getWorker(UUID workerUUID) {
+    public VideoWorker getWorker(UUID workerUUID) {
         return workers.get(workerUUID);
     }
     
