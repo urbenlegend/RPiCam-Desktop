@@ -10,6 +10,14 @@
     -fx-background-color: #00A2D3;
 }
 
+.sidebar-button {
+    -fx-background-color: transparent;
+}
+
+.sidebar-button:hover {
+    -fx-background-color: #4e5369;
+}
+
 .tabbar {
     -fx-background-color: #ffffff;
 }

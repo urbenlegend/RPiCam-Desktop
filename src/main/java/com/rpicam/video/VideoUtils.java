@@ -9,6 +9,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 
 public class VideoUtils {
     public static Image toJFXImage(Mat mat) {
+        // TODO: Figure out a way to convert without encoding
         MatOfByte bytes = new MatOfByte();
         Imgcodecs.imencode("*.bmp", mat, bytes);
         ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes.toArray());

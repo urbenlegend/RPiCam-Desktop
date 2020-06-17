@@ -1,56 +1,72 @@
 package com.rpicam.video;
 
 import java.util.HashMap;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import javafx.animation.AnimationTimer;
 
 public class VideoManager {
-    private ScheduledExecutorService schedulePool;
-    private HashMap<VideoWorker, VideoContract> contracts;
+    private static VideoManager managerSingleton;
     
-    private class VideoContract {
-        ScheduledFuture<?> grabThread;
-        ScheduledFuture<?> processThread;
-        AnimationTimer drawThread;
+    public static VideoManager getInstance() {
+        if (managerSingleton == null) {
+            managerSingleton = new VideoManager();
+        }
+        return managerSingleton;
     }
+    
+    private ScheduledExecutorService schedulePool;
+    private HashMap<UUID, OCVVideoWorker> workers;
     
     public VideoManager() {
         schedulePool = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
-        contracts = new HashMap<>();
+        workers = new HashMap<>();
     }
     
-    public void addWorker(VideoWorker worker, int grabRate, int processRate) {
-        var contract = new VideoContract();
-        contract.grabThread = schedulePool.scheduleAtFixedRate(worker::grabFrame, 0, grabRate, TimeUnit.MILLISECONDS);
-        contract.processThread = schedulePool.scheduleAtFixedRate(worker::processFrame, 0, processRate, TimeUnit.MILLISECONDS);
+    public void loadSources(String configFile) {
+        // TODO: Actually load from JSON file
+        var upperBodyModel = new OCVClassifier("./data/upperbody_recognition_model.xml");
+        upperBodyModel.setTitle("Upper Body");
+        upperBodyModel.setRGB(255, 0, 0);
+        var facialModel = new OCVClassifier("./data/facial_recognition_model.xml");
+        facialModel.setTitle("Face");
+        facialModel.setRGB(0, 255, 0);
+        var fullBodyModel = new OCVClassifier("./data/fullbody_recognition_model.xml");
+        fullBodyModel.setTitle("Full Body");
+        fullBodyModel.setRGB(0, 0, 255);
+
         
-        // Draw loop
-        contract.drawThread = new AnimationTimer() {
-            @Override
-            public void handle(long l) {
-                worker.updateUI();
-            }
-        };
-        contract.drawThread.start();
-        
-        contracts.put(worker, contract);
+        var cameraWorker = new OCVVideoWorker(schedulePool);
+        cameraWorker.addClassifier(upperBodyModel);
+        cameraWorker.addClassifier(facialModel);
+        cameraWorker.addClassifier(fullBodyModel);
+        cameraWorker.open(0);
+        addWorker(UUID.fromString("dd243140-b03a-4d72-b5ce-8f31412af8a5"), cameraWorker);
     }
     
-    public void removeWorker(VideoWorker worker) {
-        VideoContract contract = contracts.get(worker);
-        contract.grabThread.cancel(true);
-        contract.processThread.cancel(true);
-        contract.drawThread.stop();
-        contracts.remove(worker);
+    public void addWorker(UUID workerUUID, OCVVideoWorker worker) {
+        workers.put(workerUUID, worker);
+        worker.start(33, 160);
+    }
+    
+    public void removeWorker(UUID workerUUID) {
+        workers.get(workerUUID).stop();
+        workers.remove(workerUUID);
+    }
+    
+    public OCVVideoWorker getWorker(UUID workerUUID) {
+        return workers.get(workerUUID);
     }
     
     public void stopWorkers() {
-        schedulePool.shutdownNow();
-        for (var c : contracts.values()) {
-            c.drawThread.stop();
+        for (var w : workers.values()) {
+            w.stop();
+            w.close();
         }
+        schedulePool.shutdownNow();
+    }
+    
+    public void saveWorkersToJSON() {
+        
     }
 }
