@@ -9,7 +9,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 
-public class CameraStreamApp extends Application {
+public class MainApp extends Application {
     VideoManager videoManager = VideoManager.getInstance();
     
     public static void main(String[] args) {

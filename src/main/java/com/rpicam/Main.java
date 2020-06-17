@@ -5,12 +5,12 @@
  */
 package com.rpicam;
 
-import com.rpicam.ui.CameraStreamApp;
+import com.rpicam.ui.MainApp;
 import nu.pattern.OpenCV;
 
-public class CameraStream {
+public class Main {
     public static void main(String[] args) {
         OpenCV.loadLocally();
-        CameraStreamApp.main(args);
+        MainApp.main(args);
     }
 }
