@@ -41,7 +41,7 @@ public class VideoManager {
         cameraWorker.addClassifier(facialModel);
         cameraWorker.addClassifier(fullBodyModel);
         cameraWorker.open(0, 1920, 1080);
-        cameraWorker.start(16, 80);
+        cameraWorker.start(16, 160);
         addWorker(cameraWorker, UUID.fromString("dd243140-b03a-4d72-b5ce-8f31412af8a5"));
     }
     

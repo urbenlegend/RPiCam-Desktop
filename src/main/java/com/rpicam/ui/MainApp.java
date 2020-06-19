@@ -6,11 +6,14 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 
 public class MainApp extends Application {
-    VideoManager videoManager = VideoManager.getInstance();
+    private VideoManager videoManager = VideoManager.getInstance();
     
     public static void main(String[] args) {
         launch(args);
@@ -22,7 +25,12 @@ public class MainApp extends Application {
         
         Parent dashboard = FXMLLoader.load(getClass().getResource("Dashboard.fxml"));
         var scene = new Scene(dashboard);
+        
+        // Make window decoration-less
+        stage.initStyle(StageStyle.TRANSPARENT);
+        
         stage.setScene(scene);
+        
         stage.setTitle("RPiCam");
         stage.show();
     }

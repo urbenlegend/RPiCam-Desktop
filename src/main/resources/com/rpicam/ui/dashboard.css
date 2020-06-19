@@ -1,3 +1,7 @@
+.dashboard {
+    -fx-border-color: #333645;
+}
+
 .text{
     -fx-font-smoothing-type: gray;
 }
@@ -15,9 +19,37 @@
 }
 
 .sidebar-button:hover {
-    -fx-background-color: #4e5369;
+    -fx-background-color: #4E5369;
 }
 
-.tabbar {
-    -fx-background-color: #ffffff;
+.sidebar-menu-button {
+    -fx-background-color: transparent;
+}
+
+.sidebar-menu-button:hover {
+    -fx-background-color: #00B4EB;
+}
+
+.titlebar {
+    -fx-background-color: #FFFFFF;
+}
+
+.window-close-button {
+    -fx-background-color: transparent;
+}
+
+.window-close-button:hover {
+    -fx-background-color: #da1d1d;
+}
+
+.window-close-button:hover .window-close-icon {
+    -fx-icon-color: #ffffff;
+}
+
+.window-minmax-buttons {
+    -fx-background-color: transparent;
+}
+
+.window-minmax-buttons:hover {
+    -fx-background-color: #d8e2e7;
 }
