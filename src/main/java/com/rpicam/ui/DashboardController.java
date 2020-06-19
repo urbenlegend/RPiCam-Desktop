@@ -7,13 +7,11 @@ import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
@@ -46,6 +44,7 @@ public class DashboardController implements Initializable {
         catch (IOException ex) {
             throw new UIException("Dashboard failed to load sub pages", ex);
         }
+        
         showScenesPage();
     }
     
@@ -86,30 +85,35 @@ public class DashboardController implements Initializable {
     @FXML
     private void titleBarDragged(MouseEvent event) {
         Stage stage = (Stage) dashboardGrid.getScene().getWindow();
+        
+        // Workaround issue where both resize and move are triggered at the same time
+        if (xOffset < 4 || yOffset < 4) {
+            return;
+        }
+        
         if (stage.isMaximized()) {
             var screens = Screen.getScreensForRectangle(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight());
-            double screenWidth = screens.get(0).getBounds().getWidth();
+            var currentScreen = screens.get(0).getBounds();
             
             stage.setMaximized(false);
             
-            double centeredX = event.getScreenX() - stage.getWidth() / 2;
-            if (centeredX < 0) {
-                stage.setX(0);
+            double targetMinX = event.getScreenX() - stage.getWidth() / 2;
+            double targetMaxX = event.getScreenX() + stage.getWidth() / 2;
+            
+            if (targetMinX < currentScreen.getMinX()) {
+                xOffset = event.getScreenX();
             }
-            else if (centeredX + stage.getWidth() > screenWidth) {
-                double newX = screenWidth - stage.getWidth();
-                stage.setX(newX);
-                xOffset = xOffset - newX;
+            else if (targetMaxX > currentScreen.getMaxX()) {
+                xOffset = event.getScreenX() - (currentScreen.getMaxX() - stage.getWidth());
             }
             else {
-                stage.setX(centeredX);
                 xOffset = stage.getWidth() / 2;
             }
+            yOffset = event.getScreenY();
         }
-        else {
-            stage.setX(event.getScreenX() - xOffset);
-            stage.setY(event.getScreenY() - yOffset);
-        }
+        
+        stage.setX(event.getScreenX() - xOffset);
+        stage.setY(event.getScreenY() - yOffset);
     }
     
     @FXML

@@ -25,11 +25,11 @@ public class MainApp extends Application {
         
         Parent dashboard = FXMLLoader.load(getClass().getResource("Dashboard.fxml"));
         var scene = new Scene(dashboard);
+        stage.setScene(scene);
         
         // Make window decoration-less
         stage.initStyle(StageStyle.TRANSPARENT);
-        
-        stage.setScene(scene);
+        ResizeHelper.addResizeListener(stage);
         
         stage.setTitle("RPiCam");
         stage.show();
