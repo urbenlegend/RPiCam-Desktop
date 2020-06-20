@@ -4,6 +4,9 @@ import com.rpicam.exceptions.UIException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -12,8 +15,10 @@ import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 
 public class DashboardController implements Initializable {    
@@ -32,6 +37,8 @@ public class DashboardController implements Initializable {
     // Mouse offsets used to implement decoration less window
     private double xOffset;
     private double yOffset;
+    
+    private Timeline sidebarTimeline;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -45,7 +52,21 @@ public class DashboardController implements Initializable {
             throw new UIException("Dashboard failed to load sub pages", ex);
         }
         
+        setupAnimations();
         showScenesPage();
+    }
+    
+    private void setupAnimations() {
+        var widthProperty = dashboardGrid.getColumnConstraints().get(0).maxWidthProperty();
+        var maxWidth = dashboardGrid.getColumnConstraints().get(0).getMaxWidth();
+        var minWidth = dashboardGrid.getColumnConstraints().get(0).getMinWidth();
+        var kvSideBarOpen = new KeyValue(widthProperty, maxWidth);
+        var kfSideBarOpen = new KeyFrame(Duration.millis(0), kvSideBarOpen);
+        var kvSideBarClosed = new KeyValue(widthProperty, minWidth);
+        var kfSideBarClosed = new KeyFrame(Duration.millis(160), kvSideBarClosed);
+        sidebarTimeline = new Timeline();
+        sidebarTimeline.getKeyFrames().addAll(kfSideBarOpen, kfSideBarClosed);
+        sidebarTimeline.setRate(-1.0);
     }
     
     @FXML
@@ -132,5 +153,16 @@ public class DashboardController implements Initializable {
     private void closeWindow() {
         Stage stage = (Stage) dashboardGrid.getScene().getWindow();
         stage.close();
+    }
+    
+    @FXML
+    private void toggleSidebar() {
+        sidebarTimeline.setRate(-sidebarTimeline.getRate());
+        if (sidebarTimeline.getRate() < 0) {
+            sidebarTimeline.playFrom("end");
+        }
+        else {
+            sidebarTimeline.playFrom("start");
+        }
     }
 }

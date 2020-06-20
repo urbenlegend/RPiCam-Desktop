@@ -21,7 +21,7 @@ public class MainApp extends Application {
     
     @Override
     public void start(Stage stage) throws IOException {        
-        videoManager.loadSources(null);
+        videoManager.loadSources("./data/config.json");
         
         Parent dashboard = FXMLLoader.load(getClass().getResource("Dashboard.fxml"));
         var scene = new Scene(dashboard);

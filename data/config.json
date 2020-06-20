@@ -1,0 +1,27 @@
+{
+    "classifiers": [
+        {
+            "title": "Upper Body",
+            "color": {"r": 255, "g": 0, "b": 0},
+            "path": "./data/upperbody_recognition_model.xml"
+        },
+        {
+            "title": "Face",
+            "color": {"r": 0, "g": 255, "b": 0},
+            "path": "./data/facial_recognition_model.xml"
+        },
+        {
+            "title": "Full Body",
+            "color": {"r": 0, "g": 0, "b": 255},
+            "path": "./data/fullbody_recognition_model.xml"
+        }
+    ],
+    "cameras": [
+        {
+            "index": 0,
+            "res": {"w": 1920, "h": 1080},
+            "cap_rate": 16,
+            "proc_rate": 160
+        }
+    ]
+}

@@ -15,15 +15,15 @@
 
 <GridPane fx:id="dashboardGrid" prefHeight="800.0" prefWidth="1280.0" styleClass="dashboard" stylesheets="@dashboard.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rpicam.ui.DashboardController">
   <columnConstraints>
-    <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="54.0" prefWidth="250.0" />
-    <ColumnConstraints hgrow="SOMETIMES" />
+    <ColumnConstraints hgrow="SOMETIMES" maxWidth="250.0" minWidth="54.0" prefWidth="250.0" />
+    <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" prefWidth="1.0" />
   </columnConstraints>
   <rowConstraints>
-    <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="60.0" vgrow="SOMETIMES" />
-    <RowConstraints vgrow="SOMETIMES" />
+    <RowConstraints maxHeight="60.0" minHeight="60.0" prefHeight="60.0" vgrow="SOMETIMES" />
+    <RowConstraints maxHeight="1.7976931348623157E308" prefHeight="1.0" vgrow="SOMETIMES" />
   </rowConstraints>
    <children>
-      <VBox alignment="TOP_CENTER" minWidth="0.0" spacing="5.0" styleClass="sidebar" GridPane.rowIndex="1" GridPane.rowSpan="2147483647">
+      <VBox alignment="TOP_CENTER" spacing="5.0" styleClass="sidebar" GridPane.rowIndex="1" GridPane.rowSpan="2147483647">
          <children>
             <Button alignment="TOP_LEFT" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" minWidth="0.0" mnemonicParsing="false" onMouseClicked="#showScenesPage" styleClass="sidebar-button" text="Scenes" textFill="WHITE" textOverrun="CLIP">
                <font>
@@ -76,9 +76,9 @@
          <padding>
             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
          </padding></VBox>
-      <HBox alignment="CENTER_LEFT" minWidth="0.0" onMouseDragged="#titleBarDragged" onMousePressed="#titleBarPressed" spacing="5.0" styleClass="sidebar-title">
+      <HBox alignment="CENTER_LEFT" onMouseDragged="#titleBarDragged" onMousePressed="#titleBarPressed" spacing="5.0" styleClass="sidebar-title">
          <children>
-            <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" styleClass="sidebar-menu-button" text="Button">
+            <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onMouseClicked="#toggleSidebar" styleClass="sidebar-menu-button" text="Button">
                <graphic>
                   <FontIcon iconColor="WHITE" iconLiteral="mdi-menu" iconSize="24" />
                </graphic>
@@ -97,8 +97,8 @@
             <Insets left="5.0" />
          </padding>
       </HBox>
-      <HBox fx:id="pagePane" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-      <BorderPane onMouseDragged="#titleBarDragged" onMousePressed="#titleBarPressed" prefHeight="200.0" prefWidth="200.0" styleClass="titlebar" GridPane.columnIndex="1" GridPane.columnSpan="2147483647">
+      <HBox fx:id="pagePane" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+      <BorderPane onMouseDragged="#titleBarDragged" onMousePressed="#titleBarPressed" styleClass="titlebar" GridPane.columnIndex="1" GridPane.columnSpan="2147483647">
          <left>
             <Label fx:id="pageTitle" text="Page Title" textFill="#7c8184" BorderPane.alignment="CENTER">
                <font>

@@ -1,5 +1,9 @@
 package com.rpicam.video;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -23,8 +27,10 @@ public class VideoManager {
         workers = new HashMap<>();
     }
     
-    public void loadSources(String configFile) {
-        // TODO: Actually load from JSON file
+    public void loadSources(String configPath) throws IOException {
+        var configFile = Files.readString(Paths.get(configPath), StandardCharsets.US_ASCII);
+        
+        
         var upperBodyModel = new OCVClassifier("./data/upperbody_recognition_model.xml");
         upperBodyModel.setTitle("Upper Body");
         upperBodyModel.setRGB(255, 0, 0);
@@ -34,7 +40,6 @@ public class VideoManager {
         var fullBodyModel = new OCVClassifier("./data/fullbody_recognition_model.xml");
         fullBodyModel.setTitle("Full Body");
         fullBodyModel.setRGB(0, 0, 255);
-
         
         var cameraWorker = new OCVVideoWorker(schedulePool);
         cameraWorker.addClassifier(upperBodyModel);
