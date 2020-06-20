@@ -18,6 +18,7 @@
     ],
     "cameras": [
         {
+            "uuid": "dd243140-b03a-4d72-b5ce-8f31412af8a5",
             "index": 0,
             "res": {"w": 1920, "h": 1080},
             "cap_rate": 16,

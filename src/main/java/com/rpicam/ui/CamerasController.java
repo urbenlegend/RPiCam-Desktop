@@ -29,9 +29,10 @@ public class CamerasController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         // TODO: Replace with code that displays multiple videos
         var videoManager = VideoManager.getInstance();
-        var worker = videoManager.getWorker(UUID.fromString("dd243140-b03a-4d72-b5ce-8f31412af8a5"));
         var cameraView = new VideoView();
-        worker.bind(cameraView.getCameraModel());
+        for (var worker : videoManager.getWorkers().values()) {
+            worker.bind(cameraView.getCameraModel());
+        }
         cameraPane.setCenter(cameraView);
     }    
     

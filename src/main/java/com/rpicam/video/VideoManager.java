@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import org.json.JSONObject;
 
 public class VideoManager {
     private static VideoManager managerSingleton;
@@ -28,26 +30,46 @@ public class VideoManager {
     }
     
     public void loadSources(String configPath) throws IOException {
-        var configFile = Files.readString(Paths.get(configPath), StandardCharsets.US_ASCII);
+        // TODO: Consider using a less cumbersome JSON library
+        var configStr = Files.readString(Paths.get(configPath), StandardCharsets.US_ASCII);
+        var configJSON = new JSONObject(configStr);
         
+        var classifiers = new ArrayList<OCVClassifier>();
+        var classifiersJSON = configJSON.getJSONArray("classifiers");
+        for (int i = 0; i < classifiersJSON.length(); i++) {
+            var classifierObj = classifiersJSON.getJSONObject(i);
+            var title = classifierObj.getString("title");
+            var r = classifierObj.getJSONObject("color").getInt("r");
+            var g = classifierObj.getJSONObject("color").getInt("g");
+            var b = classifierObj.getJSONObject("color").getInt("b");
+            var path = classifierObj.getString("path");
+            
+            var classifier = new OCVClassifier(path);
+            classifier.setTitle(title);
+            classifier.setRGB(r, g, b);
+            classifiers.add(classifier);
+        }
         
-        var upperBodyModel = new OCVClassifier("./data/upperbody_recognition_model.xml");
-        upperBodyModel.setTitle("Upper Body");
-        upperBodyModel.setRGB(255, 0, 0);
-        var facialModel = new OCVClassifier("./data/facial_recognition_model.xml");
-        facialModel.setTitle("Face");
-        facialModel.setRGB(0, 255, 0);
-        var fullBodyModel = new OCVClassifier("./data/fullbody_recognition_model.xml");
-        fullBodyModel.setTitle("Full Body");
-        fullBodyModel.setRGB(0, 0, 255);
-        
-        var cameraWorker = new OCVVideoWorker(schedulePool);
-        cameraWorker.addClassifier(upperBodyModel);
-        cameraWorker.addClassifier(facialModel);
-        cameraWorker.addClassifier(fullBodyModel);
-        cameraWorker.open(0, 1920, 1080);
-        cameraWorker.start(16, 160);
-        addWorker(cameraWorker, UUID.fromString("dd243140-b03a-4d72-b5ce-8f31412af8a5"));
+        var camsJSON = configJSON.getJSONArray("cameras");
+        for (int i = 0; i < camsJSON.length(); i++) {
+            var camObj = camsJSON.getJSONObject(i);
+            var uuid = UUID.fromString(camObj.getString("uuid"));
+            var index = camObj.getInt("index");
+            var resW = camObj.getJSONObject("res").getInt("w");
+            var resH = camObj.getJSONObject("res").getInt("h");
+            var cap_rate = camObj.getInt("cap_rate");
+            var proc_rate = camObj.getInt("proc_rate");
+            
+            var cameraWorker = new OCVVideoWorker(schedulePool);
+            
+            for (var c : classifiers) {
+                cameraWorker.addClassifier(c);
+            }
+            
+            cameraWorker.open(index, resW, resH);
+            cameraWorker.start(cap_rate, proc_rate);
+            addWorker(cameraWorker, uuid);
+        }
     }
     
     public void addWorker(VideoWorker worker, UUID workerUUID) {
@@ -64,8 +86,8 @@ public class VideoManager {
         workers.remove(workerUUID);
     }
     
-    public VideoWorker getWorker(UUID workerUUID) {
-        return workers.get(workerUUID);
+    public HashMap<UUID, VideoWorker> getWorkers() {
+        return workers;
     }
     
     public void stopWorkers() {
