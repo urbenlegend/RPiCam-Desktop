@@ -12,6 +12,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.json.JSONObject;
 
 public class VideoManager {
+    private ScheduledExecutorService schedulePool;
+    private HashMap<UUID, VideoWorker> workers;
+    
     private static VideoManager managerSingleton;
     
     public static VideoManager getInstance() {
@@ -21,8 +24,12 @@ public class VideoManager {
         return managerSingleton;
     }
     
-    private ScheduledExecutorService schedulePool;
-    private HashMap<UUID, VideoWorker> workers;
+    public static void deleteInstance() {
+        if (managerSingleton != null) {
+            managerSingleton.stopWorkers();
+            managerSingleton = null;
+        }
+    }
     
     public VideoManager() {
         schedulePool = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
@@ -84,6 +91,10 @@ public class VideoManager {
         worker.stop();
         worker.close();
         workers.remove(workerUUID);
+    }
+    
+    public VideoWorker getWorker(UUID workerUUID) {
+        return workers.get(workerUUID);
     }
     
     public HashMap<UUID, VideoWorker> getWorkers() {
