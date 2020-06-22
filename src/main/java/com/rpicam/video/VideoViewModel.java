@@ -26,11 +26,8 @@ public class VideoViewModel {
         return classifierResults;
     }
     
-    public void setMat(UMat mat) {
-        // TODO: Figure out a way to not incur the buffer copy to reduce CPU
-        Mat tempMat = new Mat();
-        mat.copyTo(tempMat);
-        videoFrame.set(VideoUtils.toJFXImage(tempMat));
+    public void setUMat(UMat mat) {
+        videoFrame.set(VideoUtils.toJFXImage(mat));
     }
     
     public void addClassifierResults(ArrayList<ClassifierResult> results) {

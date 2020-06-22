@@ -16,7 +16,7 @@ import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 
 
 public class OCVVideoWorker implements VideoWorker {
-    private final int QUEUE_SIZE = 15;
+    private final int QUEUE_SIZE = 2;
     
     private VideoCapture capture;
     private VideoViewModel uiModel;
@@ -36,7 +36,7 @@ public class OCVVideoWorker implements VideoWorker {
         schedulePool = pool;
         classifiers = new ArrayList<>();
         imageQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
-        processQueue = new ArrayBlockingQueue<>(1);
+        processQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
         classifierResults = new ArrayBlockingQueue<>(QUEUE_SIZE);
         
         drawThread = new AnimationTimer() {
@@ -162,7 +162,7 @@ public class OCVVideoWorker implements VideoWorker {
     public void updateUIFunc() {
         UMat frame = imageQueue.poll();
         if (frame != null) {
-            uiModel.setMat(frame);
+            uiModel.setUMat(frame);
         }
         ArrayList<ClassifierResult> results = classifierResults.poll();
         if (results != null) {
