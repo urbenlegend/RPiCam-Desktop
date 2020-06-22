@@ -7,7 +7,7 @@ package com.rpicam.video;
 
 import java.util.ArrayList;
 import java.util.function.Function;
-import org.bytedeco.opencv.global.opencv_objdetect;
+import static org.bytedeco.opencv.global.opencv_objdetect.CASCADE_SCALE_IMAGE;
 import org.bytedeco.opencv.opencv_core.UMat;
 import org.bytedeco.opencv.opencv_core.RectVector;
 import org.bytedeco.opencv.opencv_core.Size;
@@ -47,7 +47,7 @@ public class OCVClassifier implements Function<UMat, ArrayList<ClassifierResult>
                 detectedObjs,
                 1.1,
                 3,
-                opencv_objdetect.CASCADE_SCALE_IMAGE,
+                CASCADE_SCALE_IMAGE,
                 new Size(minSize, minSize),
                 new Size()
         );

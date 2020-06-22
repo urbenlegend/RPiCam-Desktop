@@ -7,7 +7,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import javafx.animation.AnimationTimer;
-import org.bytedeco.opencv.global.opencv_videoio;
+import static org.bytedeco.opencv.global.opencv_videoio.CAP_ANY;
+import static org.bytedeco.opencv.global.opencv_videoio.CAP_DSHOW;
+import static org.bytedeco.opencv.global.opencv_videoio.CAP_PROP_FRAME_HEIGHT;
+import static org.bytedeco.opencv.global.opencv_videoio.CAP_PROP_FRAME_WIDTH;
 import org.bytedeco.opencv.opencv_core.UMat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 
@@ -48,14 +51,14 @@ public class OCVVideoWorker implements VideoWorker {
     public void open(int camIndex, int width, int height) {
         // Don't use OpenCV's MSMF backend on Windows. It is very slow.
         String os = System.getProperty("os.name").toLowerCase();
-        int videoAPI = os.contains("win") ? opencv_videoio.CAP_DSHOW : opencv_videoio.CAP_ANY;
+        int videoAPI = os.contains("win") ? CAP_DSHOW : CAP_ANY;
         
         if (!capture.open(camIndex, videoAPI)) {
             throw new VideoIOException("Could not open camera " + camIndex);
         }
         
-        capture.set(opencv_videoio.CAP_PROP_FRAME_WIDTH, width);
-        capture.set(opencv_videoio.CAP_PROP_FRAME_HEIGHT, height);
+        capture.set(CAP_PROP_FRAME_WIDTH, width);
+        capture.set(CAP_PROP_FRAME_HEIGHT, height);
     }
     
     @Override
