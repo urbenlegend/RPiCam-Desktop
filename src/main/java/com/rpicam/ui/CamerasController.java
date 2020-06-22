@@ -8,7 +8,6 @@ package com.rpicam.ui;
 import com.rpicam.video.VideoManager;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.UUID;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.BorderPane;

@@ -38,10 +38,15 @@ public class VideoView extends StackPane {
     }
     
     public void drawClassifier(ClassifierResult result) {
+        // Don't draw classifier if we haven't received camera image yet
+        var cameraFrame = frameView.imageProperty().get();
+        if (cameraFrame == null) {
+            return;
+        }
+        
         var gc = classifierHud.getGraphicsContext2D();
         gc.save();
         
-        var cameraFrame = frameView.imageProperty().get();
         double imageWidth = cameraFrame.getWidth();
         double imageHeight = cameraFrame.getHeight();
         double hudWidth = classifierHud.getWidth();

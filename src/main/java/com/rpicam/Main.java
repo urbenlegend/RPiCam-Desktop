@@ -6,11 +6,13 @@
 package com.rpicam;
 
 import com.rpicam.ui.MainApp;
-import nu.pattern.OpenCV;
+import org.bytedeco.opencv.global.opencv_core;
 
 public class Main {
     public static void main(String[] args) {
-        OpenCV.loadLocally();
+        // Setup OpenCL
+        opencv_core.setUseOpenCL(true);
+        
         MainApp.main(args);
     }
 }

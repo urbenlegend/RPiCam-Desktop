@@ -5,7 +5,8 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.image.Image;
-import org.opencv.core.Mat;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.UMat;
 
 
 public class VideoViewModel {
@@ -25,8 +26,11 @@ public class VideoViewModel {
         return classifierResults;
     }
     
-    public void setMat(Mat mat) {
-        videoFrame.set(VideoUtils.toJFXImage(mat));
+    public void setMat(UMat mat) {
+        // TODO: Figure out a way to not incur the buffer copy to reduce CPU
+        Mat tempMat = new Mat();
+        mat.copyTo(tempMat);
+        videoFrame.set(VideoUtils.toJFXImage(tempMat));
     }
     
     public void addClassifierResults(ArrayList<ClassifierResult> results) {

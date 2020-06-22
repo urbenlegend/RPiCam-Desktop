@@ -7,19 +7,19 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import javafx.animation.AnimationTimer;
-import org.opencv.core.Mat;
-import org.opencv.videoio.VideoCapture;
-import org.opencv.videoio.Videoio;
+import org.bytedeco.opencv.global.opencv_videoio;
+import org.bytedeco.opencv.opencv_core.UMat;
+import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 
 
 public class OCVVideoWorker implements VideoWorker {
-    private final int QUEUE_SIZE = 60;
+    private final int QUEUE_SIZE = 15;
     
     private VideoCapture capture;
     private VideoViewModel uiModel;
     private ArrayList<OCVClassifier> classifiers;
-    private ArrayBlockingQueue<Mat> imageQueue;
-    private ArrayBlockingQueue<Mat> processQueue;
+    private ArrayBlockingQueue<UMat> imageQueue;
+    private ArrayBlockingQueue<UMat> processQueue;
     private ArrayBlockingQueue<ArrayList<ClassifierResult>> classifierResults;
     
     private ScheduledExecutorService schedulePool;
@@ -48,14 +48,14 @@ public class OCVVideoWorker implements VideoWorker {
     public void open(int camIndex, int width, int height) {
         // Don't use OpenCV's MSMF backend on Windows. It is very slow.
         String os = System.getProperty("os.name").toLowerCase();
-        int videoAPI = os.contains("win") ? Videoio.CAP_DSHOW : Videoio.CAP_ANY;
+        int videoAPI = os.contains("win") ? opencv_videoio.CAP_DSHOW : opencv_videoio.CAP_ANY;
         
         if (!capture.open(camIndex, videoAPI)) {
             throw new VideoIOException("Could not open camera " + camIndex);
         }
         
-        capture.set(Videoio.CAP_PROP_FRAME_WIDTH, width);
-        capture.set(Videoio.CAP_PROP_FRAME_HEIGHT, height);
+        capture.set(opencv_videoio.CAP_PROP_FRAME_WIDTH, width);
+        capture.set(opencv_videoio.CAP_PROP_FRAME_HEIGHT, height);
     }
     
     @Override
@@ -111,8 +111,8 @@ public class OCVVideoWorker implements VideoWorker {
         classifiers.clear();
     }
     
-    private Mat getFrame() {
-        Mat frame = new Mat();
+    private UMat getFrame() {
+        UMat frame = new UMat();
         if (!capture.read(frame)) {
             throw new VideoIOException("could not grab next frame from camera");
         }
@@ -121,7 +121,7 @@ public class OCVVideoWorker implements VideoWorker {
     
     public void grabFrameFunc() {
         try {
-            Mat frame = getFrame();
+            UMat frame = getFrame();
             imageQueue.put(frame);
             
             // Make sure process Queue doesn't fall too far behind by
@@ -140,7 +140,7 @@ public class OCVVideoWorker implements VideoWorker {
 
     public void processFrameFunc() {
         try {
-            Mat frame = processQueue.take();
+            UMat frame = processQueue.take();
             ArrayList<ClassifierResult> results = new ArrayList<>();
             for (var c : classifiers) {
                 results.addAll(c.apply(frame));
@@ -157,7 +157,7 @@ public class OCVVideoWorker implements VideoWorker {
     }
     
     public void updateUIFunc() {
-        Mat frame = imageQueue.poll();
+        UMat frame = imageQueue.poll();
         if (frame != null) {
             uiModel.setMat(frame);
         }
