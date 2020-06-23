@@ -19,14 +19,10 @@ public class VideoUtils {
         
         var w = bgraMat.cols();
         var h = bgraMat.rows();
-        var channels = 4;
         
-        var imageArray = new byte[w * h * channels];
         try (Mat tempMat = bgraMat.getMat(ACCESS_READ)) {
-            tempMat.data().get(imageArray);
-        }
-        var buffer = new PixelBuffer<ByteBuffer>(w, h, ByteBuffer.wrap(imageArray), PixelFormat.getByteBgraPreInstance());
-        
-        return new WritableImage(buffer);
+            var pixelBuf = new PixelBuffer<ByteBuffer>(w, h, tempMat.createBuffer(), PixelFormat.getByteBgraPreInstance());
+            return new WritableImage(pixelBuf);
+        }    
     }
 }
