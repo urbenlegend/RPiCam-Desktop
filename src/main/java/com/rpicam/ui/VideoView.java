@@ -86,12 +86,13 @@ public class VideoView extends StackPane {
     }
     
     private void processClassifierChange(ListChangeListener.Change<? extends ClassifierResult> results) {
-        results.next();
-        if (results.wasRemoved()) {
-            clearClassifiers();
-        }
-        for (var r : results.getAddedSubList()) {
-            drawClassifier(r);
+        while (results.next()) {
+            if (results.wasRemoved()) {
+                clearClassifiers();
+            }
+            for (var r : results.getAddedSubList()) {
+                drawClassifier(r);
+            }
         }
     }
 }

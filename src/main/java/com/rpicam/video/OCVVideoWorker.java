@@ -148,7 +148,7 @@ public class OCVVideoWorker implements VideoWorker {
             for (var c : classifiers) {
                 results.addAll(c.apply(frame));
             }
-            classifierResults.add(results);
+            classifierResults.put(results);
         }
         catch (InterruptedException ex) {
             // Okay for thread to be interrupted
