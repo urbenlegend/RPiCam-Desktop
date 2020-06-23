@@ -11,18 +11,52 @@ import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.UMat;
 
-
 public class VideoUtils {
+
     public static Image toJFXImage(UMat mat) {
         UMat bgraMat = new UMat();
         cvtColor(mat, bgraMat, COLOR_BGR2BGRA);
-        
-        var w = bgraMat.cols();
-        var h = bgraMat.rows();
-        
+
         try (Mat tempMat = bgraMat.getMat(ACCESS_READ)) {
-            var pixelBuf = new PixelBuffer<ByteBuffer>(w, h, tempMat.createBuffer(), PixelFormat.getByteBgraPreInstance());
+            ByteBuffer buf = deepCopy(tempMat.createBuffer());
+            var pixelBuf = new PixelBuffer<ByteBuffer>(tempMat.cols(), tempMat.rows(), buf, PixelFormat.getByteBgraPreInstance());
             return new WritableImage(pixelBuf);
-        }    
+        }
+    }
+
+    public static ByteBuffer deepCopy(ByteBuffer orig) {
+        int pos = orig.position();
+        int lim = orig.limit();
+        try {
+            orig.position(0).limit(orig.capacity()); // set range to entire buffer
+            ByteBuffer toReturn = deepCopyVisible(orig); // deep copy range
+            toReturn.position(pos).limit(lim); // set range to original
+            return toReturn;
+        }
+        finally // do in finally in case something goes wrong we don't bork the orig
+        {
+            orig.position(pos).limit(lim); // restore original
+        }
+    }
+
+    public static ByteBuffer deepCopyVisible(ByteBuffer orig) {
+        int pos = orig.position();
+        try {
+            ByteBuffer toReturn;
+            // try to maintain implementation to keep performance
+            if (orig.isDirect()) {
+                toReturn = ByteBuffer.allocateDirect(orig.remaining());
+            } else {
+                toReturn = ByteBuffer.allocate(orig.remaining());
+            }
+
+            toReturn.put(orig);
+            toReturn.order(orig.order());
+
+            return toReturn.position(0);
+        }
+        finally {
+            orig.position(pos);
+        }
     }
 }
