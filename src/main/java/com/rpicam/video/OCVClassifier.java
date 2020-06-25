@@ -18,12 +18,11 @@ import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
  * @author benrx
  */
 public class OCVClassifier implements Function<UMat, ArrayList<ClassifierResult>> {
-    private CascadeClassifier classifier;
+    private CascadeClassifier classifier = new CascadeClassifier();
     private String title = "";
     private int r = 255, g = 255, b = 255;
     
     public OCVClassifier(String path) {
-        classifier = new CascadeClassifier();
         classifier.load(path);
     }
     

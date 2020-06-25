@@ -7,13 +7,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import org.json.JSONObject;
 
 public class VideoManager {
-    private ScheduledExecutorService schedulePool;
-    private HashMap<UUID, VideoWorker> workers;
+    private HashMap<UUID, VideoWorker> workers = new HashMap<>();
     
     private static VideoManager managerSingleton;
     
@@ -29,11 +26,6 @@ public class VideoManager {
             managerSingleton.stopWorkers();
             managerSingleton = null;
         }
-    }
-    
-    public VideoManager() {
-        schedulePool = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
-        workers = new HashMap<>();
     }
     
     public void loadSources(String configPath) throws IOException {
@@ -67,7 +59,7 @@ public class VideoManager {
             var cap_rate = camObj.getInt("cap_rate");
             var proc_rate = camObj.getInt("proc_rate");
             
-            var cameraWorker = new OCVVideoWorker(schedulePool);
+            var cameraWorker = new OCVVideoWorker();
             
             for (var c : classifiers) {
                 cameraWorker.addClassifier(c);
@@ -106,7 +98,6 @@ public class VideoManager {
             w.stop();
             w.close();
         }
-        schedulePool.shutdownNow();
     }
     
     public void saveWorkersToJSON() {

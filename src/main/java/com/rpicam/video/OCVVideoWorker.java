@@ -3,8 +3,8 @@ package com.rpicam.video;
 import com.rpicam.exceptions.VideoIOException;
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import javafx.animation.AnimationTimer;
 import static org.bytedeco.opencv.global.opencv_videoio.CAP_ANY;
@@ -18,27 +18,18 @@ import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 public class OCVVideoWorker implements VideoWorker {
     private final int QUEUE_SIZE = 2;
     
-    private VideoCapture capture;
     private VideoViewModel uiModel;
-    private ArrayList<OCVClassifier> classifiers;
-    private ArrayBlockingQueue<UMat> imageQueue;
-    private ArrayBlockingQueue<UMat> processQueue;
-    private ArrayBlockingQueue<ArrayList<ClassifierResult>> classifierResults;
+    private VideoCapture capture  = new VideoCapture();
+    private ArrayList<OCVClassifier> classifiers = new ArrayList<>();
+    private ArrayBlockingQueue<UMat> imageQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
+    private ArrayBlockingQueue<UMat> processQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
+    private ArrayBlockingQueue<ArrayList<ClassifierResult>> classifierResults = new ArrayBlockingQueue<>(QUEUE_SIZE);
     
     private ScheduledExecutorService schedulePool;
-    ScheduledFuture<?> grabThread;
-    ScheduledFuture<?> processThread;
     // TODO: Consider removing AnimationTimer out of worker and making updateUI func accept a uiModel
     AnimationTimer drawThread;
     
-    public OCVVideoWorker(ScheduledExecutorService pool) {
-        capture = new VideoCapture();
-        schedulePool = pool;
-        classifiers = new ArrayList<>();
-        imageQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
-        processQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
-        classifierResults = new ArrayBlockingQueue<>(QUEUE_SIZE);
-        
+    public OCVVideoWorker() {        
         drawThread = new AnimationTimer() {
             @Override
             public void handle(long l) {
@@ -75,8 +66,13 @@ public class OCVVideoWorker implements VideoWorker {
     
     @Override
     public void start(int grabRate, int processRate) {
-        grabThread = schedulePool.scheduleAtFixedRate(this::grabFrameFunc, 0, grabRate, TimeUnit.MILLISECONDS);
-        processThread = schedulePool.scheduleAtFixedRate(this::processFrameFunc, 0, processRate, TimeUnit.MILLISECONDS);
+        if (schedulePool != null) {
+            return;
+        }
+        
+        schedulePool = Executors.newScheduledThreadPool(2);
+        schedulePool.scheduleAtFixedRate(this::grabFrameFunc, 0, grabRate, TimeUnit.MILLISECONDS);
+        schedulePool.scheduleAtFixedRate(this::processFrameFunc, 0, processRate, TimeUnit.MILLISECONDS);
         if (uiModel != null) {
             drawThread.start();
         }
@@ -84,8 +80,8 @@ public class OCVVideoWorker implements VideoWorker {
     
     @Override
     public void stop() {
-        grabThread.cancel(true);
-        processThread.cancel(true);
+        schedulePool.shutdownNow();
+        schedulePool = null;
         drawThread.stop();
     }
     

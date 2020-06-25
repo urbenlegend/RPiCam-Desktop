@@ -11,15 +11,11 @@ import javafx.scene.text.TextAlignment;
 
 
 public class VideoView extends StackPane {
-    private VideoViewModel uiModel;
-    private ImageView frameView;
-    private Canvas classifierHud;
+    private VideoViewModel uiModel = new VideoViewModel();
+    private ImageView frameView = new ImageView();
+    private Canvas classifierHud = new Canvas();
     
     public VideoView() {
-        uiModel = new VideoViewModel();
-        frameView = new ImageView();
-        classifierHud = new Canvas();
-        
         setMinSize(0, 0);
         frameView.setPreserveRatio(true);
         frameView.fitWidthProperty().bind(widthProperty());
