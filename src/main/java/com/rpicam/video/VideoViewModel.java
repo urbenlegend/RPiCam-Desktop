@@ -1,15 +1,13 @@
 package com.rpicam.video;
 
-import java.util.ArrayList;
+import java.util.List;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.image.Image;
-import org.bytedeco.opencv.opencv_core.UMat;
 
 
 public class VideoViewModel {
-    private UMat bgraMat = new UMat();
     private SimpleObjectProperty<Image> videoFrame = new SimpleObjectProperty<>();
     private SimpleListProperty<ClassifierResult> classifierResults = new SimpleListProperty<>(FXCollections.observableArrayList());
     
@@ -21,7 +19,7 @@ public class VideoViewModel {
         return classifierResults;
     }
     
-    public void addClassifierResults(ArrayList<ClassifierResult> results) {
+    public void addClassifierResults(List<ClassifierResult> results) {
         classifierResults.get().addAll(results);
     }
     

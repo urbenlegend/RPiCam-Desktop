@@ -30,7 +30,7 @@ public class CamerasController implements Initializable {
         var videoManager = VideoManager.getInstance();
         var cameraView = new VideoView();
         for (var worker : videoManager.getWorkers().values()) {
-            worker.bind(cameraView.getCameraModel());
+            worker.setModel(cameraView.getCameraModel());
         }
         cameraPane.setCenter(cameraView);
     }    

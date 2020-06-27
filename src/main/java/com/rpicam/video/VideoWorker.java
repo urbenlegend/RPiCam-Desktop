@@ -15,9 +15,7 @@ public interface VideoWorker {
     
     void stop();
     
-    void bind(VideoViewModel model);
-    
-    void unbind();
+    void setModel(VideoViewModel model);
     
     default String toJSON() {
         return "";
