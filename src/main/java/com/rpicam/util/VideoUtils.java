@@ -1,4 +1,4 @@
-package com.rpicam.video;
+package com.rpicam.util;
 
 import java.nio.ByteBuffer;
 import javafx.scene.image.Image;

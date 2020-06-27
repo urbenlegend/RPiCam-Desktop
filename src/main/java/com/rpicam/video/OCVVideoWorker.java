@@ -1,5 +1,7 @@
 package com.rpicam.video;
 
+import com.rpicam.util.VideoUtils;
+import com.rpicam.util.MemoryPool;
 import com.rpicam.exceptions.VideoIOException;
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -7,6 +9,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import javafx.animation.AnimationTimer;
+import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2BGRA;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
 import static org.bytedeco.opencv.global.opencv_videoio.CAP_ANY;
 import static org.bytedeco.opencv.global.opencv_videoio.CAP_DSHOW;
 import static org.bytedeco.opencv.global.opencv_videoio.CAP_PROP_FRAME_HEIGHT;
@@ -18,18 +22,24 @@ import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 public class OCVVideoWorker implements VideoWorker {
     private final int QUEUE_SIZE = 2;
     
-    private VideoViewModel uiModel;
-    private VideoCapture capture  = new VideoCapture();
-    private ArrayList<OCVClassifier> classifiers = new ArrayList<>();
+    private VideoCapture capture = new VideoCapture();
+    private MemoryPool<UMat> capturePool;
+    // Allocate a bgra mat for UI display purposes
+    private UMat bgraMat = new UMat();
+    
     private ArrayBlockingQueue<UMat> imageQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
-    private ArrayBlockingQueue<UMat> processQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
+    private ArrayBlockingQueue<UMat> processQueue = new ArrayBlockingQueue<>(1);
     private ArrayBlockingQueue<ArrayList<ClassifierResult>> classifierResults = new ArrayBlockingQueue<>(QUEUE_SIZE);
+    
+    private ArrayList<OCVClassifier> classifiers = new ArrayList<>();
+    private VideoViewModel uiModel;
     
     private ScheduledExecutorService schedulePool;
     // TODO: Consider removing AnimationTimer out of worker and making updateUI func accept a uiModel
     AnimationTimer drawThread;
     
-    public OCVVideoWorker() {        
+    public OCVVideoWorker() {
+        capturePool = new MemoryPool<>(QUEUE_SIZE, () -> {return new UMat();});
         drawThread = new AnimationTimer() {
             @Override
             public void handle(long l) {
@@ -69,7 +79,6 @@ public class OCVVideoWorker implements VideoWorker {
         if (schedulePool != null) {
             return;
         }
-        
         schedulePool = Executors.newScheduledThreadPool(2);
         schedulePool.scheduleAtFixedRate(this::grabFrameFunc, 0, grabRate, TimeUnit.MILLISECONDS);
         schedulePool.scheduleAtFixedRate(this::processFrameFunc, 0, processRate, TimeUnit.MILLISECONDS);
@@ -110,15 +119,15 @@ public class OCVVideoWorker implements VideoWorker {
         classifiers.clear();
     }
     
-    private UMat getFrame() {
-        UMat frame = new UMat();
+    private UMat getFrame() throws InterruptedException {
+        UMat frame = capturePool.get();
         if (!capture.read(frame)) {
             throw new VideoIOException("could not grab next frame from camera");
         }
         return frame;
     }
     
-    public void grabFrameFunc() {
+    private void grabFrameFunc() {
         try {
             UMat frame = getFrame();
             imageQueue.put(frame);
@@ -137,7 +146,7 @@ public class OCVVideoWorker implements VideoWorker {
         }
     }
 
-    public void processFrameFunc() {
+    private void processFrameFunc() {
         try {
             UMat frame = processQueue.take();
             ArrayList<ClassifierResult> results = new ArrayList<>();
@@ -155,10 +164,17 @@ public class OCVVideoWorker implements VideoWorker {
         }
     }
     
-    public void updateUIFunc() {
+    private void updateUIFunc() {
         UMat frame = imageQueue.poll();
         if (frame != null) {
-            uiModel.setUMat(frame);
+            cvtColor(frame, bgraMat, COLOR_BGR2BGRA);
+            try {
+                capturePool.free(frame);
+            }
+            catch (InterruptedException ex) {
+                // Safe to ignore
+            }
+            uiModel.frameProperty().set(VideoUtils.wrapBgraUMat(bgraMat));
         }
         ArrayList<ClassifierResult> results = classifierResults.poll();
         if (results != null) {
