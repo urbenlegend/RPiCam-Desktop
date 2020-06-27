@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javafx.application.Platform;
 import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2BGRA;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
@@ -29,7 +29,7 @@ public class OCVVideoWorker implements VideoWorker {
     private List<ClassifierResult> classifierResults = Collections.synchronizedList(new ArrayList<>());
     
     private VideoViewModel uiModel;
-    private ReentrantLock modelLock = new ReentrantLock();
+    private ReentrantReadWriteLock modelLock = new ReentrantReadWriteLock();
     
     private ScheduledExecutorService schedulePool;
     
@@ -77,9 +77,9 @@ public class OCVVideoWorker implements VideoWorker {
     
     @Override
     public void setModel(VideoViewModel model) {
-        modelLock.lock();
+        modelLock.writeLock().lock();
         uiModel = model;
-        modelLock.unlock();
+        modelLock.writeLock().unlock();
     }
     
     public void addClassifier(OCVClassifier c) {
@@ -106,17 +106,19 @@ public class OCVVideoWorker implements VideoWorker {
         
         Platform.runLater(() -> {
             synchronized (bgraMat) {
-                modelLock.lock();
+                modelLock.readLock().lock();
                 if (uiModel != null) {
                     uiModel.frameProperty().set(VideoUtils.wrapBgraUMat(bgraMat));
                 }
-                modelLock.unlock();
+                modelLock.readLock().unlock();
             }
         });
     }
 
     private void processFrameThread() {
         synchronized (capMat) {
+            // TODO: Consider copying capMat into another Mat
+            // so we can release capMat early.
             classifierResults.clear();
             classifiers.forEach(c -> {
                 classifierResults.addAll(c.apply(capMat));
@@ -124,12 +126,12 @@ public class OCVVideoWorker implements VideoWorker {
         }
         
         Platform.runLater(() -> {
-            modelLock.lock();
+            modelLock.readLock().lock();
             if (uiModel != null) {
                 uiModel.clearClassifierResults();
                 uiModel.addClassifierResults(classifierResults);
             }
-            modelLock.unlock();
+            modelLock.readLock().unlock();
         });
     }
 }
