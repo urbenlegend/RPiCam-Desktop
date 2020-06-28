@@ -23,14 +23,11 @@ import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 public class OCVVideoWorker implements VideoWorker {
     private VideoCapture capture = new VideoCapture();
     private UMat capMat = new UMat();
+    private UMat processMat = new UMat();
     private UMat bgraMat = new UMat();
-
     private List<OCVClassifier> classifiers = Collections.synchronizedList(new ArrayList<>());
     private List<ClassifierResult> classifierResults = Collections.synchronizedList(new ArrayList<>());
-    
-    private VideoViewModel uiModel;
-    private ReentrantReadWriteLock modelLock = new ReentrantReadWriteLock();
-    
+    private List<VideoViewModel> uiModels = Collections.synchronizedList(new ArrayList<>());;
     private ScheduledExecutorService schedulePool;
     
     @Override
@@ -76,10 +73,8 @@ public class OCVVideoWorker implements VideoWorker {
     }
     
     @Override
-    public void setModel(VideoViewModel model) {
-        modelLock.writeLock().lock();
-        uiModel = model;
-        modelLock.writeLock().unlock();
+    public List<VideoViewModel> getModels() {
+        return uiModels;
     }
     
     public void addClassifier(OCVClassifier c) {
@@ -106,32 +101,32 @@ public class OCVVideoWorker implements VideoWorker {
         
         Platform.runLater(() -> {
             synchronized (bgraMat) {
-                modelLock.readLock().lock();
-                if (uiModel != null) {
-                    uiModel.frameProperty().set(VideoUtils.wrapBgraUMat(bgraMat));
+                synchronized(uiModels) {
+                    for (var model : uiModels) {
+                        model.frameProperty().set(VideoUtils.wrapBgraUMat(bgraMat));
+                    }
                 }
-                modelLock.readLock().unlock();
             }
         });
     }
 
     private void processFrameThread() {
         synchronized (capMat) {
-            // TODO: Consider copying capMat into another Mat
-            // so we can release capMat early.
-            classifierResults.clear();
-            classifiers.forEach(c -> {
-                classifierResults.addAll(c.apply(capMat));
-            });
+            capMat.copyTo(processMat);
         }
         
+        classifierResults.clear();
+        classifiers.forEach(c -> {
+            classifierResults.addAll(c.apply(processMat));
+        });
+        
         Platform.runLater(() -> {
-            modelLock.readLock().lock();
-            if (uiModel != null) {
-                uiModel.clearClassifierResults();
-                uiModel.addClassifierResults(classifierResults);
+            synchronized (uiModels) {
+                for (var model : uiModels) {
+                    model.clearClassifierResults();
+                    model.addClassifierResults(classifierResults);
+                }
             }
-            modelLock.readLock().unlock();
         });
     }
 }

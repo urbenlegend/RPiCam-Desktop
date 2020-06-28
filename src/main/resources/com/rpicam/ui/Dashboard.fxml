@@ -97,7 +97,6 @@
             <Insets left="5.0" />
          </padding>
       </HBox>
-      <HBox fx:id="pagePane" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" />
       <BorderPane onMouseDragged="#titleBarDragged" onMousePressed="#titleBarPressed" styleClass="titlebar" GridPane.columnIndex="1" GridPane.columnSpan="2147483647">
          <left>
             <Label fx:id="pageTitle" text="Page Title" textFill="#7c8184" BorderPane.alignment="CENTER">

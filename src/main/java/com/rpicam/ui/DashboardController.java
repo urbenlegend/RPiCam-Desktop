@@ -24,19 +24,15 @@ public class DashboardController implements Initializable {
     @FXML
     private GridPane dashboardGrid;
     @FXML
-    private HBox pagePane;
-    @FXML
     private Label pageTitle;
-    
+    private Parent currentPage;
     private Parent scenesPage;
     private Parent camerasPage;
     private Parent archivesPage;
     private Parent settingsPage;
-    
     // Mouse offsets used to implement decoration less window
     private double xOffset;
     private double yOffset;
-    
     private Timeline sidebarTimeline;
 
     @Override
@@ -71,29 +67,33 @@ public class DashboardController implements Initializable {
     @FXML
     private void showScenesPage() {
         pageTitle.setText("Scenes");
-        pagePane.getChildren().clear();
-        pagePane.getChildren().add(scenesPage);
+        setPage(scenesPage);
     }
 
     @FXML
     private void showCamerasPage() {
         pageTitle.setText("Cameras");
-        pagePane.getChildren().clear();
-        pagePane.getChildren().add(camerasPage);
+        setPage(camerasPage);
     }
 
     @FXML
     private void showArchivesPage() {
         pageTitle.setText("Archives");
-        pagePane.getChildren().clear();
-        pagePane.getChildren().add(archivesPage);
+        setPage(archivesPage);
     }
 
     @FXML
     private void showSettingsPage() {
         pageTitle.setText("Settings");
-        pagePane.getChildren().clear();
-        pagePane.getChildren().add(settingsPage);
+        setPage(settingsPage);
+    }
+    
+    private void setPage(Parent page) {
+        if (currentPage != null) {
+            dashboardGrid.getChildren().remove(currentPage);
+        }
+        currentPage = page;
+        dashboardGrid.add(currentPage, 1, 1);
     }
     
     @FXML
@@ -129,7 +129,6 @@ public class DashboardController implements Initializable {
             else {
                 xOffset = stage.getWidth() / 2;
             }
-            yOffset = event.getScreenY();
         }
         
         stage.setX(event.getScreenX() - xOffset);

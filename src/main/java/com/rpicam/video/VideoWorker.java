@@ -1,5 +1,7 @@
 package com.rpicam.video;
 
+import java.util.List;
+
 public interface VideoWorker {    
     default void open(int camIndex, int width, int height) {
         throw new UnsupportedOperationException("open via camera index");
@@ -15,7 +17,7 @@ public interface VideoWorker {
     
     void stop();
     
-    void setModel(VideoViewModel model);
+    List<VideoViewModel> getModels();
     
     default String toJSON() {
         return "";

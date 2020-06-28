@@ -11,7 +11,6 @@ import org.json.JSONObject;
 
 public class VideoManager {
     private HashMap<UUID, VideoWorker> workers = new HashMap<>();
-    
     private static VideoManager managerSingleton;
     
     public static VideoManager getInstance() {
