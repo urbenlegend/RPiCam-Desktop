@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.rpicam.ui;
 
 import com.rpicam.video.VideoManager;
@@ -26,20 +21,22 @@ public class CamerasController implements Initializable {
     private FlowPane cameraList;
     @FXML
     private Slider zoomSlider;
-    
+
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         var videoManager = VideoManager.getInstance();
-        
+
         for (var worker : videoManager.getWorkers().values()) {
             var cameraView = new VideoView();
             cameraView.prefWidthProperty().bind(zoomSlider.valueProperty());
-            cameraView.prefHeightProperty().bind(zoomSlider.valueProperty().multiply(3d/4d));
+            cameraView.prefHeightProperty().bind(zoomSlider.valueProperty()
+                    .multiply(cameraView.frameHeightProperty())
+                    .divide(cameraView.frameWidthProperty()));
             worker.getModels().add(cameraView.getCameraModel());
             cameraList.getChildren().add(cameraView);
         }
-    }    
+    }
 }

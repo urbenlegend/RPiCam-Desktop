@@ -13,7 +13,7 @@
    <center>
       <ScrollPane fitToWidth="true" prefHeight="200.0" prefWidth="200.0" styleClass="cameraPane" BorderPane.alignment="CENTER">
          <content>
-            <FlowPane fx:id="cameraList" hgap="10.0" prefHeight="1033.0" prefWidth="1908.0" vgap="10.0" />
+            <FlowPane fx:id="cameraList" hgap="10.0" vgap="10.0" />
          </content>
       </ScrollPane>
    </center>

@@ -1,7 +1,9 @@
 package com.rpicam.ui;
 
-import com.rpicam.video.VideoViewModel;
 import com.rpicam.video.ClassifierResult;
+import com.rpicam.video.VideoViewModel;
+import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ListChangeListener;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.ImageView;
@@ -14,7 +16,9 @@ public class VideoView extends StackPane {
     private VideoViewModel uiModel = new VideoViewModel();
     private ImageView frameView = new ImageView();
     private Canvas classifierHud = new Canvas();
-    
+    private SimpleDoubleProperty frameWidth = new SimpleDoubleProperty(widthProperty().get());
+    private SimpleDoubleProperty frameHeight = new SimpleDoubleProperty(heightProperty().get());
+
     public VideoView() {
         setMinSize(0, 0);
         frameView.setPreserveRatio(true);
@@ -22,32 +26,38 @@ public class VideoView extends StackPane {
         frameView.fitHeightProperty().bind(heightProperty());
         classifierHud.widthProperty().bind(widthProperty());
         classifierHud.heightProperty().bind(heightProperty());
-        
+
         frameView.imageProperty().bind(uiModel.frameProperty());
+        uiModel.frameProperty().addListener((obs, oldVal, newVal) -> {
+            frameWidth.set(newVal.getWidth());
+            frameHeight.set(newVal.getHeight());
+        });
         uiModel.classifierResultsProperty().addListener(this::processClassifierChange);
-        
+
         getChildren().addAll(frameView, classifierHud);
     }
-    
+
     public VideoViewModel getCameraModel() {
         return uiModel;
     }
-    
+
+    public ReadOnlyDoubleProperty frameWidthProperty() {
+        return frameWidth;
+    }
+
+    public ReadOnlyDoubleProperty frameHeightProperty() {
+        return frameHeight;
+    }
+
     public void drawClassifier(ClassifierResult result) {
-        // Don't draw classifier if we haven't received camera image yet
-        var cameraFrame = frameView.imageProperty().get();
-        if (cameraFrame == null) {
-            return;
-        }
-        
         var gc = classifierHud.getGraphicsContext2D();
         gc.save();
-        
-        double imageWidth = cameraFrame.getWidth();
-        double imageHeight = cameraFrame.getHeight();
+
+        double imageWidth = frameWidth.get();
+        double imageHeight = frameHeight.get();
         double hudWidth = classifierHud.getWidth();
         double hudHeight = classifierHud.getHeight();
-        
+
         // Calculate aspect-ratio aware scale to match ImageView behavior
         double scaleX = hudWidth / imageWidth;
         double scaleY = hudHeight / imageHeight;
@@ -67,20 +77,20 @@ public class VideoView extends StackPane {
         Color boxColor = Color.rgb(result.r, result.g, result.b);
         gc.setStroke(boxColor);
         gc.strokeRect(result.x, result.y, result.w, result.h);
-        
+
         // Draw classifier label
         gc.setTextAlign(TextAlignment.RIGHT);
         gc.setFill(boxColor);
         gc.fillText(result.title, result.x + result.w, result.y + result.h + 15);
-        
+
         gc.restore();
     }
-    
+
     public void clearClassifiers() {
         var gc = classifierHud.getGraphicsContext2D();
         gc.clearRect(0, 0, classifierHud.getWidth(), classifierHud.getHeight());
     }
-    
+
     private void processClassifierChange(ListChangeListener.Change<? extends ClassifierResult> results) {
         while (results.next()) {
             if (results.wasRemoved()) {
