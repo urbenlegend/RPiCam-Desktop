@@ -25,7 +25,7 @@
    <children>
       <VBox alignment="TOP_CENTER" spacing="5.0" styleClass="sidebar" GridPane.rowIndex="1" GridPane.rowSpan="2147483647">
          <children>
-            <Button alignment="TOP_LEFT" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" minWidth="0.0" mnemonicParsing="false" onMouseClicked="#showScenesPage" styleClass="sidebar-button" text="Scenes" textFill="WHITE" textOverrun="CLIP">
+            <Button alignment="TOP_LEFT" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" minWidth="0.0" mnemonicParsing="false" onAction="#showScenesPage" styleClass="sidebar-button" text="Scenes" textFill="WHITE" textOverrun="CLIP">
                <font>
                   <Font size="16.0" />
                </font>
@@ -36,7 +36,7 @@
                   <FontIcon iconColor="WHITE" iconLiteral="mdi-monitor" iconSize="24" />
                </graphic>
             </Button>
-            <Button alignment="TOP_LEFT" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" minWidth="0.0" mnemonicParsing="false" onMouseClicked="#showCamerasPage" styleClass="sidebar-button" text="Cameras" textFill="WHITE" textOverrun="CLIP">
+            <Button alignment="TOP_LEFT" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" minWidth="0.0" mnemonicParsing="false" onAction="#showCamerasPage" styleClass="sidebar-button" text="Cameras" textFill="WHITE" textOverrun="CLIP">
                <font>
                   <Font size="16.0" />
                </font>
@@ -47,7 +47,7 @@
                   <FontIcon iconColor="WHITE" iconLiteral="mdi-video" iconSize="24" />
                </graphic>
             </Button>
-            <Button alignment="TOP_LEFT" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" minWidth="0.0" mnemonicParsing="false" onMouseClicked="#showArchivesPage" styleClass="sidebar-button" text="Archives" textFill="WHITE" textOverrun="CLIP">
+            <Button alignment="TOP_LEFT" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" minWidth="0.0" mnemonicParsing="false" onAction="#showArchivesPage" styleClass="sidebar-button" text="Archives" textFill="WHITE" textOverrun="CLIP">
                <font>
                   <Font size="16.0" />
                </font>
@@ -61,7 +61,7 @@
                   <FontIcon iconColor="WHITE" iconLiteral="mdi-database" iconSize="24" />
                </graphic>
             </Button>
-            <Button alignment="TOP_LEFT" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" minWidth="0.0" mnemonicParsing="false" onMouseClicked="#showSettingsPage" styleClass="sidebar-button" text="Settings" textFill="WHITE" textOverrun="CLIP">
+            <Button alignment="TOP_LEFT" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" minWidth="0.0" mnemonicParsing="false" onAction="#showSettingsPage" styleClass="sidebar-button" text="Settings" textFill="WHITE" textOverrun="CLIP">
                <font>
                   <Font size="16.0" />
                </font>
@@ -78,7 +78,7 @@
          </padding></VBox>
       <HBox alignment="CENTER_LEFT" onMouseDragged="#titleBarDragged" onMousePressed="#titleBarPressed" spacing="5.0" styleClass="sidebar-title">
          <children>
-            <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onMouseClicked="#toggleSidebar" styleClass="sidebar-menu-button" text="Button">
+            <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#toggleSidebar" styleClass="sidebar-menu-button" text="Button">
                <graphic>
                   <FontIcon iconColor="WHITE" iconLiteral="mdi-menu" iconSize="24" />
                </graphic>
@@ -114,7 +114,7 @@
                         <Insets right="30.0" />
                      </HBox.margin>
                   </TextField>
-                  <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onMouseClicked="#minimizeWindow" styleClass="window-minmax-buttons" text="Button">
+                  <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#minimizeWindow" styleClass="window-minmax-buttons" text="Button">
                      <graphic>
                         <FontIcon iconColor="#7c8184" iconLiteral="mdi-window-minimize" iconSize="18" translateY="3.0" />
                      </graphic>
@@ -125,7 +125,7 @@
                         <Insets />
                      </HBox.margin>
                   </Button>
-                  <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onMouseClicked="#maximizeWindow" styleClass="window-minmax-buttons" text="Button">
+                  <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#maximizeWindow" styleClass="window-minmax-buttons" text="Button">
                      <graphic>
                         <FontIcon iconColor="#7c8184" iconLiteral="mdi-window-maximize" iconSize="18" />
                      </graphic>
@@ -136,7 +136,7 @@
                         <Insets />
                      </HBox.margin>
                   </Button>
-                  <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onMouseClicked="#closeWindow" styleClass="window-close-button" text="Button">
+                  <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#closeWindow" styleClass="window-close-button" text="Button">
                      <graphic>
                         <FontIcon iconColor="#da1d1d" iconLiteral="mdi-window-close" iconSize="18" styleClass="window-close-icon" />
                      </graphic>

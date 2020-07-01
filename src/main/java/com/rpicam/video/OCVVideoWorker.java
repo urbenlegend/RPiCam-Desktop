@@ -2,10 +2,6 @@ package com.rpicam.video;
 
 import com.rpicam.exceptions.VideoIOException;
 import com.rpicam.util.VideoUtils;
-import com.rpicam.video.ClassifierResult;
-import com.rpicam.video.OCVClassifier;
-import com.rpicam.video.VideoViewModel;
-import com.rpicam.video.VideoWorker;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
