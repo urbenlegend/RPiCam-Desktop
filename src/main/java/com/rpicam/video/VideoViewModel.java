@@ -9,7 +9,7 @@ import javafx.scene.image.Image;
 
 public class VideoViewModel {
     private SimpleObjectProperty<Image> frame = new SimpleObjectProperty<>();
-    private SimpleListProperty<ClassifierResult> classifierResults = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private SimpleListProperty<ClassifierResult> classifierResults = new SimpleListProperty<>(FXCollections.synchronizedObservableList(FXCollections.observableArrayList()));
 
     public SimpleObjectProperty<Image> frameProperty() {
         return frame;
