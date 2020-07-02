@@ -76,7 +76,7 @@
          <padding>
             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
          </padding></VBox>
-      <HBox alignment="CENTER_LEFT" onMouseDragged="#titleBarDragged" onMousePressed="#titleBarPressed" spacing="5.0" styleClass="sidebar-title">
+      <HBox alignment="CENTER_LEFT" spacing="5.0" styleClass="sidebar-title">
          <children>
             <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#toggleSidebar" styleClass="sidebar-menu-button" text="Button">
                <graphic>
@@ -97,7 +97,7 @@
             <Insets left="5.0" />
          </padding>
       </HBox>
-      <BorderPane onMouseDragged="#titleBarDragged" onMousePressed="#titleBarPressed" styleClass="titlebar" GridPane.columnIndex="1" GridPane.columnSpan="2147483647">
+      <BorderPane styleClass="titlebar" GridPane.columnIndex="1" GridPane.columnSpan="2147483647">
          <left>
             <Label fx:id="pageTitle" text="Page Title" textFill="#7c8184" BorderPane.alignment="CENTER">
                <font>
@@ -111,48 +111,15 @@
                   <FontIcon iconColor="#7c8184" iconLiteral="mdi-magnify" iconSize="24" />
                   <TextField promptText="Search">
                      <HBox.margin>
-                        <Insets right="30.0" />
+                        <Insets />
                      </HBox.margin>
                   </TextField>
-                  <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#minimizeWindow" styleClass="window-minmax-buttons" text="Button">
-                     <graphic>
-                        <FontIcon iconColor="#7c8184" iconLiteral="mdi-window-minimize" iconSize="18" translateY="3.0" />
-                     </graphic>
-                     <padding>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                     </padding>
-                     <HBox.margin>
-                        <Insets />
-                     </HBox.margin>
-                  </Button>
-                  <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#maximizeWindow" styleClass="window-minmax-buttons" text="Button">
-                     <graphic>
-                        <FontIcon iconColor="#7c8184" iconLiteral="mdi-window-maximize" iconSize="18" />
-                     </graphic>
-                     <padding>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                     </padding>
-                     <HBox.margin>
-                        <Insets />
-                     </HBox.margin>
-                  </Button>
-                  <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#closeWindow" styleClass="window-close-button" text="Button">
-                     <graphic>
-                        <FontIcon iconColor="#da1d1d" iconLiteral="mdi-window-close" iconSize="18" styleClass="window-close-icon" />
-                     </graphic>
-                     <padding>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                     </padding>
-                     <HBox.margin>
-                        <Insets />
-                     </HBox.margin>
-                  </Button>
                </children>
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>
                <padding>
-                  <Insets left="30.0" right="10.0" />
+                  <Insets left="30.0" right="20.0" />
                </padding>
             </HBox>
          </right>

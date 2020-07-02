@@ -12,10 +12,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
-import javafx.stage.Screen;
-import javafx.stage.Stage;
 import javafx.util.Duration;
 
 
@@ -93,63 +90,6 @@ public class DashboardController implements Initializable {
         }
         currentPage = page;
         dashboardGrid.add(currentPage, 1, 1);
-    }
-
-    @FXML
-    private void titleBarPressed(MouseEvent event) {
-        xOffset = event.getSceneX();
-        yOffset = event.getSceneY();
-    }
-
-    @FXML
-    private void titleBarDragged(MouseEvent event) {
-        Stage stage = (Stage) dashboardGrid.getScene().getWindow();
-
-        // Workaround issue where both resize and move are triggered at the same time
-        if (xOffset < 4 || yOffset < 4) {
-            return;
-        }
-
-        if (stage.isMaximized()) {
-            var screens = Screen.getScreensForRectangle(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight());
-            var currentScreen = screens.get(0).getBounds();
-
-            stage.setMaximized(false);
-
-            double targetMinX = event.getScreenX() - stage.getWidth() / 2;
-            double targetMaxX = event.getScreenX() + stage.getWidth() / 2;
-
-            if (targetMinX < currentScreen.getMinX()) {
-                xOffset = event.getScreenX();
-            }
-            else if (targetMaxX > currentScreen.getMaxX()) {
-                xOffset = event.getScreenX() - (currentScreen.getMaxX() - stage.getWidth());
-            }
-            else {
-                xOffset = stage.getWidth() / 2;
-            }
-        }
-
-        stage.setX(event.getScreenX() - xOffset);
-        stage.setY(event.getScreenY() - yOffset);
-    }
-
-    @FXML
-    private void minimizeWindow() {
-        Stage stage = (Stage) dashboardGrid.getScene().getWindow();
-        stage.setIconified(true);
-    }
-
-    @FXML
-    private void maximizeWindow() {
-        Stage stage = (Stage) dashboardGrid.getScene().getWindow();
-        stage.setMaximized(!stage.isMaximized());
-    }
-
-    @FXML
-    private void closeWindow() {
-        Stage stage = (Stage) dashboardGrid.getScene().getWindow();
-        stage.close();
     }
 
     @FXML
