@@ -45,8 +45,10 @@ public class CamerasController implements Initializable {
         var videoManager = VideoManager.getInstance();
         for (var worker : videoManager.getWorkers().values()) {
             var cameraView = new VideoView();
-            cameraView.prefWidthProperty().bind(zoomSlider.valueProperty());
+            cameraView.prefWidthProperty().bind(zoomSlider.valueProperty()
+                    .multiply(cameraList.widthProperty()));
             cameraView.prefHeightProperty().bind(zoomSlider.valueProperty()
+                    .multiply(cameraList.widthProperty())
                     .multiply(cameraView.frameHeightProperty())
                     .divide(cameraView.frameWidthProperty()));
             worker.getModels().add(cameraView.getCameraModel());

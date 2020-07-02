@@ -1,12 +1,12 @@
 .camera-popup-header {
-    -fx-border-color: #dadada;
+    -fx-border-color: #dedede;
     -fx-border-width: 0 0 1 0;
     -fx-border-insets: 0 10 0 10;
 }
 
 .titled-pane .title {
     -fx-background-color: transparent;
-    -fx-border-color: #dadada;
+    -fx-border-color: #dedede;
     -fx-border-width: 0 0 1 0;
     -fx-border-insets: 0 10 0 10;
     -fx-border-style: dashed;
@@ -14,18 +14,23 @@
 
 .titled-pane .title .text {
     -fx-translate-x: -15;
+    -fx-fill: #808080;
+}
+
+.titled-pane .title .arrow-button .arrow {
+    -fx-background-color: transparent;
 }
 
 .titled-pane:expanded .title {
-    -fx-font-weight: bold;
     -fx-border-width: 0;
+}
+
+.titled-pane:expanded .title .text {
+    -fx-font-weight: bold;
+    -fx-fill: #5e5d5d;
 }
 
 .titled-pane:expanded .content {
     -fx-effect: innershadow(gaussian, rgba(0,0,0,.2), 5, 0.5, 0, 0);
     -fx-border-color: transparent;
-}
-
-.titled-pane .title .arrow-button .arrow {
-    -fx-background-color: transparent;
 }

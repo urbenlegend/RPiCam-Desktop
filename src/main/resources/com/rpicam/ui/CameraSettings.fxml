@@ -28,10 +28,10 @@
                   <Font size="18.0" />
                </font>
                <padding>
-                  <Insets bottom="-5.0" left="10.0" />
+                  <Insets left="10.0" />
                </padding>
             </Label>
-            <Label text="Adjust camera properties like input source, resolution, etc." textFill="#8d8d8d">
+            <Label text="Adjust camera properties like input source, resolution, etc." textFill="GREY">
                <padding>
                   <Insets left="10.0" />
                </padding>
@@ -43,7 +43,7 @@
       </VBox>
       <Accordion fx:id="settingsAccordion" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="400.0">
         <panes>
-          <TitledPane fx:id="cameraSettingsPane" text="Source" textFill="#8d8d8d">
+          <TitledPane fx:id="cameraSettingsPane" text="Source" textFill="GREY">
                <content>
                   <VBox>
                      <children>
@@ -84,7 +84,7 @@
                   </VBox>
                </content>
           </TitledPane>
-          <TitledPane text="Detection" textFill="#8d8d8d">
+          <TitledPane text="Detection" textFill="GREY">
                <content>
                   <VBox prefHeight="200.0" prefWidth="100.0">
                      <children>
@@ -110,7 +110,7 @@
                   </VBox>
                </content>
           </TitledPane>
-            <TitledPane prefHeight="353.0" prefWidth="564.0" text="Display" textFill="#8d8d8d">
+            <TitledPane prefHeight="353.0" prefWidth="564.0" text="Display" textFill="GREY">
                <content>
                   <VBox prefHeight="200.0" prefWidth="100.0" spacing="10.0">
                      <children>
