@@ -25,7 +25,6 @@ public class OCVVideoWorker implements VideoWorker {
     private final UMat processMat = new UMat();
     private final UMat bgraMat = new UMat();
     private final List<OCVClassifier> classifiers = Collections.synchronizedList(new ArrayList<>());
-    private final List<ClassifierResult> classifierResults = Collections.synchronizedList(new ArrayList<>());
     private final List<VideoViewModel> uiModels = Collections.synchronizedList(new ArrayList<>());;
     private ScheduledExecutorService schedulePool;
 
@@ -114,7 +113,7 @@ public class OCVVideoWorker implements VideoWorker {
             capMat.copyTo(processMat);
         }
 
-        classifierResults.clear();
+        var classifierResults = new ArrayList<ClassifierResult>();
         classifiers.forEach(c -> {
             classifierResults.addAll(c.apply(processMat));
         });

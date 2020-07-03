@@ -9,8 +9,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import org.controlsfx.control.PopOver;
 
@@ -21,7 +21,7 @@ import org.controlsfx.control.PopOver;
  */
 public class CamerasController implements Initializable {
     @FXML
-    private BorderPane mainLayout;
+    private ScrollPane cameraPane;
     @FXML
     private FlowPane cameraList;
     @FXML
@@ -46,9 +46,9 @@ public class CamerasController implements Initializable {
         for (var worker : videoManager.getWorkers().values()) {
             var cameraView = new VideoView();
             cameraView.prefWidthProperty().bind(zoomSlider.valueProperty()
-                    .multiply(cameraList.widthProperty()));
+                    .multiply(cameraPane.widthProperty().subtract(2)));
             cameraView.prefHeightProperty().bind(zoomSlider.valueProperty()
-                    .multiply(cameraList.widthProperty())
+                    .multiply(cameraPane.widthProperty().subtract(2))
                     .multiply(cameraView.frameHeightProperty())
                     .divide(cameraView.frameWidthProperty()));
             worker.getModels().add(cameraView.getCameraModel());
