@@ -1,7 +1,6 @@
 package com.rpicam.ui;
 
 import com.rpicam.video.ClassifierResult;
-import com.rpicam.video.VideoViewModel;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ListChangeListener;
@@ -74,7 +73,7 @@ public class VideoView extends StackPane {
         gc.scale(scaleFactor, scaleFactor);
 
         // Draw classifier bounding box
-        Color boxColor = Color.rgb(result.r, result.g, result.b);
+        Color boxColor = Color.valueOf(result.color);
         gc.setStroke(boxColor);
         gc.strokeRect(result.x, result.y, result.w, result.h);
 

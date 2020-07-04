@@ -1,5 +1,6 @@
 package com.rpicam.ui;
 
+import com.rpicam.exceptions.UIException;
 import com.rpicam.video.VideoManager;
 import java.io.IOException;
 import java.net.URL;
@@ -39,7 +40,7 @@ public class CamerasController implements Initializable {
             addCameraPopOver = new PopOver(addCameraSettings);
             addCameraPopOver.setArrowLocation(PopOver.ArrowLocation.BOTTOM_LEFT);
         } catch (IOException ex) {
-            ex.printStackTrace();
+            throw new UIException("CamerasController failed to load camera settings pop over", ex);
         }
 
         var videoManager = VideoManager.getInstance();

@@ -26,9 +26,6 @@ public class DashboardController implements Initializable {
     private Parent camerasPage;
     private Parent archivesPage;
     private Parent settingsPage;
-    // Mouse offsets used to implement decoration less window
-    private double xOffset;
-    private double yOffset;
     private Timeline sidebarTimeline;
 
     @Override

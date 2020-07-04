@@ -1,5 +1,6 @@
 package com.rpicam.video;
 
+import com.rpicam.ui.VideoViewModel;
 import com.rpicam.exceptions.VideoIOException;
 import com.rpicam.util.VideoUtils;
 import java.util.ArrayList;
@@ -11,8 +12,7 @@ import java.util.concurrent.TimeUnit;
 import javafx.application.Platform;
 import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2BGRA;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
-import static org.bytedeco.opencv.global.opencv_videoio.CAP_ANY;
-import static org.bytedeco.opencv.global.opencv_videoio.CAP_DSHOW;
+import org.bytedeco.opencv.global.opencv_videoio;
 import static org.bytedeco.opencv.global.opencv_videoio.CAP_PROP_FRAME_HEIGHT;
 import static org.bytedeco.opencv.global.opencv_videoio.CAP_PROP_FRAME_WIDTH;
 import org.bytedeco.opencv.opencv_core.UMat;
@@ -27,47 +27,83 @@ public class OCVVideoWorker implements VideoWorker {
     private final List<OCVClassifier> classifiers = Collections.synchronizedList(new ArrayList<>());
     private final List<VideoViewModel> uiModels = Collections.synchronizedList(new ArrayList<>());;
     private ScheduledExecutorService schedulePool;
+    private Options options = new Options();
 
-    @Override
-    public void open(int camIndex, int width, int height) {
-        // Don't use OpenCV's MSMF backend on Windows. It is very slow.
-        String os = System.getProperty("os.name").toLowerCase();
-        int videoAPI = os.contains("win") ? CAP_DSHOW : CAP_ANY;
+    public static class Options implements Cloneable {
+        public String type;
+        public int camIndex;
+        public String api;
+        public int resW;
+        public int resH;
+        public String path;
+        public int grabRate;
+        public int processRate;
 
-        if (!capture.open(camIndex, videoAPI)) {
-            throw new VideoIOException("Could not open camera " + camIndex);
-        }
-
-        capture.set(CAP_PROP_FRAME_WIDTH, width);
-        capture.set(CAP_PROP_FRAME_HEIGHT, height);
-    }
-
-    @Override
-    public void open(String path) {
-        if (!capture.open(path)) {
-            throw new VideoIOException("Could not open video file " + path);
+        @Override
+        public Options clone() throws CloneNotSupportedException {
+            return (Options) super.clone();
         }
     }
 
-    @Override
-    public void close() {
+    public Options getOptions() {
+        try {
+            return options.clone();
+        } catch (CloneNotSupportedException ex) {
+            return null;
+        }
+    }
+
+    public void setOptions(Options newOptions) {
+        // TODO: Consider automatically stopping and starting camera
+        options = newOptions;
+    }
+
+    private void open() {
+        int api;
+        try {
+            var apiField = opencv_videoio.class.getField(options.api);
+            api = apiField.getInt(null);
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("Invalid camera api specified: " + options.api, ex);
+        }
+
+        switch (options.type) {
+            case "local":
+                if (!capture.open(options.camIndex, api)) {
+                    throw new VideoIOException("Could not open camera " + options.camIndex);
+                }
+
+                capture.set(CAP_PROP_FRAME_WIDTH, options.resW);
+                capture.set(CAP_PROP_FRAME_HEIGHT, options.resH);
+                break;
+            case "url":
+                if (!capture.open(options.path)) {
+                    throw new VideoIOException("Could not open video file " + options.path);
+                }
+                break;
+        }
+    }
+
+    private void close() {
         capture.release();
     }
 
     @Override
-    public void start(int grabRate, int processRate) {
-        if (schedulePool != null) {
+    public void start() {
+        if (schedulePool != null || capture.isOpened()) {
             return;
         }
+        open();
         schedulePool = Executors.newScheduledThreadPool(2);
-        schedulePool.scheduleAtFixedRate(this::grabFrameThread, 0, grabRate, TimeUnit.MILLISECONDS);
-        schedulePool.scheduleAtFixedRate(this::processFrameThread, 0, processRate, TimeUnit.MILLISECONDS);
+        schedulePool.scheduleAtFixedRate(this::grabFrameThread, 0, options.grabRate, TimeUnit.MILLISECONDS);
+        schedulePool.scheduleAtFixedRate(this::processFrameThread, 0, options.processRate, TimeUnit.MILLISECONDS);
     }
 
     @Override
     public void stop() {
         schedulePool.shutdownNow();
         schedulePool = null;
+        close();
     }
 
     @Override

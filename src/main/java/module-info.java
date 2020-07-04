@@ -3,9 +3,10 @@ module com.rpicam {
     requires javafx.fxml;
     requires org.bytedeco.opencv;
     requires java.base;
-    requires org.json;
+    requires com.google.gson;
     requires org.controlsfx.controls;
 
     opens com.rpicam.ui to javafx.fxml;
     exports com.rpicam.ui to javafx.graphics;
+    exports com.rpicam.config to com.google.gson;
 }

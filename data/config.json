@@ -2,27 +2,30 @@
     "classifiers": [
         {
             "title": "Upper Body",
-            "color": {"r": 255, "g": 0, "b": 0},
+            "color": "rgb(255,0,0)",
             "path": "./data/upperbody_recognition_model.xml"
         },
         {
             "title": "Face",
-            "color": {"r": 0, "g": 255, "b": 0},
+            "color": "rgb(0,255,0)",
             "path": "./data/facial_recognition_model.xml"
         },
         {
             "title": "Full Body",
-            "color": {"r": 0, "g": 0, "b": 255},
+            "color": "rgb(0,0,255)",
             "path": "./data/fullbody_recognition_model.xml"
         }
     ],
     "cameras": [
         {
+            "type": "local",
             "uuid": "dd243140-b03a-4d72-b5ce-8f31412af8a5",
             "index": 0,
-            "res": {"w": 1920, "h": 1080},
-            "cap_rate": 33,
-            "proc_rate": 165
+            "api": "CAP_DSHOW",
+            "resW": 1920,
+            "resH": 1080,
+            "capRate": 33,
+            "procRate": 165
         }
     ]
 }

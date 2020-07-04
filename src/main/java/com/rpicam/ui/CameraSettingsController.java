@@ -58,6 +58,20 @@ public class CameraSettingsController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         urlRadioBtn.setToggleGroup(sourceTg);
         localRadioBtn.setToggleGroup(sourceTg);
+        sourceTg.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
+            var selectedBtn = (RadioButton) newVal;
+            if (selectedBtn == urlRadioBtn) {
+                urlTextBox.setDisable(false);
+                apiSelectBox.setDisable(true);
+                cameraSelectBox.setDisable(true);
+            }
+            else if (selectedBtn == localRadioBtn) {
+                urlTextBox.setDisable(true);
+                apiSelectBox.setDisable(false);
+                cameraSelectBox.setDisable(false);
+            }
+        });
+        sourceTg.selectToggle(urlRadioBtn);
 
         settingsAccordion.setExpandedPane(cameraSettingsPane);
     }

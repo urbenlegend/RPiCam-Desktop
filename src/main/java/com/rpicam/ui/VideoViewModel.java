@@ -1,5 +1,6 @@
-package com.rpicam.video;
+package com.rpicam.ui;
 
+import com.rpicam.video.ClassifierResult;
 import java.util.List;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;

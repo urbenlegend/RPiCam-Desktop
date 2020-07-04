@@ -20,25 +20,23 @@ import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
 public class OCVClassifier implements Function<UMat, ArrayList<ClassifierResult>> {
     private CascadeClassifier classifier = new CascadeClassifier();
     private String title = "";
-    private int r = 255, g = 255, b = 255;
-    
+    private String color = "";
+
     public OCVClassifier(String path) {
         classifier.load(path);
     }
-    
+
     public void setTitle(String name) {
         title = name;
     }
-    
-    public void setRGB(int red, int green, int blue) {
-        r = red;
-        g = green;
-        b = blue;
+
+    public void setRGB(String colorStr) {
+        color = colorStr;
     }
-    
+
     @Override
     public ArrayList<ClassifierResult> apply(UMat frame) {
-        RectVector detectedObjs = new RectVector();
+        var detectedObjs = new RectVector();
         int minSize = Math.round(frame.rows() * 0.1f);
 
         // TODO: Check if correct parameters are being used
@@ -50,12 +48,12 @@ public class OCVClassifier implements Function<UMat, ArrayList<ClassifierResult>
                 new Size(minSize, minSize),
                 new Size()
         );
-        
-        ArrayList<ClassifierResult> results = new ArrayList<>();
+
+        var results = new ArrayList<ClassifierResult>();
         for (var obj : detectedObjs.get()) {
-            results.add(new ClassifierResult(obj.x(), obj.y(), obj.width(), obj.height(), title, r, g, b));
+            results.add(new ClassifierResult(obj.x(), obj.y(), obj.width(), obj.height(), title, color));
         }
-        
+
         return results;
     }
 }
