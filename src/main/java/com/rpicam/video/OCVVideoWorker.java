@@ -25,7 +25,7 @@ public class OCVVideoWorker implements VideoWorker {
     private final UMat processMat = new UMat();
     private final UMat bgraMat = new UMat();
     private final List<OCVClassifier> classifiers = Collections.synchronizedList(new ArrayList<>());
-    private final List<VideoViewModel> uiModels = Collections.synchronizedList(new ArrayList<>());;
+    private final List<VideoViewModel> videoModels = Collections.synchronizedList(new ArrayList<>());;
     private ScheduledExecutorService schedulePool;
     private Options options = new Options();
 
@@ -107,8 +107,13 @@ public class OCVVideoWorker implements VideoWorker {
     }
 
     @Override
-    public List<VideoViewModel> getModels() {
-        return uiModels;
+    public void bindModel(VideoViewModel model) {
+        videoModels.add(model);
+    }
+
+    @Override
+    public void unbindModel(VideoViewModel model) {
+        videoModels.remove(model);
     }
 
     public void addClassifier(OCVClassifier c) {
@@ -135,8 +140,8 @@ public class OCVVideoWorker implements VideoWorker {
 
         Platform.runLater(() -> {
             synchronized (bgraMat) {
-                synchronized(uiModels) {
-                    for (var model : uiModels) {
+                synchronized(videoModels) {
+                    for (var model : videoModels) {
                         model.frameProperty().set(VideoUtils.wrapBgraUMat(bgraMat));
                     }
                 }
@@ -155,8 +160,8 @@ public class OCVVideoWorker implements VideoWorker {
         });
 
         Platform.runLater(() -> {
-            synchronized (uiModels) {
-                for (var model : uiModels) {
+            synchronized (videoModels) {
+                for (var model : videoModels) {
                     model.clearClassifierResults();
                     model.addClassifierResults(classifierResults);
                 }

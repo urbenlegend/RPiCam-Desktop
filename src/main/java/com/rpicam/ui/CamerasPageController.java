@@ -20,7 +20,7 @@ import org.controlsfx.control.PopOver;
  *
  * @author benrx
  */
-public class CamerasController implements Initializable {
+public class CamerasPageController implements Initializable {
     @FXML
     private ScrollPane cameraPane;
     @FXML
@@ -52,7 +52,7 @@ public class CamerasController implements Initializable {
                     .multiply(cameraPane.widthProperty().subtract(2))
                     .multiply(cameraView.frameHeightProperty())
                     .divide(cameraView.frameWidthProperty()));
-            worker.getModels().add(cameraView.getCameraModel());
+            worker.bindModel(cameraView.getModel());
             cameraList.getChildren().add(cameraView);
         }
     }

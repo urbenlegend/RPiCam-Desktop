@@ -31,10 +31,10 @@ public class DashboardController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         try {
-            scenesPage = FXMLLoader.load(getClass().getResource("Scenes.fxml"));
-            camerasPage = FXMLLoader.load(getClass().getResource("Cameras.fxml"));
-            archivesPage = FXMLLoader.load(getClass().getResource("Archives.fxml"));
-            settingsPage = FXMLLoader.load(getClass().getResource("Settings.fxml"));
+            scenesPage = FXMLLoader.load(getClass().getResource("ScenesPage.fxml"));
+            camerasPage = FXMLLoader.load(getClass().getResource("CamerasPage.fxml"));
+            archivesPage = FXMLLoader.load(getClass().getResource("ArchivesPage.fxml"));
+            settingsPage = FXMLLoader.load(getClass().getResource("SettingsPage.fxml"));
         }
         catch (IOException ex) {
             throw new UIException("Dashboard failed to load sub pages", ex);

@@ -12,7 +12,7 @@ import javafx.scene.text.TextAlignment;
 
 
 public class VideoView extends StackPane {
-    private VideoViewModel uiModel = new VideoViewModel();
+    private VideoViewModel videoModel = new VideoViewModel();
     private ImageView frameView = new ImageView();
     private Canvas classifierHud = new Canvas();
     private SimpleDoubleProperty frameWidth = new SimpleDoubleProperty(widthProperty().get());
@@ -26,18 +26,18 @@ public class VideoView extends StackPane {
         classifierHud.widthProperty().bind(widthProperty());
         classifierHud.heightProperty().bind(heightProperty());
 
-        frameView.imageProperty().bind(uiModel.frameProperty());
-        uiModel.frameProperty().addListener((obs, oldVal, newVal) -> {
+        frameView.imageProperty().bind(videoModel.frameProperty());
+        videoModel.frameProperty().addListener((obs, oldVal, newVal) -> {
             frameWidth.set(newVal.getWidth());
             frameHeight.set(newVal.getHeight());
         });
-        uiModel.classifierResultsProperty().addListener(this::processClassifierChange);
+        videoModel.classifierResultsProperty().addListener(this::processClassifierChange);
 
         getChildren().addAll(frameView, classifierHud);
     }
 
-    public VideoViewModel getCameraModel() {
-        return uiModel;
+    public VideoViewModel getModel() {
+        return videoModel;
     }
 
     public ReadOnlyDoubleProperty frameWidthProperty() {
