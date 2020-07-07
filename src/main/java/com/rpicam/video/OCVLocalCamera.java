@@ -16,16 +16,51 @@ import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 
 public class OCVLocalCamera implements VideoWorker {
 
-    private final UMat capMat = new UMat();
     private VideoCapture capture = new VideoCapture();
-    private final List<OCVClassifier> classifiers = Collections.synchronizedList(new ArrayList<>());
     private final VideoModel model = new VideoModel(this);
     private Options options = new Options();
-    private final UMat processMat = new UMat();
     private ScheduledExecutorService schedulePool;
+    private final UMat capMat = new UMat();
+    private final UMat processMat = new UMat();
+    private final List<OCVClassifier> classifiers = Collections.synchronizedList(new ArrayList<>());
 
-    public void addClassifier(OCVClassifier c) {
-        classifiers.add(c);
+    private void open() {
+        int api;
+        try {
+            var apiField = opencv_videoio.class.getField(options.api);
+            api = apiField.getInt(null);
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("Invalid camera api specified: " + options.api, ex);
+        }
+
+        if (!capture.open(options.camIndex, api)) {
+            throw new VideoIOException("Could not open camera " + options.camIndex);
+        }
+
+        capture.set(CAP_PROP_FRAME_WIDTH, options.resW);
+        capture.set(CAP_PROP_FRAME_HEIGHT, options.resH);
+    }
+
+    private void close() {
+        capture.release();
+    }
+
+    @Override
+    public void start() {
+        if (schedulePool != null || capture.isOpened()) {
+            return;
+        }
+        open();
+        schedulePool = Executors.newScheduledThreadPool(2);
+        schedulePool.scheduleAtFixedRate(this::capFrameThread, 0, options.capRate, TimeUnit.MILLISECONDS);
+        schedulePool.scheduleAtFixedRate(this::processFrameThread, 0, options.procRate, TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public void stop() {
+        schedulePool.shutdownNow();
+        schedulePool = null;
+        close();
     }
 
     private void capFrameThread() {
@@ -37,12 +72,17 @@ public class OCVLocalCamera implements VideoWorker {
         }
     }
 
-    public void clearClassifiers() {
-        classifiers.clear();
-    }
+    private void processFrameThread() {
+        synchronized (capMat) {
+            capMat.copyTo(processMat);
+        }
 
-    private void close() {
-        capture.release();
+        var classifierResults = new ArrayList<ClassifierResult>();
+        classifiers.forEach(c -> {
+            classifierResults.addAll(c.apply(processMat));
+        });
+
+        model.updateClassifierResultsLater(classifierResults);
     }
 
     @Override
@@ -63,56 +103,16 @@ public class OCVLocalCamera implements VideoWorker {
         options = newOptions;
     }
 
-    private void open() {
-        int api;
-        try {
-            var apiField = opencv_videoio.class.getField(options.api);
-            api = apiField.getInt(null);
-        } catch (Exception ex) {
-            throw new IllegalArgumentException("Invalid camera api specified: " + options.api, ex);
-        }
-
-        if (!capture.open(options.camIndex, api)) {
-            throw new VideoIOException("Could not open camera " + options.camIndex);
-        }
-
-        capture.set(CAP_PROP_FRAME_WIDTH, options.resW);
-        capture.set(CAP_PROP_FRAME_HEIGHT, options.resH);
-    }
-
-    private void processFrameThread() {
-        synchronized (capMat) {
-            capMat.copyTo(processMat);
-        }
-
-        var classifierResults = new ArrayList<ClassifierResult>();
-        classifiers.forEach(c -> {
-            classifierResults.addAll(c.apply(processMat));
-        });
-
-        model.updateClassifierResultsLater(classifierResults);
+    public void addClassifier(OCVClassifier c) {
+        classifiers.add(c);
     }
 
     public void removeClassifier(OCVClassifier c) {
         classifiers.remove(c);
     }
 
-    @Override
-    public void start() {
-        if (schedulePool != null || capture.isOpened()) {
-            return;
-        }
-        open();
-        schedulePool = Executors.newScheduledThreadPool(2);
-        schedulePool.scheduleAtFixedRate(this::capFrameThread, 0, options.capRate, TimeUnit.MILLISECONDS);
-        schedulePool.scheduleAtFixedRate(this::processFrameThread, 0, options.procRate, TimeUnit.MILLISECONDS);
-    }
-
-    @Override
-    public void stop() {
-        schedulePool.shutdownNow();
-        schedulePool = null;
-        close();
+    public void clearClassifiers() {
+        classifiers.clear();
     }
 
     public static class Options implements Cloneable {

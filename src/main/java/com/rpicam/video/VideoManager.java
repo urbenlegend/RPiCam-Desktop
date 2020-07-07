@@ -16,15 +16,6 @@ public class VideoManager {
     private VideoListModel model = new VideoListModel(this);
     private ArrayList<VideoWorker> workers = new ArrayList<>();
 
-    public void addWorker(VideoWorker worker) {
-        workers.add(worker);
-        updateModel();
-    }
-
-    public VideoListModel getModel() {
-        return model;
-    }
-
     public void loadSources(String configPath) throws IOException {
         // TODO: Consider using a less cumbersome JSON library
         var configStr = Files.readString(Paths.get(configPath), StandardCharsets.US_ASCII);
@@ -64,6 +55,23 @@ public class VideoManager {
         }
     }
 
+    public void startWorkers() {
+        for (var w : workers) {
+            w.start();
+        }
+    }
+
+    public void stopWorkers() {
+        for (var w : workers) {
+            w.stop();
+        }
+    }
+
+    public void addWorker(VideoWorker worker) {
+        workers.add(worker);
+        updateModel();
+    }
+
     public void removeWorker(VideoWorker worker) {
         worker.stop();
         workers.remove(worker);
@@ -78,16 +86,8 @@ public class VideoManager {
 
     }
 
-    public void startWorkers() {
-        for (var w : workers) {
-            w.start();
-        }
-    }
-
-    public void stopWorkers() {
-        for (var w : workers) {
-            w.stop();
-        }
+    public VideoListModel getModel() {
+        return model;
     }
 
     private void updateModel() {

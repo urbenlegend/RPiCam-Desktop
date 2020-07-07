@@ -18,6 +18,14 @@ public class OCVClassifier implements Function<UMat, ArrayList<ClassifierResult>
         classifier.load(aPath);
     }
 
+    public void setRGB(String aColor) {
+        color = aColor;
+    }
+
+    public void setTitle(String aTitle) {
+        title = aTitle;
+    }
+
     @Override
     public ArrayList<ClassifierResult> apply(UMat frame) {
         var detectedObjs = new RectVector();
@@ -39,13 +47,5 @@ public class OCVClassifier implements Function<UMat, ArrayList<ClassifierResult>
         }
 
         return results;
-    }
-
-    public void setRGB(String aColor) {
-        color = aColor;
-    }
-
-    public void setTitle(String aTitle) {
-        title = aTitle;
     }
 }

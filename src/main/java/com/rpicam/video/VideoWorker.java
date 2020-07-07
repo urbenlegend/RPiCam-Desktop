@@ -4,11 +4,11 @@ import com.rpicam.ui.VideoModel;
 
 public interface VideoWorker {
 
-    VideoModel getModel();
-
     void start();
 
     void stop();
+
+    VideoModel getModel();
 
     default String toJSON() {
         return "";

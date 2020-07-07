@@ -30,7 +30,6 @@ public class CameraSettingsController {
     private RadioButton localRadioBtn;
     @FXML
     private Accordion settingsAccordion;
-    private ToggleGroup sourceTg = new ToggleGroup();
     @FXML
     private CheckBox statsToggle;
     @FXML
@@ -40,10 +39,7 @@ public class CameraSettingsController {
     @FXML
     private TextField widthBox;
 
-    @FXML
-    public void applyBtnClicked() {
-
-    }
+    private ToggleGroup sourceTg = new ToggleGroup();
 
     @FXML
     public void initialize() {
@@ -64,5 +60,10 @@ public class CameraSettingsController {
         sourceTg.selectToggle(urlRadioBtn);
 
         settingsAccordion.setExpandedPane(cameraSettingsPane);
+    }
+
+    @FXML
+    public void applyBtnClicked() {
+
     }
 }

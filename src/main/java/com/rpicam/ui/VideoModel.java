@@ -16,21 +16,13 @@ import org.bytedeco.opencv.opencv_core.UMat;
 
 public class VideoModel {
 
+    private VideoWorker worker;
     private final UMat bgraMat = new UMat();
     private SimpleListProperty<ClassifierResult> classifierResults = new SimpleListProperty<>(FXCollections.observableArrayList());
     private SimpleObjectProperty<Image> frame = new SimpleObjectProperty<>();
-    private VideoWorker worker;
 
     public VideoModel(VideoWorker aWorker) {
         worker = aWorker;
-    }
-
-    public SimpleListProperty<ClassifierResult> classifierResultsProperty() {
-        return classifierResults;
-    }
-
-    public ObjectProperty<Image> frameProperty() {
-        return frame;
     }
 
     public void updateClassifierResultsLater(List<ClassifierResult> results) {
@@ -49,5 +41,13 @@ public class VideoModel {
                 frame.set(VideoUtils.wrapBgraUMat(bgraMat));
             }
         });
+    }
+
+    public SimpleListProperty<ClassifierResult> classifierResultsProperty() {
+        return classifierResults;
+    }
+
+    public ObjectProperty<Image> frameProperty() {
+        return frame;
     }
 }

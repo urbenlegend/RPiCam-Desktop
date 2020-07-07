@@ -14,24 +14,17 @@ import javafx.util.Duration;
 
 public class DashboardController {
 
-    private Parent archivesPage;
-    private Parent camerasPage;
-    private Parent currentPage;
     @FXML
     private GridPane dashboardGrid;
     @FXML
     private Label pageTitle;
+
+    private Parent archivesPage;
+    private Parent camerasPage;
+    private Parent currentPage;
     private Parent scenesPage;
     private Parent settingsPage;
     private Timeline sidebarTimeline;
-
-    private void setPage(Parent page) {
-        if (currentPage != null) {
-            dashboardGrid.getChildren().remove(currentPage);
-        }
-        currentPage = page;
-        dashboardGrid.add(currentPage, 1, 1);
-    }
 
     @FXML
     public void initialize() {
@@ -68,6 +61,24 @@ public class DashboardController {
     }
 
     @FXML
+    private void toggleSidebar() {
+        sidebarTimeline.setRate(-sidebarTimeline.getRate());
+        if (sidebarTimeline.getRate() < 0) {
+            sidebarTimeline.playFrom("end");
+        } else {
+            sidebarTimeline.playFrom("start");
+        }
+    }
+
+    private void setPage(Parent page) {
+        if (currentPage != null) {
+            dashboardGrid.getChildren().remove(currentPage);
+        }
+        currentPage = page;
+        dashboardGrid.add(currentPage, 1, 1);
+    }
+
+    @FXML
     private void showArchivesPage() {
         pageTitle.setText("Archives");
         setPage(archivesPage);
@@ -89,15 +100,5 @@ public class DashboardController {
     private void showSettingsPage() {
         pageTitle.setText("Settings");
         setPage(settingsPage);
-    }
-
-    @FXML
-    private void toggleSidebar() {
-        sidebarTimeline.setRate(-sidebarTimeline.getRate());
-        if (sidebarTimeline.getRate() < 0) {
-            sidebarTimeline.playFrom("end");
-        } else {
-            sidebarTimeline.playFrom("start");
-        }
     }
 }
