@@ -15,6 +15,7 @@ public class VideoManager {
 
     private VideoListModel model = new VideoListModel(this);
     private ArrayList<VideoWorker> workers = new ArrayList<>();
+    private ArrayList<OCVClassifier> classifiers = new ArrayList<>();
 
     public void loadSources(String configPath) throws IOException {
         // TODO: Consider using a less cumbersome JSON library
@@ -23,7 +24,6 @@ public class VideoManager {
         var gson = builder.create();
         Config config = gson.fromJson(configStr, Config.class);
 
-        var classifiers = new ArrayList<OCVClassifier>();
         for (var classifierConf : config.classifiers) {
             var classifier = new OCVClassifier(classifierConf.path);
             classifier.setTitle(classifierConf.title);
@@ -33,10 +33,6 @@ public class VideoManager {
 
         for (var camConf : config.cameras) {
             var cameraWorker = new OCVLocalCamera();
-
-            for (var c : classifiers) {
-                cameraWorker.addClassifier(c);
-            }
 
             var camOptions = cameraWorker.getOptions();
             switch (camConf.type) {
@@ -68,6 +64,13 @@ public class VideoManager {
     }
 
     public void addWorker(VideoWorker worker) {
+        if (worker instanceof OCVLocalCamera) {
+            var ocvWorker = (OCVLocalCamera) worker;
+            for (var c : classifiers) {
+                ocvWorker.addClassifier(c);
+            }
+        }
+
         workers.add(worker);
         updateModel();
     }

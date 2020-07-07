@@ -29,6 +29,7 @@ public class VideoListModel {
         options.resH = resH;
         options.capRate = capRate;
         options.procRate = procRate;
+        worker.setOptions(options);
         videoManager.addWorker(worker);
         worker.start();
     }

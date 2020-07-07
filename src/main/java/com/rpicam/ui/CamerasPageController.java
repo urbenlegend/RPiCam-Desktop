@@ -30,6 +30,7 @@ public class CamerasPageController {
     private Slider zoomSlider;
     private PopOver addCameraPopOver;
     private Parent addCameraSettings;
+    private FXMLLoader cameraSettingsLoader = new FXMLLoader(getClass().getResource("CameraSettings.fxml"));
     private VideoListModel videoListModel;
     private SimpleListProperty<VideoModel> selection = new SimpleListProperty<>();
     private SimpleListProperty<VideoModel> videoList = new SimpleListProperty<>();
@@ -37,7 +38,6 @@ public class CamerasPageController {
     @FXML
     public void initialize() {
         try {
-            var cameraSettingsLoader = new FXMLLoader(getClass().getResource("CameraSettings.fxml"));
             addCameraSettings = cameraSettingsLoader.load();
             addCameraPopOver = new PopOver(addCameraSettings);
             addCameraPopOver.setArrowLocation(PopOver.ArrowLocation.BOTTOM_LEFT);
@@ -65,6 +65,8 @@ public class CamerasPageController {
         videoListModel = aVideoListModel;
         videoList.bind(videoListModel.videoListProperty());
         selection.bind(videoListModel.selectionProperty());
+        CameraSettingsController cameraSettingsController = cameraSettingsLoader.getController();
+        cameraSettingsController.setModel(videoListModel);
     }
 
     @FXML

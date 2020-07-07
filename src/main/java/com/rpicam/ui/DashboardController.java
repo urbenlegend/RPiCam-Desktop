@@ -19,26 +19,27 @@ public class DashboardController {
     @FXML
     private Label pageTitle;
 
+    private FXMLLoader archivesLoader = new FXMLLoader(getClass().getResource("ArchivesPage.fxml"));
     private Parent archivesPage;
+    private FXMLLoader camerasLoader = new FXMLLoader(getClass().getResource("CamerasPage.fxml"));
     private Parent camerasPage;
     private Parent currentPage;
+    private FXMLLoader scenesLoader = new FXMLLoader(getClass().getResource("ScenesPage.fxml"));
     private Parent scenesPage;
+    private FXMLLoader settingsLoader = new FXMLLoader(getClass().getResource("SettingsPage.fxml"));
     private Parent settingsPage;
     private Timeline sidebarTimeline;
 
     @FXML
     public void initialize() {
         try {
-            var scenesLoader = new FXMLLoader(getClass().getResource("ScenesPage.fxml"));
-            scenesPage = scenesLoader.load();
-            var camerasLoader = new FXMLLoader(getClass().getResource("CamerasPage.fxml"));
+            archivesPage = archivesLoader.load();
             camerasPage = camerasLoader.load();
+            scenesPage = scenesLoader.load();
+            settingsPage = settingsLoader.load();
+
             CamerasPageController camerasController = camerasLoader.getController();
             camerasController.setModel(MainApp.getVideoManager().getModel());
-            var archivesLoader = new FXMLLoader(getClass().getResource("ArchivesPage.fxml"));
-            archivesPage = archivesLoader.load();
-            var settingsLoader = new FXMLLoader(getClass().getResource("SettingsPage.fxml"));
-            settingsPage = settingsLoader.load();
         } catch (IOException ex) {
             throw new UIException("Dashboard failed to load sub pages", ex);
         }

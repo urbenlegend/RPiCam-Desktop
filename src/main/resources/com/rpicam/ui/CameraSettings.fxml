@@ -13,7 +13,6 @@
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
@@ -50,34 +49,27 @@
                         <GridPane hgap="10.0" vgap="5.0">
                           <columnConstraints>
                             <ColumnConstraints hgrow="SOMETIMES" minWidth="80.0" />
-                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="194.0" />
-                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="84.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="136.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="136.0" />
                           </columnConstraints>
                           <rowConstraints>
                             <RowConstraints vgrow="SOMETIMES" />
                             <RowConstraints vgrow="SOMETIMES" />
                               <RowConstraints vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                           </rowConstraints>
                            <children>
                               <RadioButton fx:id="urlRadioBtn" mnemonicParsing="false" text="URL" />
                               <RadioButton fx:id="localRadioBtn" mnemonicParsing="false" text="Local" GridPane.rowIndex="1" />
                               <TextField fx:id="urlTextBox" promptText="Remote Camera URL" GridPane.columnIndex="1" GridPane.columnSpan="2" />
-                              <ComboBox fx:id="apiSelectBox" maxWidth="1.7976931348623157E308" promptText="API" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                              <ComboBox fx:id="cameraSelectBox" maxWidth="1.7976931348623157E308" promptText="Camera" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <ComboBox fx:id="cameraSelectBox" editable="true" maxWidth="1.7976931348623157E308" promptText="Camera" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <ComboBox fx:id="apiSelectBox" editable="true" maxWidth="1.7976931348623157E308" promptText="API" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                               <Label text="Video Quality" GridPane.rowIndex="2" />
-                              <HBox alignment="CENTER" spacing="5.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2">
-                                 <children>
-                                    <TextField fx:id="widthBox" promptText="Width" />
-                                    <Label text="x" textOverrun="CLIP" />
-                                    <TextField fx:id="heightBox" promptText="Height" />
-                                    <Label text="\@" textOverrun="CLIP">
-                                       <HBox.margin>
-                                          <Insets />
-                                       </HBox.margin>
-                                    </Label>
-                                    <TextField fx:id="fpsBox" promptText="FPS" />
-                                 </children>
-                              </HBox>
+                              <TextField fx:id="widthBox" maxWidth="1.7976931348623157E308" promptText="Width" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                              <TextField fx:id="heightBox" promptText="Height" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                              <Label text="Framerate" GridPane.rowIndex="3" />
+                              <TextField fx:id="capFpsBox" promptText="Capture FPS" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                              <TextField fx:id="procFpsBox" promptText="Processing FPS" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                            </children>
                         </GridPane>
                      </children>

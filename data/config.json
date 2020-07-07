@@ -17,14 +17,5 @@
         }
     ],
     "cameras": [
-        {
-            "type": "local",
-            "index": 0,
-            "api": "CAP_DSHOW",
-            "resW": 1920,
-            "resH": 1080,
-            "capRate": 33,
-            "procRate": 165
-        }
     ]
 }

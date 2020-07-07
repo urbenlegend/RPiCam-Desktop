@@ -25,7 +25,9 @@ public class MainApp extends Application {
         videoManager.loadSources("./data/config.json");
         videoManager.startWorkers();
 
-        Parent dashboard = FXMLLoader.load(getClass().getResource("Dashboard.fxml"));
+        FXMLLoader dashboardLoader = new FXMLLoader(getClass().getResource("Dashboard.fxml"));
+        Parent dashboard = dashboardLoader.load();
+
         var scene = new Scene(dashboard);
         stage.setScene(scene);
 

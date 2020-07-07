@@ -23,7 +23,9 @@ public class CameraSettingsController {
     @FXML
     private CheckBox detectBoxToggle;
     @FXML
-    private TextField fpsBox;
+    private TextField capFpsBox;
+    @FXML
+    private TextField procFpsBox;
     @FXML
     private TextField heightBox;
     @FXML
@@ -38,8 +40,8 @@ public class CameraSettingsController {
     private TextField urlTextBox;
     @FXML
     private TextField widthBox;
-
     private ToggleGroup sourceTg = new ToggleGroup();
+    private VideoListModel videoListModel;
 
     @FXML
     public void initialize() {
@@ -62,8 +64,20 @@ public class CameraSettingsController {
         settingsAccordion.setExpandedPane(cameraSettingsPane);
     }
 
+    public void setModel(VideoListModel aVideoListModel) {
+        videoListModel = aVideoListModel;
+    }
+
     @FXML
     public void applyBtnClicked() {
-
+        if (sourceTg.selectedToggleProperty().get() == localRadioBtn) {
+            int camIndex = Integer.parseInt(cameraSelectBox.getValue().toString());
+            String api = apiSelectBox.getValue().toString();
+            int width = Integer.parseInt(widthBox.getText());
+            int height = Integer.parseInt(heightBox.getText());
+            int capFps = Integer.parseInt(capFpsBox.getText());
+            int procFps = Integer.parseInt(procFpsBox.getText());
+            videoListModel.addOCVLocalCamera(camIndex, api, width, height, 1000 / capFps, 1000 / procFps);
+        }
     }
 }
