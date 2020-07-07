@@ -10,8 +10,9 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.UMat;
 
 public class VideoUtils {
+
     public static Image wrapBgraUMat(UMat bgraMat) {
-        try (Mat tempMat = bgraMat.getMat(ACCESS_READ)) {
+        try ( Mat tempMat = bgraMat.getMat(ACCESS_READ)) {
             var pixelBuf = new PixelBuffer<ByteBuffer>(tempMat.cols(), tempMat.rows(), tempMat.createBuffer(), PixelFormat.getByteBgraPreInstance());
             return new WritableImage(pixelBuf);
         }

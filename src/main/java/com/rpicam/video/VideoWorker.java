@@ -1,15 +1,14 @@
 package com.rpicam.video;
 
-import com.rpicam.ui.VideoViewModel;
+import com.rpicam.ui.VideoModel;
 
 public interface VideoWorker {
+
+    VideoModel getModel();
+
     void start();
 
     void stop();
-
-    void bindModel(VideoViewModel model);
-
-    void unbindModel(VideoViewModel model);
 
     default String toJSON() {
         return "";

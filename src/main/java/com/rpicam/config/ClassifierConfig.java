@@ -1,7 +1,8 @@
 package com.rpicam.config;
 
-public class ClassifierGSON {
-    public String title;
+public class ClassifierConfig {
+
     public String color;
     public String path;
+    public String title;
 }

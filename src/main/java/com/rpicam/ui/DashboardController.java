@@ -2,41 +2,51 @@ package com.rpicam.ui;
 
 import com.rpicam.exceptions.UIException;
 import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.util.Duration;
 
+public class DashboardController {
 
-public class DashboardController implements Initializable {
+    private Parent archivesPage;
+    private Parent camerasPage;
+    private Parent currentPage;
     @FXML
     private GridPane dashboardGrid;
     @FXML
     private Label pageTitle;
-    private Parent currentPage;
     private Parent scenesPage;
-    private Parent camerasPage;
-    private Parent archivesPage;
     private Parent settingsPage;
     private Timeline sidebarTimeline;
 
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        try {
-            scenesPage = FXMLLoader.load(getClass().getResource("ScenesPage.fxml"));
-            camerasPage = FXMLLoader.load(getClass().getResource("CamerasPage.fxml"));
-            archivesPage = FXMLLoader.load(getClass().getResource("ArchivesPage.fxml"));
-            settingsPage = FXMLLoader.load(getClass().getResource("SettingsPage.fxml"));
+    private void setPage(Parent page) {
+        if (currentPage != null) {
+            dashboardGrid.getChildren().remove(currentPage);
         }
-        catch (IOException ex) {
+        currentPage = page;
+        dashboardGrid.add(currentPage, 1, 1);
+    }
+
+    @FXML
+    public void initialize() {
+        try {
+            var scenesLoader = new FXMLLoader(getClass().getResource("ScenesPage.fxml"));
+            scenesPage = scenesLoader.load();
+            var camerasLoader = new FXMLLoader(getClass().getResource("CamerasPage.fxml"));
+            camerasPage = camerasLoader.load();
+            CamerasPageController camerasController = camerasLoader.getController();
+            camerasController.setModel(MainApp.getVideoManager().getModel());
+            var archivesLoader = new FXMLLoader(getClass().getResource("ArchivesPage.fxml"));
+            archivesPage = archivesLoader.load();
+            var settingsLoader = new FXMLLoader(getClass().getResource("SettingsPage.fxml"));
+            settingsPage = settingsLoader.load();
+        } catch (IOException ex) {
             throw new UIException("Dashboard failed to load sub pages", ex);
         }
 
@@ -58,9 +68,9 @@ public class DashboardController implements Initializable {
     }
 
     @FXML
-    private void showScenesPage() {
-        pageTitle.setText("Scenes");
-        setPage(scenesPage);
+    private void showArchivesPage() {
+        pageTitle.setText("Archives");
+        setPage(archivesPage);
     }
 
     @FXML
@@ -70,9 +80,9 @@ public class DashboardController implements Initializable {
     }
 
     @FXML
-    private void showArchivesPage() {
-        pageTitle.setText("Archives");
-        setPage(archivesPage);
+    private void showScenesPage() {
+        pageTitle.setText("Scenes");
+        setPage(scenesPage);
     }
 
     @FXML
@@ -81,21 +91,12 @@ public class DashboardController implements Initializable {
         setPage(settingsPage);
     }
 
-    private void setPage(Parent page) {
-        if (currentPage != null) {
-            dashboardGrid.getChildren().remove(currentPage);
-        }
-        currentPage = page;
-        dashboardGrid.add(currentPage, 1, 1);
-    }
-
     @FXML
     private void toggleSidebar() {
         sidebarTimeline.setRate(-sidebarTimeline.getRate());
         if (sidebarTimeline.getRate() < 0) {
             sidebarTimeline.playFrom("end");
-        }
-        else {
+        } else {
             sidebarTimeline.playFrom("start");
         }
     }

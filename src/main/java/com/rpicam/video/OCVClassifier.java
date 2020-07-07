@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.rpicam.video;
 
 import java.util.ArrayList;
@@ -13,25 +8,14 @@ import org.bytedeco.opencv.opencv_core.RectVector;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
 
-/**
- *
- * @author benrx
- */
 public class OCVClassifier implements Function<UMat, ArrayList<ClassifierResult>> {
+
     private CascadeClassifier classifier = new CascadeClassifier();
-    private String title = "";
     private String color = "";
+    private String title = "";
 
-    public OCVClassifier(String path) {
-        classifier.load(path);
-    }
-
-    public void setTitle(String name) {
-        title = name;
-    }
-
-    public void setRGB(String colorStr) {
-        color = colorStr;
+    public OCVClassifier(String aPath) {
+        classifier.load(aPath);
     }
 
     @Override
@@ -55,5 +39,13 @@ public class OCVClassifier implements Function<UMat, ArrayList<ClassifierResult>
         }
 
         return results;
+    }
+
+    public void setRGB(String aColor) {
+        color = aColor;
+    }
+
+    public void setTitle(String aTitle) {
+        title = aTitle;
     }
 }

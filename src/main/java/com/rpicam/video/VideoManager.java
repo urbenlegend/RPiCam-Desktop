@@ -1,31 +1,28 @@
 package com.rpicam.video;
 
 import com.google.gson.GsonBuilder;
-import com.rpicam.config.ConfigGSON;
+import com.rpicam.config.Config;
+import com.rpicam.ui.VideoListModel;
+import com.rpicam.ui.VideoModel;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class VideoManager {
-    private HashMap<UUID, VideoWorker> workers = new HashMap<>();
-    private static VideoManager managerSingleton;
 
-    public static VideoManager getInstance() {
-        if (managerSingleton == null) {
-            managerSingleton = new VideoManager();
-        }
-        return managerSingleton;
+    private VideoListModel model = new VideoListModel(this);
+    private ArrayList<VideoWorker> workers = new ArrayList<>();
+
+    public void addWorker(VideoWorker worker) {
+        workers.add(worker);
+        updateModel();
     }
 
-    public static void deleteInstance() {
-        if (managerSingleton != null) {
-            managerSingleton.stopWorkers();
-            managerSingleton = null;
-        }
+    public VideoListModel getModel() {
+        return model;
     }
 
     public void loadSources(String configPath) throws IOException {
@@ -33,65 +30,70 @@ public class VideoManager {
         var configStr = Files.readString(Paths.get(configPath), StandardCharsets.US_ASCII);
         var builder = new GsonBuilder();
         var gson = builder.create();
-        ConfigGSON config = gson.fromJson(configStr, ConfigGSON.class);
+        Config config = gson.fromJson(configStr, Config.class);
 
         var classifiers = new ArrayList<OCVClassifier>();
-        for (var classifierGSON : config.classifiers) {
-            var classifier = new OCVClassifier(classifierGSON.path);
-            classifier.setTitle(classifierGSON.title);
-            classifier.setRGB(classifierGSON.color);
+        for (var classifierConf : config.classifiers) {
+            var classifier = new OCVClassifier(classifierConf.path);
+            classifier.setTitle(classifierConf.title);
+            classifier.setRGB(classifierConf.color);
             classifiers.add(classifier);
         }
 
-        for (var camGSON : config.cameras) {
-            var cameraWorker = new OCVVideoWorker();
+        for (var camConf : config.cameras) {
+            var cameraWorker = new OCVLocalCamera();
 
             for (var c : classifiers) {
                 cameraWorker.addClassifier(c);
             }
 
             var camOptions = cameraWorker.getOptions();
-            camOptions.type = camGSON.type;
-            camOptions.camIndex = camGSON.index;
-            camOptions.api = camGSON.api;
-            camOptions.resW = camGSON.resW;
-            camOptions.resH = camGSON.resH;
-            camOptions.grabRate = camGSON.capRate;
-            camOptions.processRate = camGSON.procRate;
-            cameraWorker.setOptions(camOptions);
-            cameraWorker.start();
-            addWorker(cameraWorker, UUID.fromString(camGSON.uuid));
+            switch (camConf.type) {
+                case "local" -> {
+                    camOptions.camIndex = camConf.index;
+                    camOptions.api = camConf.api;
+                    camOptions.resW = camConf.resW;
+                    camOptions.resH = camConf.resH;
+                    camOptions.capRate = camConf.capRate;
+                    camOptions.procRate = camConf.procRate;
+                    cameraWorker.setOptions(camOptions);
+                    addWorker(cameraWorker);
+                }
+                // TODO: Add other camera types
+            }
         }
     }
 
-    public void addWorker(VideoWorker worker, UUID workerUUID) {
-        if (workerUUID == null) {
-            workerUUID = UUID.randomUUID();
-        }
-        workers.put(workerUUID, worker);
-    }
-
-    public void removeWorker(UUID workerUUID) {
-        var worker = workers.get(workerUUID);
+    public void removeWorker(VideoWorker worker) {
         worker.stop();
-        workers.remove(workerUUID);
+        workers.remove(worker);
+        updateModel();
     }
 
-    public VideoWorker getWorker(UUID workerUUID) {
-        return workers.get(workerUUID);
-    }
-
-    public HashMap<UUID, VideoWorker> getWorkers() {
-        return workers;
-    }
-
-    public void stopWorkers() {
-        for (var w : workers.values()) {
-            w.stop();
-        }
+    public void removeWorkerViaModel(VideoModel model) {
+        workers.removeIf((worker) -> worker.getModel() == model);
     }
 
     public void saveWorkersToJSON() {
 
+    }
+
+    public void startWorkers() {
+        for (var w : workers) {
+            w.start();
+        }
+    }
+
+    public void stopWorkers() {
+        for (var w : workers) {
+            w.stop();
+        }
+    }
+
+    private void updateModel() {
+        var videoList = workers.stream()
+                .map(worker -> worker.getModel())
+                .collect(Collectors.toList());
+        model.updateVideoList(videoList);
     }
 }

@@ -19,7 +19,6 @@
     "cameras": [
         {
             "type": "local",
-            "uuid": "dd243140-b03a-4d72-b5ce-8f31412af8a5",
             "index": 0,
             "api": "CAP_DSHOW",
             "resW": 1920,

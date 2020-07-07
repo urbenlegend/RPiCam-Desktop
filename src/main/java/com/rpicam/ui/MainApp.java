@@ -8,9 +8,13 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-
 public class MainApp extends Application {
-    private VideoManager videoManager = VideoManager.getInstance();
+
+    private static VideoManager videoManager = new VideoManager();
+
+    public static VideoManager getVideoManager() {
+        return videoManager;
+    }
 
     public static void main(String[] args) {
         launch(args);
@@ -19,6 +23,7 @@ public class MainApp extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         videoManager.loadSources("./data/config.json");
+        videoManager.startWorkers();
 
         Parent dashboard = FXMLLoader.load(getClass().getResource("Dashboard.fxml"));
         var scene = new Scene(dashboard);
@@ -32,4 +37,5 @@ public class MainApp extends Application {
     public void stop() {
         videoManager.stopWorkers();
     }
+
 }
