@@ -18,15 +18,15 @@
   ],
   "cameras": [
     {
-      "type": "local",
       "camIndex": 0,
-      "api": "CAP_DSHOW",
-      "resW": 1920,
-      "resH": 1080,
+      "captureApi": "CAP_DSHOW",
+      "widthRes": 1920,
+      "heightRes": 1080,
       "capRate": 33,
       "procRate": 166,
+      "type": "local",
       "drawDetection": true,
-      "drawStats": true
+      "drawStats": false
     }
   ]
 }

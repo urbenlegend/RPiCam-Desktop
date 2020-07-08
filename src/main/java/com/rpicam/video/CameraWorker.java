@@ -1,7 +1,6 @@
 package com.rpicam.video;
 
-import com.rpicam.config.CameraConfig;
-import com.rpicam.models.CameraModel;
+import com.rpicam.models.CameraViewModel;
 
 public interface CameraWorker {
 
@@ -9,7 +8,9 @@ public interface CameraWorker {
 
     void stop();
 
-    CameraModel getModel();
+    CameraViewModel getViewModel();
 
-    CameraConfig getConfig();
+    String toJson();
+
+    void fromJson(String jsonStr);
 }

@@ -20,9 +20,9 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.UMat;
 import com.rpicam.video.CameraWorker;
 
-public class CameraModel {
+public class CameraViewModel {
 
-    private CameraWorker worker;
+    private CameraWorker camera;
     private final UMat bgraMat = new UMat();
 
     private SimpleObjectProperty<Image> frame = new SimpleObjectProperty<>();
@@ -30,17 +30,17 @@ public class CameraModel {
     private SimpleBooleanProperty drawDetection = new SimpleBooleanProperty();
     private SimpleBooleanProperty drawStats = new SimpleBooleanProperty();
 
-    public CameraModel(CameraWorker aWorker) {
-        worker = aWorker;
+    public CameraViewModel(CameraWorker aCamera) {
+        camera = aCamera;
     }
 
-    public void updateClassifierResultsLater(List<ClassifierResult> results) {
+    public void updateClassifierResults(List<ClassifierResult> results) {
         Platform.runLater(() -> {
             classifierResults.setAll(results);
         });
     }
 
-    public void updateFrameLater(UMat mat) {
+    public void updateFrame(UMat mat) {
         synchronized (bgraMat) {
             cvtColor(mat, bgraMat, COLOR_BGR2BGRA);
         }

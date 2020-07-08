@@ -45,53 +45,55 @@
         <panes>
           <TitledPane fx:id="cameraSettingsPane" text="Source" textFill="GREY">
                <content>
-                  <VBox>
+                  <VBox prefHeight="222.0" prefWidth="240.0">
                      <children>
                         <GridPane hgap="10.0" vgap="5.0">
                           <columnConstraints>
-                            <ColumnConstraints hgrow="SOMETIMES" minWidth="80.0" />
-                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="136.0" />
-                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="136.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" />
                           </columnConstraints>
                           <rowConstraints>
                             <RowConstraints vgrow="SOMETIMES" />
                             <RowConstraints vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                               <RowConstraints vgrow="SOMETIMES" />
                               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                           </rowConstraints>
                            <children>
-                              <RadioButton fx:id="urlRadioBtn" mnemonicParsing="false" text="URL" />
-                              <RadioButton fx:id="localRadioBtn" mnemonicParsing="false" text="Local" GridPane.rowIndex="1" />
+                              <RadioButton fx:id="urlRadioBtn" minWidth="-Infinity" mnemonicParsing="false" text="URL" />
+                              <RadioButton fx:id="localRadioBtn" minWidth="-Infinity" mnemonicParsing="false" text="Local" GridPane.rowIndex="1" />
                               <TextField fx:id="urlTextBox" promptText="Remote Camera URL" GridPane.columnIndex="1" GridPane.columnSpan="2">
                                  <tooltip>
                                     <Tooltip text="Remote Camera URL" />
                                  </tooltip></TextField>
-                              <ComboBox fx:id="cameraSelectBox" editable="true" maxWidth="1.7976931348623157E308" promptText="Camera Index" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                              <ComboBox fx:id="cameraSelectBox" editable="true" maxWidth="1.7976931348623157E308" promptText="Camera Index" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="1">
                                  <tooltip>
                                     <Tooltip text="Camera Index" />
                                  </tooltip></ComboBox>
-                              <ComboBox fx:id="apiSelectBox" editable="true" maxWidth="1.7976931348623157E308" promptText="Capture API" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                              <ComboBox fx:id="captureApiSelectBox" editable="true" maxWidth="1.7976931348623157E308" promptText="Capture API" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2">
                                  <tooltip>
                                     <Tooltip text="Capture API" />
                                  </tooltip></ComboBox>
-                              <Label text="Video Quality" GridPane.rowIndex="2" />
-                              <TextField fx:id="widthBox" maxWidth="1.7976931348623157E308" promptText="Resolution Width" text="1920" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                              <Label minWidth="-Infinity" text="Video Quality" textOverrun="CLIP" GridPane.rowIndex="3" />
+                              <TextField fx:id="widthBox" maxWidth="1.7976931348623157E308" promptText="Resolution Width" text="1920" GridPane.columnIndex="1" GridPane.rowIndex="3">
                                  <tooltip>
                                     <Tooltip text="Resolution Width" />
                                  </tooltip></TextField>
-                              <TextField fx:id="heightBox" promptText="Resolution Height" text="1080" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                              <TextField fx:id="heightBox" promptText="Resolution Height" text="1080" GridPane.columnIndex="2" GridPane.rowIndex="3">
                                  <tooltip>
                                     <Tooltip text="Resolution Height" />
                                  </tooltip></TextField>
-                              <Label text="Framerate" GridPane.rowIndex="3" />
-                              <TextField fx:id="capFpsBox" promptText="Capture FPS" text="30" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                              <Label minWidth="-Infinity" text="Framerate" GridPane.rowIndex="4" />
+                              <TextField fx:id="capFpsBox" promptText="Capture FPS" text="30" GridPane.columnIndex="1" GridPane.rowIndex="4">
                                  <tooltip>
                                     <Tooltip text="Capture FPS" />
                                  </tooltip></TextField>
-                              <TextField fx:id="procFpsBox" promptText="Processing FPS" text="6" GridPane.columnIndex="2" GridPane.rowIndex="3">
+                              <TextField fx:id="procFpsBox" promptText="Processing FPS" text="6" GridPane.columnIndex="2" GridPane.rowIndex="4">
                                  <tooltip>
                                     <Tooltip text="Processing FPS" />
                                  </tooltip></TextField>
+                              <Label minWidth="-Infinity" text="Capture API" GridPane.rowIndex="2" />
                            </children>
                         </GridPane>
                      </children>

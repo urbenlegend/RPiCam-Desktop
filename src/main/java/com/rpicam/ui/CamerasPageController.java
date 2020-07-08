@@ -1,8 +1,10 @@
 package com.rpicam.ui;
 
-import com.rpicam.models.CameraModel;
 import com.rpicam.models.CameraManagerModel;
 import com.rpicam.exceptions.UIException;
+import com.rpicam.video.CameraWorker;
+import com.rpicam.video.OCVLocalCamera;
+import com.rpicam.video.OCVStreamCamera;
 import java.io.IOException;
 import javafx.beans.property.SimpleListProperty;
 import javafx.fxml.FXML;
@@ -31,16 +33,18 @@ public class CamerasPageController {
     private Slider zoomSlider;
     private PopOver addCameraPopOver;
     private Parent addCameraSettings;
-    private FXMLLoader cameraSettingsLoader = new FXMLLoader(getClass().getResource("CameraSettings.fxml"));
+    private CameraSettingsController addCameraController;
 
-    private CameraManagerModel videoListModel;
-    private SimpleListProperty<CameraModel> selection = new SimpleListProperty<>();
-    private SimpleListProperty<CameraModel> cameraList = new SimpleListProperty<>();
+    private CameraManagerModel cameraMgrModel;
+    private SimpleListProperty<CameraWorker> selection = new SimpleListProperty<>();
+    private SimpleListProperty<CameraWorker> cameraList = new SimpleListProperty<>();
 
     @FXML
     public void initialize() {
         try {
+            FXMLLoader cameraSettingsLoader = new FXMLLoader(getClass().getResource("CameraSettings.fxml"));
             addCameraSettings = cameraSettingsLoader.load();
+            addCameraController = cameraSettingsLoader.getController();
             addCameraPopOver = new PopOver(addCameraSettings);
             addCameraPopOver.setArrowLocation(PopOver.ArrowLocation.BOTTOM_LEFT);
         } catch (IOException ex) {
@@ -49,7 +53,7 @@ public class CamerasPageController {
 
         cameraList.addListener((obs, oldVal, newVal) -> {
             cameraFlowPane.getChildren().clear();
-            for (var model : newVal) {
+            for (var camera : newVal) {
                 var cameraView = new CameraView();
                 cameraView.prefWidthProperty().bind(zoomSlider.valueProperty()
                         .multiply(cameraScrollPane.widthProperty().subtract(2)));
@@ -57,22 +61,61 @@ public class CamerasPageController {
                         .multiply(cameraScrollPane.widthProperty().subtract(2))
                         .multiply(cameraView.frameHeightProperty())
                         .divide(cameraView.frameWidthProperty()));
-                cameraView.setModel(model);
+                cameraView.setModel(camera.getViewModel());
                 cameraFlowPane.getChildren().add(cameraView);
             }
         });
 
-        var addCameraPopOverResults = cameraSettingsLoader.<CameraSettingsController>getController().resultsProperty();
-        addCameraPopOverResults.addListener((obs, oldVal, newVal) -> {
-            videoListModel.addCamera(newVal);
+        addCameraController.resultsProperty().addListener((obs, oldVal, newVal) -> {
+            CameraWorker camera = null;
+            switch (newVal.get("type")) {
+                case "local" -> {
+                    var newCamera = new OCVLocalCamera();
+                    var options = newCamera.getParameters();
+                    options.camIndex = Integer.parseInt(newVal.get("camIndex"));
+                    options.captureApi = newVal.get("captureApi");
+                    options.widthRes = Integer.parseInt(newVal.get("resW"));
+                    options.heightRes = Integer.parseInt(newVal.get("resH"));
+                    options.capRate = 1000 / Integer.parseInt(newVal.get("capFPS"));
+                    options.procRate = 1000 / Integer.parseInt(newVal.get("procFPS"));
+                    newCamera.setParameters(options);
+                    newCamera.getViewModel().drawDetectionProperty().set(Boolean.parseBoolean(newVal.get("drawDetection")));
+                    newCamera.getViewModel().drawStatsProperty().set(Boolean.parseBoolean(newVal.get("drawStats")));
+                    camera = newCamera;
+                }
+                case "url" -> {
+                    var newCamera = new OCVStreamCamera();
+                    var options = newCamera.getParameters();
+                    options.url = newVal.get("path");
+                    options.captureApi = newVal.get("captureApi");
+                    options.widthRes = Integer.parseInt(newVal.get("resW"));
+                    options.heightRes = Integer.parseInt(newVal.get("resH"));
+                    options.capRate = 1000 / Integer.parseInt(newVal.get("capFPS"));
+                    options.procRate = 1000 / Integer.parseInt(newVal.get("procFPS"));
+                    newCamera.setParameters(options);
+                    newCamera.getViewModel().drawDetectionProperty().set(Boolean.parseBoolean(newVal.get("drawDetection")));
+                    newCamera.getViewModel().drawStatsProperty().set(Boolean.parseBoolean(newVal.get("drawStats")));
+                    camera = newCamera;
+                }
+            }
+
+            try {
+                camera.start();
+                cameraMgrModel.addCamera(camera);
+            }
+            catch (Exception ex) {
+                // TODO: Display error dialog
+                ex.printStackTrace();
+            }
+
             addCameraPopOver.hide();
         });
     }
 
-    public void setModel(CameraManagerModel aVideoListModel) {
-        videoListModel = aVideoListModel;
-        cameraList.bind(videoListModel.cameraListProperty());
-        selection.bind(videoListModel.selectionProperty());
+    public void setModel(CameraManagerModel aCameraMgrModel) {
+        cameraMgrModel = aCameraMgrModel;
+        cameraList.bind(cameraMgrModel.cameraListProperty());
+        selection.bind(cameraMgrModel.selectionProperty());
     }
 
     @FXML

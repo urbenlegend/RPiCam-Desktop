@@ -1,6 +1,6 @@
 package com.rpicam.ui;
 
-import com.rpicam.models.CameraModel;
+import com.rpicam.models.CameraViewModel;
 import com.rpicam.video.ClassifierResult;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -17,7 +17,7 @@ public class CameraView extends StackPane {
     private Canvas classifierHud = new Canvas();
     private ImageView frameView = new ImageView();
 
-    private CameraModel cameraModel;
+    private CameraViewModel cameraModel;
     private SimpleListProperty<ClassifierResult> classifierResults = new SimpleListProperty<>();
     private SimpleDoubleProperty frameWidth = new SimpleDoubleProperty(widthProperty().get());
     private SimpleDoubleProperty frameHeight = new SimpleDoubleProperty(heightProperty().get());
@@ -117,7 +117,7 @@ public class CameraView extends StackPane {
         return frameWidth;
     }
 
-    public void setModel(CameraModel aCameraModel) {
+    public void setModel(CameraViewModel aCameraModel) {
         cameraModel = aCameraModel;
         frameView.imageProperty().bind(cameraModel.frameProperty());
         classifierResults.bind(cameraModel.classifierResultsProperty());

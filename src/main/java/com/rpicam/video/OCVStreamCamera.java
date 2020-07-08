@@ -11,12 +11,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.bytedeco.opencv.global.opencv_videoio;
-import static org.bytedeco.opencv.global.opencv_videoio.CAP_PROP_FRAME_HEIGHT;
-import static org.bytedeco.opencv.global.opencv_videoio.CAP_PROP_FRAME_WIDTH;
 import org.bytedeco.opencv.opencv_core.UMat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 
-public class OCVLocalCamera implements CameraWorker {
+public class OCVStreamCamera implements CameraWorker {
 
     private VideoCapture capture = new VideoCapture();
     private final CameraViewModel viewModel = new CameraViewModel(this);
@@ -35,12 +33,9 @@ public class OCVLocalCamera implements CameraWorker {
             throw new IllegalArgumentException("Invalid camera api specified: " + params.captureApi, ex);
         }
 
-        if (!capture.open(params.camIndex, api)) {
-            throw new VideoIOException("Could not open camera " + params.camIndex);
+        if (!capture.open(params.url, api)) {
+            throw new VideoIOException("Could not open " + params.url);
         }
-
-        capture.set(CAP_PROP_FRAME_WIDTH, params.widthRes);
-        capture.set(CAP_PROP_FRAME_HEIGHT, params.heightRes);
     }
 
     private void close() {
@@ -109,7 +104,7 @@ public class OCVLocalCamera implements CameraWorker {
         var builder = new GsonBuilder();
         var gson = builder.create();
         var jsonObj = gson.toJsonTree(params).getAsJsonObject();
-        jsonObj.addProperty("type", "local");
+        jsonObj.addProperty("type", "path");
         jsonObj.addProperty("drawDetection", viewModel.drawDetectionProperty().get());
         jsonObj.addProperty("drawStats", viewModel.drawStatsProperty().get());
         return jsonObj.toString();
@@ -139,8 +134,7 @@ public class OCVLocalCamera implements CameraWorker {
     }
 
     public static class Parameters implements Cloneable {
-
-        public int camIndex;
+        public String url;
         public String captureApi;
         public int widthRes;
         public int heightRes;

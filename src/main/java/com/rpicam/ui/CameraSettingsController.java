@@ -28,7 +28,7 @@ public class CameraSettingsController {
     @FXML
     private ComboBox<String> cameraSelectBox;
     @FXML
-    private ComboBox<String> apiSelectBox;
+    private ComboBox<String> captureApiSelectBox;
     @FXML
     private TextField widthBox;
     @FXML
@@ -56,20 +56,18 @@ public class CameraSettingsController {
             var selectedBtn = (RadioButton) newVal;
             if (selectedBtn == urlRadioBtn) {
                 urlTextBox.setDisable(false);
-                apiSelectBox.setDisable(true);
                 cameraSelectBox.setDisable(true);
             } else if (selectedBtn == localRadioBtn) {
                 urlTextBox.setDisable(true);
-                apiSelectBox.setDisable(false);
                 cameraSelectBox.setDisable(false);
             }
         });
         sourceTg.selectToggle(urlRadioBtn);
 
         // TODO: Get API list from hardware detection module
-        apiSelectBox.getItems().add("CAP_ANY");
-        apiSelectBox.getItems().add("CAP_DSHOW");
-        apiSelectBox.setValue("CAP_ANY");
+        captureApiSelectBox.getItems().add("CAP_ANY");
+        captureApiSelectBox.getItems().add("CAP_DSHOW");
+        captureApiSelectBox.setValue("CAP_ANY");
 
         settingsAccordion.setExpandedPane(cameraSettingsPane);
     }
@@ -85,12 +83,13 @@ public class CameraSettingsController {
         if (selectedSourceType == localRadioBtn) {
             resultsMap.put("type", "local");
             resultsMap.put("camIndex", cameraSelectBox.getValue().toString());
-            resultsMap.put("api", apiSelectBox.getValue().toString());
+
         }
         else if (selectedSourceType == urlRadioBtn) {
             resultsMap.put("type", "url");
-            resultsMap.put("url", urlTextBox.getText());
+            resultsMap.put("path", urlTextBox.getText());
         }
+        resultsMap.put("captureApi", captureApiSelectBox.getValue().toString());
         resultsMap.put("resW", widthBox.getText());
         resultsMap.put("resH", heightBox.getText());
         resultsMap.put("capFPS", capFpsBox.getText());

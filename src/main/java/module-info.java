@@ -8,5 +8,5 @@ module com.rpicam {
 
     opens com.rpicam.ui to javafx.fxml;
     exports com.rpicam.ui to javafx.graphics;
-    exports com.rpicam.config to com.google.gson;
+    opens com.rpicam.video to com.google.gson;
 }

@@ -18,23 +18,26 @@ public class DashboardController {
     private GridPane dashboardGrid;
     @FXML
     private Label pageTitle;
-    private FXMLLoader archivesLoader = new FXMLLoader(getClass().getResource("ArchivesPage.fxml"));
     private Parent archivesPage;
-    private FXMLLoader camerasLoader = new FXMLLoader(getClass().getResource("CamerasPage.fxml"));
     private Parent camerasPage;
     private Parent currentPage;
-    private FXMLLoader scenesLoader = new FXMLLoader(getClass().getResource("ScenesPage.fxml"));
     private Parent scenesPage;
-    private FXMLLoader settingsLoader = new FXMLLoader(getClass().getResource("SettingsPage.fxml"));
     private Parent settingsPage;
+    private CamerasPageController camerasPageController;
+
     private Timeline sidebarTimeline;
     private MainApp app;
 
     @FXML
     public void initialize() {
         try {
+            FXMLLoader archivesLoader = new FXMLLoader(getClass().getResource("ArchivesPage.fxml"));
+            FXMLLoader camerasLoader = new FXMLLoader(getClass().getResource("CamerasPage.fxml"));
+            FXMLLoader scenesLoader = new FXMLLoader(getClass().getResource("ScenesPage.fxml"));
+            FXMLLoader settingsLoader = new FXMLLoader(getClass().getResource("SettingsPage.fxml"));
             archivesPage = archivesLoader.load();
             camerasPage = camerasLoader.load();
+            camerasPageController = camerasLoader.getController();
             scenesPage = scenesLoader.load();
             settingsPage = settingsLoader.load();
         } catch (IOException ex) {
@@ -47,8 +50,7 @@ public class DashboardController {
 
     public void setApp(MainApp aApp) {
         app = aApp;
-        camerasLoader.<CamerasPageController>getController()
-                .setModel(app.getCameraManager().getModel());
+        camerasPageController.setModel(app.getCameraManager().getViewModel());
     }
 
     private void setupAnimations() {

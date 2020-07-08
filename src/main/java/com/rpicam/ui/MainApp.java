@@ -2,6 +2,7 @@ package com.rpicam.ui;
 
 import com.rpicam.video.CameraManager;
 import java.io.IOException;
+import java.nio.file.Paths;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -23,8 +24,8 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        cameraManager.loadConfig(CONFIG_PATH);
-        cameraManager.startWorkers();
+        cameraManager.loadConfigFile(Paths.get(CONFIG_PATH));
+        cameraManager.startCameras();
 
         FXMLLoader dashboardLoader = new FXMLLoader(getClass().getResource("Dashboard.fxml"));
         Parent dashboard = dashboardLoader.load();
@@ -40,7 +41,7 @@ public class MainApp extends Application {
 
     @Override
     public void stop() throws IOException {
-        cameraManager.stopWorkers();
-        cameraManager.saveConfig(CONFIG_PATH);
+        cameraManager.stopCameras();
+        cameraManager.saveConfigFile(Paths.get(CONFIG_PATH));
     }
 }
