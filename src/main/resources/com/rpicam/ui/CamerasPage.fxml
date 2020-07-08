@@ -11,9 +11,9 @@
 
 <BorderPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="1080.0" prefWidth="1920.0" stylesheets="@camerapage.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rpicam.ui.CamerasPageController">
    <center>
-      <ScrollPane fx:id="cameraPane" fitToWidth="true" styleClass="camera-pane" BorderPane.alignment="CENTER">
+      <ScrollPane fx:id="cameraScrollPane" fitToWidth="true" styleClass="camera-pane" BorderPane.alignment="CENTER">
          <content>
-            <FlowPane fx:id="cameraList" hgap="10.0" vgap="10.0" />
+            <FlowPane fx:id="cameraFlowPane" hgap="10.0" vgap="10.0" />
          </content>
       </ScrollPane>
    </center>

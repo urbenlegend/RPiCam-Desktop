@@ -1,6 +1,6 @@
 package com.rpicam.ui;
 
-import com.rpicam.video.VideoManager;
+import com.rpicam.video.CameraManager;
 import java.io.IOException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -9,11 +9,12 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class MainApp extends Application {
+    private static final String CONFIG_PATH = "./data/config.json";
 
-    private static VideoManager videoManager = new VideoManager();
+    private CameraManager cameraManager = new CameraManager();
 
-    public static VideoManager getVideoManager() {
-        return videoManager;
+    public CameraManager getCameraManager() {
+        return cameraManager;
     }
 
     public static void main(String[] args) {
@@ -22,11 +23,13 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        videoManager.loadSources("./data/config.json");
-        videoManager.startWorkers();
+        cameraManager.loadConfig(CONFIG_PATH);
+        cameraManager.startWorkers();
 
         FXMLLoader dashboardLoader = new FXMLLoader(getClass().getResource("Dashboard.fxml"));
         Parent dashboard = dashboardLoader.load();
+        DashboardController dashboardController = dashboardLoader.getController();
+        dashboardController.setApp(this);
 
         var scene = new Scene(dashboard);
         stage.setScene(scene);
@@ -36,8 +39,8 @@ public class MainApp extends Application {
     }
 
     @Override
-    public void stop() {
-        videoManager.stopWorkers();
+    public void stop() throws IOException {
+        cameraManager.stopWorkers();
+        cameraManager.saveConfig(CONFIG_PATH);
     }
-
 }

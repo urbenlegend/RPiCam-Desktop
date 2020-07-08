@@ -1,5 +1,8 @@
 package com.rpicam.ui;
 
+import javafx.beans.property.ReadOnlyMapProperty;
+import javafx.beans.property.SimpleMapProperty;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.CheckBox;
@@ -13,35 +16,37 @@ import javafx.scene.control.ToggleGroup;
 public class CameraSettingsController {
 
     @FXML
-    private ComboBox<?> apiSelectBox;
-    @FXML
-    private ComboBox<?> cameraSelectBox;
-    @FXML
-    private TitledPane cameraSettingsPane;
-    @FXML
-    private ListView<?> classifierView;
-    @FXML
-    private CheckBox detectBoxToggle;
-    @FXML
-    private TextField capFpsBox;
-    @FXML
-    private TextField procFpsBox;
-    @FXML
-    private TextField heightBox;
-    @FXML
-    private RadioButton localRadioBtn;
-    @FXML
     private Accordion settingsAccordion;
     @FXML
-    private CheckBox statsToggle;
+    private TitledPane cameraSettingsPane;
     @FXML
     private RadioButton urlRadioBtn;
     @FXML
     private TextField urlTextBox;
     @FXML
+    private RadioButton localRadioBtn;
+    @FXML
+    private ComboBox<String> cameraSelectBox;
+    @FXML
+    private ComboBox<String> apiSelectBox;
+    @FXML
     private TextField widthBox;
+    @FXML
+    private TextField heightBox;
+    @FXML
+    private TextField capFpsBox;
+    @FXML
+    private TextField procFpsBox;
+    @FXML
+    private ListView<String> classifierView;
+    @FXML
+    private CheckBox detectBoxToggle;
+    @FXML
+    private CheckBox statsToggle;
+
     private ToggleGroup sourceTg = new ToggleGroup();
-    private VideoListModel videoListModel;
+
+    private SimpleMapProperty<String, String> results = new SimpleMapProperty<>();
 
     @FXML
     public void initialize() {
@@ -61,23 +66,37 @@ public class CameraSettingsController {
         });
         sourceTg.selectToggle(urlRadioBtn);
 
+        // TODO: Get API list from hardware detection module
+        apiSelectBox.getItems().add("CAP_ANY");
+        apiSelectBox.getItems().add("CAP_DSHOW");
+        apiSelectBox.setValue("CAP_ANY");
+
         settingsAccordion.setExpandedPane(cameraSettingsPane);
     }
 
-    public void setModel(VideoListModel aVideoListModel) {
-        videoListModel = aVideoListModel;
+    public ReadOnlyMapProperty<String, String> resultsProperty() {
+        return results;
     }
 
     @FXML
     public void applyBtnClicked() {
-        if (sourceTg.selectedToggleProperty().get() == localRadioBtn) {
-            int camIndex = Integer.parseInt(cameraSelectBox.getValue().toString());
-            String api = apiSelectBox.getValue().toString();
-            int width = Integer.parseInt(widthBox.getText());
-            int height = Integer.parseInt(heightBox.getText());
-            int capFps = Integer.parseInt(capFpsBox.getText());
-            int procFps = Integer.parseInt(procFpsBox.getText());
-            videoListModel.addOCVLocalCamera(camIndex, api, width, height, 1000 / capFps, 1000 / procFps);
+        var resultsMap = FXCollections.<String, String>observableHashMap();
+        var selectedSourceType = sourceTg.selectedToggleProperty().get();
+        if (selectedSourceType == localRadioBtn) {
+            resultsMap.put("type", "local");
+            resultsMap.put("camIndex", cameraSelectBox.getValue().toString());
+            resultsMap.put("api", apiSelectBox.getValue().toString());
         }
+        else if (selectedSourceType == urlRadioBtn) {
+            resultsMap.put("type", "url");
+            resultsMap.put("url", urlTextBox.getText());
+        }
+        resultsMap.put("resW", widthBox.getText());
+        resultsMap.put("resH", heightBox.getText());
+        resultsMap.put("capFPS", capFpsBox.getText());
+        resultsMap.put("procFPS", procFpsBox.getText());
+        resultsMap.put("drawDetection", Boolean.toString(detectBoxToggle.isSelected()));
+        resultsMap.put("drawStats", Boolean.toString(statsToggle.isSelected()));
+        results.set(resultsMap);
     }
 }

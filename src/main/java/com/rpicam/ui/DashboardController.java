@@ -18,7 +18,6 @@ public class DashboardController {
     private GridPane dashboardGrid;
     @FXML
     private Label pageTitle;
-
     private FXMLLoader archivesLoader = new FXMLLoader(getClass().getResource("ArchivesPage.fxml"));
     private Parent archivesPage;
     private FXMLLoader camerasLoader = new FXMLLoader(getClass().getResource("CamerasPage.fxml"));
@@ -29,6 +28,7 @@ public class DashboardController {
     private FXMLLoader settingsLoader = new FXMLLoader(getClass().getResource("SettingsPage.fxml"));
     private Parent settingsPage;
     private Timeline sidebarTimeline;
+    private MainApp app;
 
     @FXML
     public void initialize() {
@@ -37,15 +37,18 @@ public class DashboardController {
             camerasPage = camerasLoader.load();
             scenesPage = scenesLoader.load();
             settingsPage = settingsLoader.load();
-
-            CamerasPageController camerasController = camerasLoader.getController();
-            camerasController.setModel(MainApp.getVideoManager().getModel());
         } catch (IOException ex) {
             throw new UIException("Dashboard failed to load sub pages", ex);
         }
 
         setupAnimations();
         showScenesPage();
+    }
+
+    public void setApp(MainApp aApp) {
+        app = aApp;
+        camerasLoader.<CamerasPageController>getController()
+                .setModel(app.getCameraManager().getModel());
     }
 
     private void setupAnimations() {

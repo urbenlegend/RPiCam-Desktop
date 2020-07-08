@@ -11,6 +11,7 @@
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
@@ -61,15 +62,36 @@
                            <children>
                               <RadioButton fx:id="urlRadioBtn" mnemonicParsing="false" text="URL" />
                               <RadioButton fx:id="localRadioBtn" mnemonicParsing="false" text="Local" GridPane.rowIndex="1" />
-                              <TextField fx:id="urlTextBox" promptText="Remote Camera URL" GridPane.columnIndex="1" GridPane.columnSpan="2" />
-                              <ComboBox fx:id="cameraSelectBox" editable="true" maxWidth="1.7976931348623157E308" promptText="Camera" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                              <ComboBox fx:id="apiSelectBox" editable="true" maxWidth="1.7976931348623157E308" promptText="API" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                              <TextField fx:id="urlTextBox" promptText="Remote Camera URL" GridPane.columnIndex="1" GridPane.columnSpan="2">
+                                 <tooltip>
+                                    <Tooltip text="Remote Camera URL" />
+                                 </tooltip></TextField>
+                              <ComboBox fx:id="cameraSelectBox" editable="true" maxWidth="1.7976931348623157E308" promptText="Camera Index" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                 <tooltip>
+                                    <Tooltip text="Camera Index" />
+                                 </tooltip></ComboBox>
+                              <ComboBox fx:id="apiSelectBox" editable="true" maxWidth="1.7976931348623157E308" promptText="Capture API" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                 <tooltip>
+                                    <Tooltip text="Capture API" />
+                                 </tooltip></ComboBox>
                               <Label text="Video Quality" GridPane.rowIndex="2" />
-                              <TextField fx:id="widthBox" maxWidth="1.7976931348623157E308" promptText="Width" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                              <TextField fx:id="heightBox" promptText="Height" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                              <TextField fx:id="widthBox" maxWidth="1.7976931348623157E308" promptText="Resolution Width" text="1920" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                 <tooltip>
+                                    <Tooltip text="Resolution Width" />
+                                 </tooltip></TextField>
+                              <TextField fx:id="heightBox" promptText="Resolution Height" text="1080" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                                 <tooltip>
+                                    <Tooltip text="Resolution Height" />
+                                 </tooltip></TextField>
                               <Label text="Framerate" GridPane.rowIndex="3" />
-                              <TextField fx:id="capFpsBox" promptText="Capture FPS" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                              <TextField fx:id="procFpsBox" promptText="Processing FPS" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                              <TextField fx:id="capFpsBox" promptText="Capture FPS" text="30" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                                 <tooltip>
+                                    <Tooltip text="Capture FPS" />
+                                 </tooltip></TextField>
+                              <TextField fx:id="procFpsBox" promptText="Processing FPS" text="6" GridPane.columnIndex="2" GridPane.rowIndex="3">
+                                 <tooltip>
+                                    <Tooltip text="Processing FPS" />
+                                 </tooltip></TextField>
                            </children>
                         </GridPane>
                      </children>
@@ -106,8 +128,8 @@
                <content>
                   <VBox spacing="10.0">
                      <children>
-                        <CheckBox fx:id="statsToggle" mnemonicParsing="false" text="Display video statistics" />
-                        <CheckBox fx:id="detectBoxToggle" mnemonicParsing="false" text="Display detection boxes" />
+                        <CheckBox fx:id="detectBoxToggle" mnemonicParsing="false" selected="true" text="Display detection boxes" />
+                        <CheckBox fx:id="statsToggle" mnemonicParsing="false" selected="true" text="Display video statistics" />
                      </children>
                   </VBox>
                </content>

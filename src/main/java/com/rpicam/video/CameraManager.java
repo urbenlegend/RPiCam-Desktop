@@ -1,9 +1,11 @@
 package com.rpicam.video;
 
 import com.google.gson.GsonBuilder;
+import com.rpicam.config.CameraConfig;
+import com.rpicam.config.ClassifierConfig;
 import com.rpicam.config.Config;
-import com.rpicam.ui.VideoListModel;
-import com.rpicam.ui.VideoModel;
+import com.rpicam.models.CameraManagerModel;
+import com.rpicam.models.CameraModel;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -11,13 +13,13 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-public class VideoManager {
+public class CameraManager {
 
-    private VideoListModel model = new VideoListModel(this);
-    private ArrayList<VideoWorker> workers = new ArrayList<>();
+    private CameraManagerModel model = new CameraManagerModel(this);
+    private ArrayList<CameraWorker> workers = new ArrayList<>();
     private ArrayList<OCVClassifier> classifiers = new ArrayList<>();
 
-    public void loadSources(String configPath) throws IOException {
+    public void loadConfig(String configPath) throws IOException {
         // TODO: Consider using a less cumbersome JSON library
         var configStr = Files.readString(Paths.get(configPath), StandardCharsets.US_ASCII);
         var builder = new GsonBuilder();
@@ -26,25 +28,16 @@ public class VideoManager {
 
         for (var classifierConf : config.classifiers) {
             var classifier = new OCVClassifier(classifierConf.path);
-            classifier.setTitle(classifierConf.title);
-            classifier.setRGB(classifierConf.color);
+            classifier.setConfig(classifierConf);
             classifiers.add(classifier);
         }
 
         for (var camConf : config.cameras) {
-            var cameraWorker = new OCVLocalCamera();
-
-            var camOptions = cameraWorker.getOptions();
             switch (camConf.type) {
                 case "local" -> {
-                    camOptions.camIndex = camConf.index;
-                    camOptions.api = camConf.api;
-                    camOptions.resW = camConf.resW;
-                    camOptions.resH = camConf.resH;
-                    camOptions.capRate = camConf.capRate;
-                    camOptions.procRate = camConf.procRate;
-                    cameraWorker.setOptions(camOptions);
-                    addWorker(cameraWorker);
+                    var worker = new OCVLocalCamera();
+                    worker.setConfig(camConf);
+                    addWorker(worker);
                 }
                 // TODO: Add other camera types
             }
@@ -63,7 +56,7 @@ public class VideoManager {
         }
     }
 
-    public void addWorker(VideoWorker worker) {
+    public void addWorker(CameraWorker worker) {
         if (worker instanceof OCVLocalCamera) {
             var ocvWorker = (OCVLocalCamera) worker;
             for (var c : classifiers) {
@@ -75,21 +68,34 @@ public class VideoManager {
         updateModel();
     }
 
-    public void removeWorker(VideoWorker worker) {
+    public void removeWorker(CameraWorker worker) {
         worker.stop();
         workers.remove(worker);
         updateModel();
     }
 
-    public void removeWorkerViaModel(VideoModel model) {
+    public void removeWorkerViaModel(CameraModel model) {
         workers.removeIf((worker) -> worker.getModel() == model);
     }
 
-    public void saveWorkersToJSON() {
+    public void saveConfig(String configPath) throws IOException {
+        var config = new Config();
+        config.classifiers = new ClassifierConfig[classifiers.size()];
+        config.cameras = new CameraConfig[workers.size()];
+        for (int i = 0; i < config.classifiers.length; i++) {
+            config.classifiers[i] = classifiers.get(i).getConfig();
+        }
+        for (int i = 0; i < config.cameras.length; i++) {
+            config.cameras[i] = workers.get(i).getConfig();
+        }
 
+        var builder = new GsonBuilder();
+        var gson = builder.setPrettyPrinting().create();
+        String configJSON = gson.toJson(config, Config.class);
+        Files.writeString(Paths.get(configPath), configJSON);
     }
 
-    public VideoListModel getModel() {
+    public CameraManagerModel getModel() {
         return model;
     }
 
@@ -97,6 +103,6 @@ public class VideoManager {
         var videoList = workers.stream()
                 .map(worker -> worker.getModel())
                 .collect(Collectors.toList());
-        model.updateVideoList(videoList);
+        model.updateCameraList(videoList);
     }
 }

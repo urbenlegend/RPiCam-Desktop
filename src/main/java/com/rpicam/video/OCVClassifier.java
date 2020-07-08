@@ -1,5 +1,6 @@
 package com.rpicam.video;
 
+import com.rpicam.config.ClassifierConfig;
 import java.util.ArrayList;
 import java.util.function.Function;
 import static org.bytedeco.opencv.global.opencv_objdetect.CASCADE_SCALE_IMAGE;
@@ -12,10 +13,25 @@ public class OCVClassifier implements Function<UMat, ArrayList<ClassifierResult>
 
     private CascadeClassifier classifier = new CascadeClassifier();
     private String color = "";
+    private String path = "";
     private String title = "";
 
     public OCVClassifier(String aPath) {
-        classifier.load(aPath);
+        path = aPath;
+        classifier.load(path);
+    }
+
+    public ClassifierConfig getConfig() {
+        var config = new ClassifierConfig();
+        config.color = color;
+        config.path = path;
+        config.title = title;
+        return config;
+    }
+
+    public void setConfig(ClassifierConfig config) {
+        setTitle(config.title);
+        setRGB(config.color);
     }
 
     public void setRGB(String aColor) {

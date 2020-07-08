@@ -1,21 +1,32 @@
 {
-    "classifiers": [
-        {
-            "title": "Upper Body",
-            "color": "rgb(255,0,0)",
-            "path": "./data/upperbody_recognition_model.xml"
-        },
-        {
-            "title": "Face",
-            "color": "rgb(0,255,0)",
-            "path": "./data/facial_recognition_model.xml"
-        },
-        {
-            "title": "Full Body",
-            "color": "rgb(0,0,255)",
-            "path": "./data/fullbody_recognition_model.xml"
-        }
-    ],
-    "cameras": [
-    ]
+  "classifiers": [
+    {
+      "color": "rgb(255,0,0)",
+      "path": "./data/upperbody_recognition_model.xml",
+      "title": "Upper Body"
+    },
+    {
+      "color": "rgb(0,255,0)",
+      "path": "./data/facial_recognition_model.xml",
+      "title": "Face"
+    },
+    {
+      "color": "rgb(0,0,255)",
+      "path": "./data/fullbody_recognition_model.xml",
+      "title": "Full Body"
+    }
+  ],
+  "cameras": [
+    {
+      "type": "local",
+      "camIndex": 0,
+      "api": "CAP_DSHOW",
+      "resW": 1920,
+      "resH": 1080,
+      "capRate": 33,
+      "procRate": 166,
+      "drawDetection": true,
+      "drawStats": true
+    }
+  ]
 }

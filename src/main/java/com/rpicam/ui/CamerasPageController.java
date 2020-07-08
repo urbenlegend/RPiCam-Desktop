@@ -1,9 +1,10 @@
 package com.rpicam.ui;
 
+import com.rpicam.models.CameraModel;
+import com.rpicam.models.CameraManagerModel;
 import com.rpicam.exceptions.UIException;
 import java.io.IOException;
 import javafx.beans.property.SimpleListProperty;
-import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -23,17 +24,18 @@ public class CamerasPageController {
     @FXML
     private Button addCameraBtn;
     @FXML
-    private FlowPane cameraList;
+    private FlowPane cameraFlowPane;
     @FXML
-    private ScrollPane cameraPane;
+    private ScrollPane cameraScrollPane;
     @FXML
     private Slider zoomSlider;
     private PopOver addCameraPopOver;
     private Parent addCameraSettings;
     private FXMLLoader cameraSettingsLoader = new FXMLLoader(getClass().getResource("CameraSettings.fxml"));
-    private VideoListModel videoListModel;
-    private SimpleListProperty<VideoModel> selection = new SimpleListProperty<>();
-    private SimpleListProperty<VideoModel> videoList = new SimpleListProperty<>();
+
+    private CameraManagerModel videoListModel;
+    private SimpleListProperty<CameraModel> selection = new SimpleListProperty<>();
+    private SimpleListProperty<CameraModel> cameraList = new SimpleListProperty<>();
 
     @FXML
     public void initialize() {
@@ -45,28 +47,32 @@ public class CamerasPageController {
             throw new UIException("CamerasController failed to load camera settings pop over", ex);
         }
 
-        videoList.addListener((ListChangeListener.Change<? extends VideoModel> changes) -> {
-            cameraList.getChildren().clear();
-            for (var model : changes.getList()) {
-                var cameraView = new VideoView();
+        cameraList.addListener((obs, oldVal, newVal) -> {
+            cameraFlowPane.getChildren().clear();
+            for (var model : newVal) {
+                var cameraView = new CameraView();
                 cameraView.prefWidthProperty().bind(zoomSlider.valueProperty()
-                        .multiply(cameraPane.widthProperty().subtract(2)));
+                        .multiply(cameraScrollPane.widthProperty().subtract(2)));
                 cameraView.prefHeightProperty().bind(zoomSlider.valueProperty()
-                        .multiply(cameraPane.widthProperty().subtract(2))
+                        .multiply(cameraScrollPane.widthProperty().subtract(2))
                         .multiply(cameraView.frameHeightProperty())
                         .divide(cameraView.frameWidthProperty()));
                 cameraView.setModel(model);
-                cameraList.getChildren().add(cameraView);
+                cameraFlowPane.getChildren().add(cameraView);
             }
+        });
+
+        var addCameraPopOverResults = cameraSettingsLoader.<CameraSettingsController>getController().resultsProperty();
+        addCameraPopOverResults.addListener((obs, oldVal, newVal) -> {
+            videoListModel.addCamera(newVal);
+            addCameraPopOver.hide();
         });
     }
 
-    public void setModel(VideoListModel aVideoListModel) {
+    public void setModel(CameraManagerModel aVideoListModel) {
         videoListModel = aVideoListModel;
-        videoList.bind(videoListModel.videoListProperty());
+        cameraList.bind(videoListModel.cameraListProperty());
         selection.bind(videoListModel.selectionProperty());
-        CameraSettingsController cameraSettingsController = cameraSettingsLoader.getController();
-        cameraSettingsController.setModel(videoListModel);
     }
 
     @FXML

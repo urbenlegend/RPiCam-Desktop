@@ -1,6 +1,7 @@
 package com.rpicam.video;
 
-import com.rpicam.ui.VideoModel;
+import com.rpicam.config.CameraConfig;
+import com.rpicam.models.CameraModel;
 import com.rpicam.exceptions.VideoIOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,10 +15,10 @@ import static org.bytedeco.opencv.global.opencv_videoio.CAP_PROP_FRAME_WIDTH;
 import org.bytedeco.opencv.opencv_core.UMat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 
-public class OCVLocalCamera implements VideoWorker {
+public class OCVLocalCamera implements CameraWorker {
 
     private VideoCapture capture = new VideoCapture();
-    private final VideoModel model = new VideoModel(this);
+    private final CameraModel model = new CameraModel(this);
     private Options options = new Options();
     private ScheduledExecutorService schedulePool;
     private final UMat capMat = new UMat();
@@ -85,17 +86,41 @@ public class OCVLocalCamera implements VideoWorker {
         model.updateClassifierResultsLater(classifierResults);
     }
 
-    @Override
-    public VideoModel getModel() {
-        return model;
+    public CameraConfig getConfig() {
+        var config = new CameraConfig();
+        config.type = "local";
+        config.camIndex = options.camIndex;
+        config.api = options.api;
+        config.resW = options.resW;
+        config.resH = options.resH;
+        config.capRate = options.capRate;
+        config.procRate = options.procRate;
+        config.drawDetection = model.drawDetectionProperty().get();
+        config.drawStats = model.drawStatsProperty().get();
+        return config;
     }
 
     public Options getOptions() {
-        try {
-            return options.clone();
-        } catch (CloneNotSupportedException ex) {
-            return null;
-        }
+        return options.clone();
+    }
+
+    @Override
+    public CameraModel getModel() {
+        return model;
+    }
+
+    public void setConfig(CameraConfig config) {
+        var newOptions = new Options();
+        newOptions.camIndex = config.camIndex;
+        newOptions.api = config.api;
+        newOptions.resW = config.resW;
+        newOptions.resH = config.resH;
+        newOptions.capRate = config.capRate;
+        newOptions.procRate = config.procRate;
+        model.drawDetectionProperty().set(config.drawDetection);
+        model.drawStatsProperty().set(config.drawStats);
+
+        setOptions(newOptions);
     }
 
     public void setOptions(Options newOptions) {
@@ -125,8 +150,12 @@ public class OCVLocalCamera implements VideoWorker {
         public int procRate;
 
         @Override
-        public Options clone() throws CloneNotSupportedException {
-            return (Options) super.clone();
+        public Options clone() {
+            try {
+                return (Options) super.clone();
+            } catch (CloneNotSupportedException ex) {
+                return null;
+            }
         }
     }
 }
