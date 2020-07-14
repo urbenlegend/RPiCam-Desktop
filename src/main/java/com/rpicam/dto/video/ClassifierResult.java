@@ -1,4 +1,4 @@
-package com.rpicam.video;
+package com.rpicam.dto.video;
 
 public class ClassifierResult {
 

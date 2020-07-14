@@ -90,8 +90,8 @@ public class CameraSettingsController {
             resultsMap.put("path", urlTextBox.getText());
         }
         resultsMap.put("captureApi", captureApiSelectBox.getValue().toString());
-        resultsMap.put("resW", widthBox.getText());
-        resultsMap.put("resH", heightBox.getText());
+        resultsMap.put("widthRes", widthBox.getText());
+        resultsMap.put("heightRes", heightBox.getText());
         resultsMap.put("capFPS", capFpsBox.getText());
         resultsMap.put("procFPS", procFpsBox.getText());
         resultsMap.put("drawDetection", Boolean.toString(detectBoxToggle.isSelected()));

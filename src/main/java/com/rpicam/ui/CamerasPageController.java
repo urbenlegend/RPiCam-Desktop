@@ -1,7 +1,8 @@
 package com.rpicam.ui;
 
-import com.rpicam.models.CameraManagerModel;
+import com.rpicam.ui.models.CameraManagerModel;
 import com.rpicam.exceptions.UIException;
+import com.rpicam.ui.models.CameraModel;
 import com.rpicam.video.CameraWorker;
 import com.rpicam.video.OCVLocalCamera;
 import com.rpicam.video.OCVStreamCamera;
@@ -48,21 +49,28 @@ public class CamerasPageController {
             addCameraPopOver = new PopOver(addCameraSettings);
             addCameraPopOver.setArrowLocation(PopOver.ArrowLocation.BOTTOM_LEFT);
         } catch (IOException ex) {
-            throw new UIException("CamerasController failed to load camera settings pop over", ex);
+            throw new UIException("Failed to load camera settings pop over", ex);
         }
 
         cameraList.addListener((obs, oldVal, newVal) -> {
             cameraFlowPane.getChildren().clear();
             for (var camera : newVal) {
-                var cameraView = new CameraView();
-                cameraView.prefWidthProperty().bind(zoomSlider.valueProperty()
-                        .multiply(cameraScrollPane.widthProperty().subtract(2)));
-                cameraView.prefHeightProperty().bind(zoomSlider.valueProperty()
-                        .multiply(cameraScrollPane.widthProperty().subtract(2))
-                        .multiply(cameraView.frameHeightProperty())
-                        .divide(cameraView.frameWidthProperty()));
-                cameraView.setModel(camera.getViewModel());
-                cameraFlowPane.getChildren().add(cameraView);
+                try {
+                    FXMLLoader cameraViewLoader = new FXMLLoader(getClass().getResource("CameraView.fxml"));
+                    Parent cameraView = cameraViewLoader.load();
+                    CameraViewController viewController = cameraViewLoader.getController();
+                    viewController.prefWidthProperty().bind(zoomSlider.valueProperty()
+                            .multiply(cameraScrollPane.widthProperty().subtract(2)));
+                    viewController.prefHeightProperty().bind(zoomSlider.valueProperty()
+                            .multiply(cameraScrollPane.widthProperty().subtract(2))
+                            .multiply(viewController.frameHeightProperty())
+                            .divide(viewController.frameWidthProperty()));
+                    var cameraModel = new CameraModel(camera);
+                    viewController.cameraModelProperty().set(cameraModel);
+                    cameraFlowPane.getChildren().add(cameraView);
+                } catch (IOException ex) {
+                    throw new UIException("Failed to load camera view UI", ex);
+                }
             }
         });
 
@@ -74,13 +82,11 @@ public class CamerasPageController {
                     var options = newCamera.getParameters();
                     options.camIndex = Integer.parseInt(newVal.get("camIndex"));
                     options.captureApi = newVal.get("captureApi");
-                    options.widthRes = Integer.parseInt(newVal.get("resW"));
-                    options.heightRes = Integer.parseInt(newVal.get("resH"));
+                    options.widthRes = Integer.parseInt(newVal.get("widthRes"));
+                    options.heightRes = Integer.parseInt(newVal.get("heightRes"));
                     options.capRate = 1000 / Integer.parseInt(newVal.get("capFPS"));
                     options.procRate = 1000 / Integer.parseInt(newVal.get("procFPS"));
                     newCamera.setParameters(options);
-                    newCamera.getViewModel().drawDetectionProperty().set(Boolean.parseBoolean(newVal.get("drawDetection")));
-                    newCamera.getViewModel().drawStatsProperty().set(Boolean.parseBoolean(newVal.get("drawStats")));
                     camera = newCamera;
                 }
                 case "url" -> {
@@ -88,13 +94,11 @@ public class CamerasPageController {
                     var options = newCamera.getParameters();
                     options.url = newVal.get("path");
                     options.captureApi = newVal.get("captureApi");
-                    options.widthRes = Integer.parseInt(newVal.get("resW"));
-                    options.heightRes = Integer.parseInt(newVal.get("resH"));
+                    options.widthRes = Integer.parseInt(newVal.get("widthRes"));
+                    options.heightRes = Integer.parseInt(newVal.get("heightRes"));
                     options.capRate = 1000 / Integer.parseInt(newVal.get("capFPS"));
                     options.procRate = 1000 / Integer.parseInt(newVal.get("procFPS"));
                     newCamera.setParameters(options);
-                    newCamera.getViewModel().drawDetectionProperty().set(Boolean.parseBoolean(newVal.get("drawDetection")));
-                    newCamera.getViewModel().drawStatsProperty().set(Boolean.parseBoolean(newVal.get("drawStats")));
                     camera = newCamera;
                 }
             }
@@ -110,10 +114,8 @@ public class CamerasPageController {
 
             addCameraPopOver.hide();
         });
-    }
 
-    public void setModel(CameraManagerModel aCameraMgrModel) {
-        cameraMgrModel = aCameraMgrModel;
+        cameraMgrModel = MainApp.getCameraManager().getViewModel();
         cameraList.bind(cameraMgrModel.cameraListProperty());
         selection.bind(cameraMgrModel.selectionProperty());
     }

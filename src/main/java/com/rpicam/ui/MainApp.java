@@ -12,9 +12,9 @@ import javafx.stage.Stage;
 public class MainApp extends Application {
     private static final String CONFIG_PATH = "./data/config.json";
 
-    private CameraManager cameraManager = new CameraManager();
+    private static CameraManager cameraManager = new CameraManager();
 
-    public CameraManager getCameraManager() {
+    public static CameraManager getCameraManager() {
         return cameraManager;
     }
 
@@ -29,9 +29,7 @@ public class MainApp extends Application {
 
         FXMLLoader dashboardLoader = new FXMLLoader(getClass().getResource("Dashboard.fxml"));
         Parent dashboard = dashboardLoader.load();
-        DashboardController dashboardController = dashboardLoader.getController();
-        dashboardController.setApp(this);
-
+        
         var scene = new Scene(dashboard);
         stage.setScene(scene);
 

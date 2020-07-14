@@ -1,11 +1,10 @@
-package com.rpicam.models;
+package com.rpicam.ui.models;
 
-import com.rpicam.video.ClassifierResult;
+import com.rpicam.dto.video.ClassifierResult;
 import java.nio.ByteBuffer;
 import java.util.List;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -19,28 +18,30 @@ import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.UMat;
 import com.rpicam.video.CameraWorker;
+import com.rpicam.video.CameraListener;
 
-public class CameraViewModel {
+public class CameraModel implements CameraListener {
 
     private CameraWorker camera;
     private final UMat bgraMat = new UMat();
 
     private SimpleObjectProperty<Image> frame = new SimpleObjectProperty<>();
     private SimpleListProperty<ClassifierResult> classifierResults = new SimpleListProperty<>(FXCollections.observableArrayList());
-    private SimpleBooleanProperty drawDetection = new SimpleBooleanProperty();
-    private SimpleBooleanProperty drawStats = new SimpleBooleanProperty();
 
-    public CameraViewModel(CameraWorker aCamera) {
+    public CameraModel(CameraWorker aCamera) {
         camera = aCamera;
+        camera.addWeakListener(this);
     }
 
-    public void updateClassifierResults(List<ClassifierResult> results) {
+    @Override
+    public void onClassifierResults(List<ClassifierResult> results) {
         Platform.runLater(() -> {
             classifierResults.setAll(results);
         });
     }
 
-    public void updateFrame(UMat mat) {
+    @Override
+    public void onFrame(UMat mat) {
         synchronized (bgraMat) {
             cvtColor(mat, bgraMat, COLOR_BGR2BGRA);
         }
@@ -65,13 +66,5 @@ public class CameraViewModel {
 
     public ObjectProperty<Image> frameProperty() {
         return frame;
-    }
-
-    public SimpleBooleanProperty drawDetectionProperty() {
-        return drawDetection;
-    }
-
-    public SimpleBooleanProperty drawStatsProperty() {
-        return drawStats;
     }
 }

@@ -24,9 +24,7 @@
       "heightRes": 1080,
       "capRate": 33,
       "procRate": 166,
-      "type": "local",
-      "drawDetection": true,
-      "drawStats": false
+      "type": "local"
     }
   ]
 }

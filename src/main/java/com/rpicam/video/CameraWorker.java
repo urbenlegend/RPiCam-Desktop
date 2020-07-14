@@ -1,14 +1,12 @@
 package com.rpicam.video;
 
-import com.rpicam.models.CameraViewModel;
+import com.rpicam.util.Listenable;
 
-public interface CameraWorker {
+public interface CameraWorker extends Listenable<CameraListener> {
 
     void start();
 
     void stop();
-
-    CameraViewModel getViewModel();
 
     String toJson();
 

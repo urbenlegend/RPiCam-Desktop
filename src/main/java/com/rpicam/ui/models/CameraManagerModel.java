@@ -1,4 +1,4 @@
-package com.rpicam.models;
+package com.rpicam.ui.models;
 
 import com.rpicam.video.CameraManager;
 import java.util.List;

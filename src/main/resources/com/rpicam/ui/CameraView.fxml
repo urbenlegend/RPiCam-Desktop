@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.StackPane?>
+
+
+<StackPane fx:id="cameraViewPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="0.0" minWidth="0.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rpicam.ui.CameraViewController">
+   <children>
+      <ImageView fx:id="frameView" fitHeight="480.0" fitWidth="640.0" pickOnBounds="true" preserveRatio="true" />
+      <Canvas fx:id="statsHud" height="480.0" width="640.0" />
+      <Canvas fx:id="classifierHud" height="480.0" width="640.0" />
+   </children>
+</StackPane>

@@ -23,10 +23,8 @@ public class DashboardController {
     private Parent currentPage;
     private Parent scenesPage;
     private Parent settingsPage;
-    private CamerasPageController camerasPageController;
 
     private Timeline sidebarTimeline;
-    private MainApp app;
 
     @FXML
     public void initialize() {
@@ -37,7 +35,6 @@ public class DashboardController {
             FXMLLoader settingsLoader = new FXMLLoader(getClass().getResource("SettingsPage.fxml"));
             archivesPage = archivesLoader.load();
             camerasPage = camerasLoader.load();
-            camerasPageController = camerasLoader.getController();
             scenesPage = scenesLoader.load();
             settingsPage = settingsLoader.load();
         } catch (IOException ex) {
@@ -46,11 +43,6 @@ public class DashboardController {
 
         setupAnimations();
         showScenesPage();
-    }
-
-    public void setApp(MainApp aApp) {
-        app = aApp;
-        camerasPageController.setModel(app.getCameraManager().getViewModel());
     }
 
     private void setupAnimations() {

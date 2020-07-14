@@ -1,5 +1,6 @@
 package com.rpicam.video;
 
+import com.rpicam.dto.video.ClassifierResult;
 import com.google.gson.GsonBuilder;
 import java.util.ArrayList;
 import java.util.function.Function;
