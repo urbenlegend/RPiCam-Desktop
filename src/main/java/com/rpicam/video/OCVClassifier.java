@@ -1,7 +1,7 @@
 package com.rpicam.video;
 
 import com.rpicam.dto.video.ClassifierResult;
-import com.google.gson.GsonBuilder;
+import com.rpicam.config.OCVClassifierConfig;
 import java.util.ArrayList;
 import java.util.function.Function;
 import static org.bytedeco.opencv.global.opencv_objdetect.CASCADE_SCALE_IMAGE;
@@ -46,44 +46,23 @@ public class OCVClassifier implements Function<UMat, ArrayList<ClassifierResult>
         return results;
     }
 
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String aColor) {
-        color = aColor;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String aPath) {
+    private void setPath(String aPath) {
         path = aPath;
         classifier = new CascadeClassifier();
         classifier.load(this.path);
     }
 
-    public String getTitle() {
-        return title;
+    public OCVClassifierConfig toConfig() {
+        var conf = new OCVClassifierConfig();
+        conf.path = path;
+        conf.title = title;
+        conf.color = color;
+        return conf;
     }
 
-    public void setTitle(String aTitle) {
-        title = aTitle;
-    }
-
-    public String toJson() {
-        var builder = new GsonBuilder();
-        var gson = builder.create();
-        return gson.toJsonTree(this).toString();
-    }
-
-    public void fromJson(String jsonStr) {
-        var builder = new GsonBuilder();
-        var gson = builder.create();
-        var template = gson.fromJson(jsonStr, this.getClass());
-        setPath(template.path);
-        setTitle(template.title);
-        setColor(template.color);
+    public void fromConfig(OCVClassifierConfig conf) {
+        setPath(conf.path);
+        title = conf.title;
+        color = conf.color;
     }
 }

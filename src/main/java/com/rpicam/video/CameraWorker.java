@@ -1,5 +1,6 @@
 package com.rpicam.video;
 
+import com.rpicam.config.OCVCameraConfig;
 import com.rpicam.util.Listenable;
 
 public interface CameraWorker extends Listenable<CameraListener> {
@@ -8,7 +9,7 @@ public interface CameraWorker extends Listenable<CameraListener> {
 
     void stop();
 
-    String toJson();
+    OCVCameraConfig toConfig();
 
-    void fromJson(String jsonStr);
+    void fromConfig(OCVCameraConfig conf);
 }

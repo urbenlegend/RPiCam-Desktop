@@ -1,6 +1,6 @@
 package com.rpicam;
 
-import com.rpicam.ui.MainApp;
+import com.rpicam.ui.App;
 import org.bytedeco.opencv.global.opencv_core;
 
 public class Main {
@@ -9,6 +9,6 @@ public class Main {
         // Setup OpenCL
         opencv_core.setUseOpenCL(true);
 
-        MainApp.main(args);
+        App.main(args);
     }
 }

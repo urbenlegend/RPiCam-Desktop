@@ -1,8 +1,9 @@
 package com.rpicam.video;
 
 import com.rpicam.dto.video.ClassifierResult;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParser;
+import com.rpicam.config.OCVCameraConfig;
+import com.rpicam.config.OCVLocalCameraConfig;
+import com.rpicam.exceptions.ConfigException;
 import com.rpicam.exceptions.VideoIOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,7 +22,13 @@ import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 public class OCVLocalCamera implements CameraWorker {
 
     private VideoCapture capture = new VideoCapture();
-    private Parameters params = new Parameters();
+    private int camIndex;
+    private String captureApi;
+    private int widthRes;
+    private int heightRes;
+    private int capRate;
+    private int procRate;
+
     private ScheduledExecutorService schedulePool;
     private final UMat capMat = new UMat();
     private final UMat processMat = new UMat();
@@ -31,18 +38,18 @@ public class OCVLocalCamera implements CameraWorker {
     private void open() {
         int api;
         try {
-            var apiField = opencv_videoio.class.getField(params.captureApi);
+            var apiField = opencv_videoio.class.getField(captureApi);
             api = apiField.getInt(null);
         } catch (Exception ex) {
-            throw new IllegalArgumentException("Invalid camera api specified: " + params.captureApi, ex);
+            throw new IllegalArgumentException("Invalid camera api specified: " + captureApi, ex);
         }
 
-        if (!capture.open(params.camIndex, api)) {
-            throw new VideoIOException("Could not open camera " + params.camIndex);
+        if (!capture.open(camIndex, api)) {
+            throw new VideoIOException("Could not open camera " + camIndex);
         }
 
-        capture.set(CAP_PROP_FRAME_WIDTH, params.widthRes);
-        capture.set(CAP_PROP_FRAME_HEIGHT, params.heightRes);
+        capture.set(CAP_PROP_FRAME_WIDTH, widthRes);
+        capture.set(CAP_PROP_FRAME_HEIGHT, heightRes);
     }
 
     private void close() {
@@ -56,8 +63,8 @@ public class OCVLocalCamera implements CameraWorker {
         }
         open();
         schedulePool = Executors.newScheduledThreadPool(2);
-        schedulePool.scheduleAtFixedRate(this::capFrameThread, 0, params.capRate, TimeUnit.MILLISECONDS);
-        schedulePool.scheduleAtFixedRate(this::processFrameThread, 0, params.procRate, TimeUnit.MILLISECONDS);
+        schedulePool.scheduleAtFixedRate(this::capFrameThread, 0, capRate, TimeUnit.MILLISECONDS);
+        schedulePool.scheduleAtFixedRate(this::processFrameThread, 0, procRate, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -119,45 +126,31 @@ public class OCVLocalCamera implements CameraWorker {
     }
 
     @Override
-    public String toJson() {
-        var builder = new GsonBuilder();
-        var gson = builder.create();
-        var jsonObj = gson.toJsonTree(params).getAsJsonObject();
-        jsonObj.addProperty("type", "local");
-        return jsonObj.toString();
+    public OCVLocalCameraConfig toConfig() {
+        var conf = new OCVLocalCameraConfig();
+        conf.camIndex = camIndex;
+        conf.captureApi = captureApi;
+        conf.widthRes = widthRes;
+        conf.heightRes = heightRes;
+        conf.capRate = capRate;
+        conf.procRate = procRate;
+
+        return conf;
     }
 
     @Override
-    public void fromJson(String jsonStr) {
-        var builder = new GsonBuilder();
-        var gson = builder.create();
-        var jsonObj = JsonParser.parseString(jsonStr).getAsJsonObject();
-        var newParams = gson.fromJson(jsonObj, Parameters.class);
-        setParameters(newParams);
-    }
-
-    public Parameters getParameters() {
-        return params.clone();
-    }
-
-    public void setParameters(Parameters newParams) {
-        // TODO: Consider automatically stopping and starting camera
-        params = newParams;
-    }
-
-    public static class Parameters implements Cloneable {
-
-        public int camIndex;
-        public String captureApi;
-        public int widthRes;
-        public int heightRes;
-        public int capRate;
-        public int procRate;
-
-        @Override
-        public Parameters clone() {
-            try {return (Parameters) super.clone();}
-            catch (CloneNotSupportedException ex) {return null;}
+    public void fromConfig(OCVCameraConfig conf) {
+        if (!(conf instanceof OCVLocalCameraConfig)) {
+            throw new ConfigException("Invalid config for OCVLocalCamera");
         }
+
+        var localConf = (OCVLocalCameraConfig) conf;
+
+        camIndex = localConf.camIndex;
+        captureApi = localConf.captureApi;
+        widthRes = localConf.widthRes;
+        heightRes = localConf.heightRes;
+        capRate = localConf.capRate;
+        procRate = localConf.procRate;
     }
 }

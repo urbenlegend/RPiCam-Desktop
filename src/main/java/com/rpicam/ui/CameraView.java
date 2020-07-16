@@ -2,22 +2,22 @@ package com.rpicam.ui;
 
 import com.rpicam.ui.models.CameraModel;
 import com.rpicam.dto.video.ClassifierResult;
-import javafx.beans.property.DoubleProperty;
+import com.rpicam.exceptions.UIException;
+import java.io.IOException;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 
-public class CameraViewController {
-    @FXML
-    private StackPane cameraViewPane;
+public class CameraView extends StackPane {
     @FXML
     private ImageView frameView;
     @FXML
@@ -32,22 +32,39 @@ public class CameraViewController {
     private SimpleBooleanProperty drawDetection = new SimpleBooleanProperty(true);
     private SimpleBooleanProperty drawStats = new SimpleBooleanProperty(true);
 
+    public CameraView() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("CameraView.fxml"));
+            loader.setController(this);
+            loader.setRoot(this);
+            loader.load();
+        }
+        catch (IOException ex) {
+            throw new UIException("Failed to load camera view UI", ex);
+        }
+    }
+
     @FXML
     public void initialize() {
-        frameView.fitWidthProperty().bind(cameraViewPane.widthProperty());
-        frameView.fitHeightProperty().bind(cameraViewPane.heightProperty());
-        statsHud.widthProperty().bind(cameraViewPane.widthProperty());
-        statsHud.heightProperty().bind(cameraViewPane.heightProperty());
+        // Make all the components have the same size as the main component
+        frameView.fitWidthProperty().bind(widthProperty());
+        frameView.fitHeightProperty().bind(heightProperty());
+        statsHud.widthProperty().bind(widthProperty());
+        statsHud.heightProperty().bind(heightProperty());
+        classifierHud.widthProperty().bind(widthProperty());
+        classifierHud.heightProperty().bind(heightProperty());
+
         statsHud.visibleProperty().bind(drawStats);
-        classifierHud.widthProperty().bind(cameraViewPane.widthProperty());
-        classifierHud.heightProperty().bind(cameraViewPane.heightProperty());
         classifierHud.visibleProperty().bind(drawDetection);
 
+        // Expose camera frame dimensions so that
+        // external code can resize CameraView easily
         frameView.imageProperty().addListener((obs, oldVal, newVal) -> {
             frameWidth.set(newVal.getWidth());
             frameHeight.set(newVal.getHeight());
         });
         // TODO: Add listener for stats results
+        // Draw classifiers whenever we get new results
         classifierResults.addListener((obs, oldVal, newVal) -> {
             clearClassifiers();
             newVal.forEach(r -> {
@@ -55,9 +72,11 @@ public class CameraViewController {
             });
         });
 
+        // Bind model properties if we detect a new model is set
         cameraModel.addListener((obs, oldVal, newVal) -> {
             frameView.imageProperty().bind(newVal.frameProperty());
             classifierResults.bind(newVal.classifierResultsProperty());
+            // TODO: Bind stats results
         });
     }
 
@@ -109,14 +128,6 @@ public class CameraViewController {
 
     private void drawStats() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public DoubleProperty prefWidthProperty() {
-        return cameraViewPane.prefWidthProperty();
-    }
-
-    public DoubleProperty prefHeightProperty() {
-        return cameraViewPane.prefHeightProperty();
     }
 
     public ReadOnlyDoubleProperty frameHeightProperty() {

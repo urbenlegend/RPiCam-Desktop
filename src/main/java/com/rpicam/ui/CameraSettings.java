@@ -1,9 +1,12 @@
 package com.rpicam.ui;
 
+import com.rpicam.exceptions.UIException;
+import java.io.IOException;
 import javafx.beans.property.ReadOnlyMapProperty;
 import javafx.beans.property.SimpleMapProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -12,8 +15,9 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.VBox;
 
-public class CameraSettingsController {
+public class CameraSettings extends VBox {
 
     @FXML
     private Accordion settingsAccordion;
@@ -48,6 +52,18 @@ public class CameraSettingsController {
 
     private SimpleMapProperty<String, String> results = new SimpleMapProperty<>();
 
+    public CameraSettings() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("CameraSettings.fxml"));
+            loader.setController(this);
+            loader.setRoot(this);
+            loader.load();
+        }
+        catch (IOException ex) {
+            throw new UIException("Failed to load camera settings UI", ex);
+        }
+    }
+
     @FXML
     public void initialize() {
         urlRadioBtn.setToggleGroup(sourceTg);
@@ -77,7 +93,7 @@ public class CameraSettingsController {
     }
 
     @FXML
-    public void applyBtnClicked() {
+    private void onApplyClicked() {
         var resultsMap = FXCollections.<String, String>observableHashMap();
         var selectedSourceType = sourceTg.selectedToggleProperty().get();
         if (selectedSourceType == localRadioBtn) {
@@ -86,8 +102,8 @@ public class CameraSettingsController {
 
         }
         else if (selectedSourceType == urlRadioBtn) {
-            resultsMap.put("type", "url");
-            resultsMap.put("path", urlTextBox.getText());
+            resultsMap.put("type", "path");
+            resultsMap.put("url", urlTextBox.getText());
         }
         resultsMap.put("captureApi", captureApiSelectBox.getValue().toString());
         resultsMap.put("widthRes", widthBox.getText());

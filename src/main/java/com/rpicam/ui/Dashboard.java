@@ -7,48 +7,51 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.util.Duration;
 
-public class DashboardController {
+public class Dashboard extends GridPane {
+    private static final String FXML_PATH = "Dashboard.fxml";
 
     @FXML
-    private GridPane dashboardGrid;
-    @FXML
     private Label pageTitle;
-    private Parent archivesPage;
-    private Parent camerasPage;
-    private Parent currentPage;
-    private Parent scenesPage;
-    private Parent settingsPage;
+    private ArchivesPage archivesPage;
+    private CamerasPage camerasPage;
+    private ScenesPage scenesPage;
+    private SettingsPage settingsPage;
+    private Node currentPage;
 
     private Timeline sidebarTimeline;
 
+    public Dashboard() {
+        try {
+            var loader = new FXMLLoader(getClass().getResource(FXML_PATH));
+            loader.setController(this);
+            loader.setRoot(this);
+            loader.load();
+        } catch (IOException ex) {
+            throw new UIException("Failed to load " + FXML_PATH, ex);
+        }
+    }
+
     @FXML
     public void initialize() {
-        try {
-            FXMLLoader archivesLoader = new FXMLLoader(getClass().getResource("ArchivesPage.fxml"));
-            FXMLLoader camerasLoader = new FXMLLoader(getClass().getResource("CamerasPage.fxml"));
-            FXMLLoader scenesLoader = new FXMLLoader(getClass().getResource("ScenesPage.fxml"));
-            FXMLLoader settingsLoader = new FXMLLoader(getClass().getResource("SettingsPage.fxml"));
-            archivesPage = archivesLoader.load();
-            camerasPage = camerasLoader.load();
-            scenesPage = scenesLoader.load();
-            settingsPage = settingsLoader.load();
-        } catch (IOException ex) {
-            throw new UIException("Dashboard failed to load sub pages", ex);
-        }
+        archivesPage = new ArchivesPage();
+        camerasPage = new CamerasPage();
+        scenesPage = new ScenesPage();
+        settingsPage = new SettingsPage();
 
         setupAnimations();
         showScenesPage();
     }
 
     private void setupAnimations() {
-        var widthProperty = dashboardGrid.getColumnConstraints().get(0).maxWidthProperty();
-        var maxWidth = dashboardGrid.getColumnConstraints().get(0).getMaxWidth();
-        var minWidth = dashboardGrid.getColumnConstraints().get(0).getMinWidth();
+        var widthProperty = getColumnConstraints().get(0).maxWidthProperty();
+        var maxWidth = getColumnConstraints().get(0).getMaxWidth();
+        var minWidth = getColumnConstraints().get(0).getMinWidth();
         var kvSideBarOpen = new KeyValue(widthProperty, maxWidth);
         var kfSideBarOpen = new KeyFrame(Duration.millis(0), kvSideBarOpen);
         var kvSideBarClosed = new KeyValue(widthProperty, minWidth);
@@ -70,10 +73,10 @@ public class DashboardController {
 
     private void setPage(Parent page) {
         if (currentPage != null) {
-            dashboardGrid.getChildren().remove(currentPage);
+            getChildren().remove(currentPage);
         }
         currentPage = page;
-        dashboardGrid.add(currentPage, 1, 1);
+        add(currentPage, 1, 1);
     }
 
     @FXML

@@ -1,89 +1,89 @@
 package com.rpicam.video;
 
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.rpicam.ui.models.CameraManagerModel;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import com.rpicam.config.OCVCameraConfig;
+import com.rpicam.config.OCVClassifierConfig;
+import com.rpicam.config.OCVLocalCameraConfig;
+import com.rpicam.config.OCVStreamCameraConfig;
+import com.rpicam.ui.App;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.UUID;
 
 public class CameraManager {
 
-    private CameraManagerModel viewModel = new CameraManagerModel(this);
-    private ArrayList<CameraWorker> cameras = new ArrayList<>();
+    private HashMap<UUID, CameraWorker> cameras = new HashMap<>();
     private ArrayList<OCVClassifier> classifiers = new ArrayList<>();
 
-    public void loadConfigFile(Path configPath) throws IOException {
-        var configStr = Files.readString(configPath, StandardCharsets.US_ASCII);
-        JsonObject rootJsonObj = JsonParser.parseString(configStr).getAsJsonObject();
-        var builder = new GsonBuilder();
-        var gson = builder.create();
-
-        JsonArray classifiersJsonArray = rootJsonObj.getAsJsonArray("classifiers");
-        JsonArray camerasJsonArray = rootJsonObj.getAsJsonArray("cameras");
-
-        classifiersJsonArray.forEach((element) -> {
-            var template = gson.fromJson(element, OCVClassifier.class);
-            var classifier = new OCVClassifier(template.getPath(), template.getTitle(), template.getColor());
+    public void loadConfig() {
+        var configRoot = App.getConfigManager().getConfig();
+        for (var conf : configRoot.classifiers) {
+            var classifier = new OCVClassifier(conf.path, conf.title, conf.color);
             classifiers.add(classifier);
-        });
+        }
 
-        camerasJsonArray.forEach((element) -> {
-            var cameraJson = element.getAsJsonObject();
-            switch (cameraJson.get("type").getAsString()) {
-                case "local" -> {
-                    var newCamera = new OCVLocalCamera();
-                    newCamera.fromJson(element.toString());
-                    addCamera(newCamera);
-                }
-                case "path" -> {
-                    var newCamera = new OCVStreamCamera();
-                    newCamera.fromJson(element.toString());
-                    addCamera(newCamera);
-                }
-                // TODO: Add other camera types
+        for (var conf : configRoot.cameras) {
+            CameraWorker newCamera = null;
+            // TODO: Add other camera types
+            if (conf instanceof OCVLocalCameraConfig) {
+                newCamera = new OCVLocalCamera();
+
             }
-        });
+            else if (conf instanceof OCVStreamCameraConfig) {
+                newCamera = new OCVStreamCamera();
+            }
+
+            newCamera.fromConfig(conf);
+            addCamera(newCamera, UUID.fromString(conf.uuid));
+        }
     }
 
-    public void saveConfigFile(Path configPath) throws IOException {
-        var builder = new GsonBuilder();
-        var gson = builder.setPrettyPrinting().create();
+    public void saveConfig() {
+        var configRoot = App.getConfigManager().getConfig();
 
-        var classifiersJsonArray = new JsonArray();
-        var camerasJsonArray = new JsonArray();
+        ArrayList<OCVClassifierConfig> classifierConfs = new ArrayList<>();
         for (var classifier : classifiers) {
-            classifiersJsonArray.add(JsonParser.parseString(classifier.toJson()));
+            classifierConfs.add(classifier.toConfig());
         }
-        for (var camera : cameras) {
-            camerasJsonArray.add(JsonParser.parseString(camera.toJson()));
+        configRoot.classifiers = new OCVClassifierConfig[classifierConfs.size()];
+        classifierConfs.toArray(configRoot.classifiers);
+
+        ArrayList<OCVCameraConfig> cameraConfs = new ArrayList<>();
+        for (var entry : cameras.entrySet()) {
+            var cameraUUID = entry.getKey();
+            var camera = entry.getValue();
+
+            var conf = camera.toConfig();
+            conf.uuid = cameraUUID.toString();
+            cameraConfs.add(conf);
         }
-
-        var configObj = new JsonObject();
-        configObj.add("classifiers", classifiersJsonArray);
-        configObj.add("cameras", camerasJsonArray);
-        String configJson = gson.toJson(configObj);
-
-        Files.writeString(configPath, configJson);
+        configRoot.cameras = new OCVCameraConfig[cameraConfs.size()];
+        cameraConfs.toArray(configRoot.cameras);
     }
 
     public void startCameras() {
-        for (var c : cameras) {
+        for (var c : cameras.values()) {
             c.start();
         }
     }
 
     public void stopCameras() {
-        for (var c : cameras) {
+        for (var c : cameras.values()) {
             c.stop();
         }
     }
 
-    public void addCamera(CameraWorker camera) {
+    public UUID addCamera(CameraWorker camera) {
+        UUID cameraUUID = UUID.randomUUID();
+        addCamera(camera, cameraUUID);
+        return cameraUUID;
+    }
+
+    public void addCamera(CameraWorker camera, UUID cameraUUID) {
+        if (camera == null) {
+            return;
+        }
+
+        // TODO: Move classifier adding elsewhere
         if (camera instanceof OCVLocalCamera) {
             var ocvCamera = (OCVLocalCamera) camera;
             for (var c : classifiers) {
@@ -91,21 +91,12 @@ public class CameraManager {
             }
         }
 
-        cameras.add(camera);
-        updateModel();
+        cameras.put(cameraUUID, camera);
     }
 
-    public void removeCamera(CameraWorker camera) {
+    public void removeCamera(UUID cameraUUID) {
+        CameraWorker camera = cameras.get(cameraUUID);
         camera.stop();
-        cameras.remove(camera);
-        updateModel();
-    }
-
-    public CameraManagerModel getViewModel() {
-        return viewModel;
-    }
-
-    private void updateModel() {
-        viewModel.updateCameraList(cameras);
+        cameras.remove(cameraUUID);
     }
 }
