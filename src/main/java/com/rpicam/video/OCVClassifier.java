@@ -1,6 +1,5 @@
 package com.rpicam.video;
 
-import com.rpicam.dto.video.ClassifierResult;
 import com.rpicam.config.OCVClassifierConfig;
 import java.util.ArrayList;
 import java.util.function.Function;

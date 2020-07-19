@@ -1,7 +1,7 @@
 package com.rpicam.ui;
 
 import com.rpicam.ui.models.CameraModel;
-import com.rpicam.dto.video.ClassifierResult;
+import com.rpicam.video.ClassifierResult;
 import com.rpicam.exceptions.UIException;
 import java.io.IOException;
 import javafx.beans.property.ReadOnlyDoubleProperty;
@@ -33,14 +33,15 @@ public class CameraView extends StackPane {
     private SimpleBooleanProperty drawStats = new SimpleBooleanProperty(true);
 
     public CameraView() {
+        final String FXML_PATH = "CameraView.fxml";
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("CameraView.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_PATH));
             loader.setController(this);
             loader.setRoot(this);
             loader.load();
         }
         catch (IOException ex) {
-            throw new UIException("Failed to load camera view UI", ex);
+            throw new UIException("Failed to load " + FXML_PATH, ex);
         }
     }
 

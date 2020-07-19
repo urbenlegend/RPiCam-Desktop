@@ -1,6 +1,7 @@
 package com.rpicam.ui;
 
 import com.rpicam.exceptions.UIException;
+import com.rpicam.ui.models.SceneModel;
 import java.io.IOException;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -14,8 +15,6 @@ import javafx.scene.layout.GridPane;
 import javafx.util.Duration;
 
 public class Dashboard extends GridPane {
-    private static final String FXML_PATH = "Dashboard.fxml";
-
     @FXML
     private Label pageTitle;
     private ArchivesPage archivesPage;
@@ -27,6 +26,7 @@ public class Dashboard extends GridPane {
     private Timeline sidebarTimeline;
 
     public Dashboard() {
+        final String FXML_PATH = "Dashboard.fxml";
         try {
             var loader = new FXMLLoader(getClass().getResource(FXML_PATH));
             loader.setController(this);
@@ -43,6 +43,10 @@ public class Dashboard extends GridPane {
         camerasPage = new CamerasPage();
         scenesPage = new ScenesPage();
         settingsPage = new SettingsPage();
+
+        var camerasScene = App.getSceneManager().getScene("_CAMERAS_LIST_");
+        var sceneModel = new SceneModel(camerasScene);
+        camerasPage.sceneModelProperty().set(sceneModel);
 
         setupAnimations();
         showScenesPage();

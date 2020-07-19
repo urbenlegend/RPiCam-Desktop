@@ -17,5 +17,31 @@
     }
   ],
   "cameras": [
+    {
+      "camIndex": 0,
+      "type": "local",
+      "uuid": "753d8628-710b-4eb0-b8f0-7795dcd420b1",
+      "captureApi": "CAP_DSHOW",
+      "widthRes": 1920,
+      "heightRes": 1080,
+      "capRate": 33,
+      "procRate": 166
+    }
+  ],
+  "scenes": [
+    {
+      "title": "_CAMERAS_LIST_",
+      "views": [
+        {
+          "cameraUUID": "753d8628-710b-4eb0-b8f0-7795dcd420b1",
+          "drawStats": true,
+          "drawDetection": true,
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        }
+      ]
+    }
   ]
 }

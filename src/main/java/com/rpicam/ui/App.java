@@ -2,6 +2,7 @@ package com.rpicam.ui;
 
 import com.rpicam.config.ConfigManager;
 import com.rpicam.video.CameraManager;
+import com.rpicam.scenes.SceneManager;
 import java.io.IOException;
 import java.nio.file.Paths;
 import javafx.application.Application;
@@ -13,6 +14,7 @@ public class App extends Application {
 
     private static ConfigManager configManager = new ConfigManager();
     private static CameraManager cameraManager = new CameraManager();
+    private static SceneManager sceneManager = new SceneManager();
 
     public static CameraManager getCameraManager() {
         return cameraManager;
@@ -20,6 +22,10 @@ public class App extends Application {
 
     public static ConfigManager getConfigManager() {
         return configManager;
+    }
+
+    public static SceneManager getSceneManager() {
+        return sceneManager;
     }
 
     public static void main(String[] args) {
@@ -31,6 +37,7 @@ public class App extends Application {
         configManager.loadConfigFile(Paths.get(CONFIG_PATH));
 
         cameraManager.loadConfig();
+        sceneManager.loadConfig();
         cameraManager.startCameras();
 
         var dashboard = new Dashboard();
@@ -45,6 +52,7 @@ public class App extends Application {
     @Override
     public void stop() throws IOException {
         cameraManager.stopCameras();
+        sceneManager.saveConfig();
         cameraManager.saveConfig();
         configManager.saveConfigFile(Paths.get(CONFIG_PATH));
     }

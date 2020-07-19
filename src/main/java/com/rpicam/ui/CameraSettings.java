@@ -18,7 +18,6 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.VBox;
 
 public class CameraSettings extends VBox {
-
     @FXML
     private Accordion settingsAccordion;
     @FXML
@@ -53,14 +52,16 @@ public class CameraSettings extends VBox {
     private SimpleMapProperty<String, String> results = new SimpleMapProperty<>();
 
     public CameraSettings() {
+        final String FXML_PATH = "CameraSettings.fxml";
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("CameraSettings.fxml"));
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_PATH));
             loader.setController(this);
             loader.setRoot(this);
             loader.load();
         }
         catch (IOException ex) {
-            throw new UIException("Failed to load camera settings UI", ex);
+            throw new UIException("Failed to load " + FXML_PATH, ex);
         }
     }
 

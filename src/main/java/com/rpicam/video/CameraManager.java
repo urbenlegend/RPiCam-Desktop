@@ -99,4 +99,8 @@ public class CameraManager {
         camera.stop();
         cameras.remove(cameraUUID);
     }
+
+    public CameraWorker getCamera(UUID cameraUUID) {
+        return cameras.get(cameraUUID);
+    }
 }

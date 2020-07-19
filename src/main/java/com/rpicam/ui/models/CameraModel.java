@@ -1,6 +1,6 @@
 package com.rpicam.ui.models;
 
-import com.rpicam.dto.video.ClassifierResult;
+import com.rpicam.video.ClassifierResult;
 import java.nio.ByteBuffer;
 import java.util.List;
 import javafx.application.Platform;

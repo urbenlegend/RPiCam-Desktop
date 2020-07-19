@@ -1,15 +1,12 @@
 package com.rpicam.video;
 
 import com.rpicam.config.OCVCameraConfig;
-import com.rpicam.dto.video.ClassifierResult;
 import com.rpicam.config.OCVStreamCameraConfig;
 import com.rpicam.exceptions.ConfigException;
 import com.rpicam.exceptions.VideoIOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -17,7 +14,7 @@ import org.bytedeco.opencv.global.opencv_videoio;
 import org.bytedeco.opencv.opencv_core.UMat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 
-public class OCVStreamCamera implements CameraWorker {
+public class OCVStreamCamera extends CameraWorker {
 
     private VideoCapture capture = new VideoCapture();
     private String url;
@@ -31,7 +28,6 @@ public class OCVStreamCamera implements CameraWorker {
     private final UMat capMat = new UMat();
     private final UMat processMat = new UMat();
     private final List<OCVClassifier> classifiers = Collections.synchronizedList(new ArrayList<>());
-    private final Map<CameraListener, CameraListener> listeners = Collections.synchronizedMap(new WeakHashMap<>());
 
     private void open() {
         int api;
@@ -77,29 +73,12 @@ public class OCVStreamCamera implements CameraWorker {
         classifiers.remove(c);
     }
 
-    @Override
-    public void addListener(CameraListener listener) {
-        // TODO: Remove hacky workaround using a
-        // WeakHashMap to implement weak listeners
-        listeners.put(listener, listener);
-    }
-
-    @Override
-    public void addWeakListener(CameraListener listener) {
-        listeners.put(listener, null);
-    }
-
-    @Override
-    public void removeListener(CameraListener listener) {
-        listeners.remove(listener);
-    }
-
     private void capFrameThread() {
         synchronized (capMat) {
             if (!capture.read(capMat)) {
                 throw new VideoIOException("could not grab next frame from camera");
             }
-            listeners.forEach((listener, dummy) -> {
+            getListeners().forEach((listener) -> {
                 listener.onFrame(capMat);
             });
         }
@@ -115,7 +94,7 @@ public class OCVStreamCamera implements CameraWorker {
             classifierResults.addAll(c.apply(processMat));
         });
 
-        listeners.forEach((listener, dummy) -> {
+        getListeners().forEach((listener) -> {
             listener.onClassifierResults(classifierResults);
         });
     }

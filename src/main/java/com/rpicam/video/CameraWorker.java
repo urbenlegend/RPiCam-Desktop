@@ -3,13 +3,13 @@ package com.rpicam.video;
 import com.rpicam.config.OCVCameraConfig;
 import com.rpicam.util.Listenable;
 
-public interface CameraWorker extends Listenable<CameraListener> {
+public abstract class CameraWorker extends Listenable<CameraListener> {
 
-    void start();
+    public abstract void start();
 
-    void stop();
+    public abstract void stop();
 
-    OCVCameraConfig toConfig();
+    public abstract OCVCameraConfig toConfig();
 
-    void fromConfig(OCVCameraConfig conf);
+    public abstract void fromConfig(OCVCameraConfig conf);
 }

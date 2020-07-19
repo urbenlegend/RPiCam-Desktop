@@ -6,9 +6,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
 
 public class SettingsPage extends BorderPane {
-    private static final String FXML_PATH = "SettingsPage.fxml";
-
     public SettingsPage() {
+        final String FXML_PATH = "SettingsPage.fxml";
         try {
             var loader = new FXMLLoader(getClass().getResource(FXML_PATH));
             loader.setController(this);

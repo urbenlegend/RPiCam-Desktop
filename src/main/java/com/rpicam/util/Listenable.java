@@ -1,19 +1,26 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.rpicam.util;
 
-/**
- *
- * @author benrx
- */
-public interface Listenable<T> {
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 
-    void addListener(T listener);
+public class Listenable<T> {
+    private final Map<T, T> listeners = Collections.synchronizedMap(new WeakHashMap<>());
 
-    void addWeakListener(T listener);
+    public void addListener(T listener) {
+        listeners.put(listener, listener);
+    }
 
-    void removeListener(T listener);
+    public void addWeakListener(T listener) {
+        listeners.put(listener, null);
+    }
+
+    public void removeListener(T listener) {
+        listeners.remove(listener);
+    }
+
+    public Set<T> getListeners() {
+        return listeners.keySet();
+    }
 }
