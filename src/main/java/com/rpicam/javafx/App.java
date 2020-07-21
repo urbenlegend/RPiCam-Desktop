@@ -1,4 +1,4 @@
-package com.rpicam.ui;
+package com.rpicam.javafx;
 
 import com.rpicam.config.ConfigManager;
 import com.rpicam.video.CameraManager;

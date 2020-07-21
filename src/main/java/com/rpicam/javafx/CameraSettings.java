@@ -1,4 +1,4 @@
-package com.rpicam.ui;
+package com.rpicam.javafx;
 
 import com.rpicam.exceptions.UIException;
 import java.io.IOException;

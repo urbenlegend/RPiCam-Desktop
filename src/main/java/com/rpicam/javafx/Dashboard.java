@@ -1,7 +1,6 @@
-package com.rpicam.ui;
+package com.rpicam.javafx;
 
 import com.rpicam.exceptions.UIException;
-import com.rpicam.ui.models.SceneModel;
 import java.io.IOException;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -43,10 +42,6 @@ public class Dashboard extends GridPane {
         camerasPage = new CamerasPage();
         scenesPage = new ScenesPage();
         settingsPage = new SettingsPage();
-
-        var camerasScene = App.getSceneManager().getScene("_CAMERAS_LIST_");
-        var sceneModel = new SceneModel(camerasScene);
-        camerasPage.sceneModelProperty().set(sceneModel);
 
         setupAnimations();
         showScenesPage();

@@ -1,6 +1,6 @@
-package com.rpicam.ui.models;
+package com.rpicam.javafx.models;
 
-import com.rpicam.video.ClassifierResult;
+import com.rpicam.detection.ClassifierResult;
 import java.nio.ByteBuffer;
 import java.util.List;
 import javafx.application.Platform;
@@ -21,7 +21,6 @@ import com.rpicam.video.CameraWorker;
 import com.rpicam.video.CameraListener;
 
 public class CameraModel implements CameraListener {
-
     private CameraWorker camera;
     private final UMat bgraMat = new UMat();
 
@@ -53,8 +52,8 @@ public class CameraModel implements CameraListener {
         });
     }
 
-    public static Image wrapBgraUMat(UMat bgraMat) {
-        try ( Mat tempMat = bgraMat.getMat(ACCESS_READ)) {
+    private Image wrapBgraUMat(UMat bgraMat) {
+        try (Mat tempMat = bgraMat.getMat(ACCESS_READ)) {
             var pixelBuf = new PixelBuffer<ByteBuffer>(tempMat.cols(), tempMat.rows(), tempMat.createBuffer(), PixelFormat.getByteBgraPreInstance());
             return new WritableImage(pixelBuf);
         }

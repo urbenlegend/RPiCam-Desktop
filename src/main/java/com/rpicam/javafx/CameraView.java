@@ -1,7 +1,7 @@
-package com.rpicam.ui;
+package com.rpicam.javafx;
 
-import com.rpicam.ui.models.CameraModel;
-import com.rpicam.video.ClassifierResult;
+import com.rpicam.javafx.models.CameraModel;
+import com.rpicam.detection.ClassifierResult;
 import com.rpicam.exceptions.UIException;
 import java.io.IOException;
 import javafx.beans.property.ReadOnlyDoubleProperty;
@@ -29,8 +29,8 @@ public class CameraView extends StackPane {
     private SimpleDoubleProperty frameWidth = new SimpleDoubleProperty();
     private SimpleDoubleProperty frameHeight = new SimpleDoubleProperty();
     private SimpleListProperty<ClassifierResult> classifierResults = new SimpleListProperty<>();
-    private SimpleBooleanProperty drawDetection = new SimpleBooleanProperty(true);
-    private SimpleBooleanProperty drawStats = new SimpleBooleanProperty(true);
+    private SimpleBooleanProperty drawDetection = new SimpleBooleanProperty();
+    private SimpleBooleanProperty drawStats = new SimpleBooleanProperty();
 
     public CameraView() {
         final String FXML_PATH = "CameraView.fxml";

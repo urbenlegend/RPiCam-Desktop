@@ -2,32 +2,11 @@ package com.rpicam.scenes;
 
 import com.rpicam.config.SceneConfig;
 import com.rpicam.config.ViewConfig;
-import com.rpicam.util.Listenable;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-public class SceneInfo extends Listenable<SceneListener> {
+public class SceneInfo {
     private ArrayList<ViewInfo> views = new ArrayList<>();
-
-    public void addView(ViewInfo view) {
-        views.add(view);
-        updateListeners();
-    }
-
-    public void removeView(ViewInfo view) {
-        views.remove(view);
-        updateListeners();
-    }
-
-    public ArrayList<ViewInfo> getViews() {
-        return views;
-    }
-
-    private void updateListeners() {
-        getListeners().forEach((listener) -> {
-            listener.onViewsUpdated(views);
-        });
-    }
 
     public void fromConfig(SceneConfig config) {
         for (var viewConfig : config.views) {
@@ -45,5 +24,17 @@ public class SceneInfo extends Listenable<SceneListener> {
                 .collect(Collectors.toList())
                 .toArray(config.views);
         return config;
+    }
+
+    public void addView(ViewInfo view) {
+        views.add(view);
+    }
+
+    public void removeView(ViewInfo view) {
+        views.remove(view);
+    }
+
+    public ArrayList<ViewInfo> getViews() {
+        return views;
     }
 }

@@ -1,5 +1,6 @@
 package com.rpicam.video;
 
+import com.rpicam.detection.ClassifierResult;
 import java.util.List;
 import org.bytedeco.opencv.opencv_core.UMat;
 

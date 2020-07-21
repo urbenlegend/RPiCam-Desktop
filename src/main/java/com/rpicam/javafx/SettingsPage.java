@@ -1,13 +1,13 @@
-package com.rpicam.ui;
+package com.rpicam.javafx;
 
 import com.rpicam.exceptions.UIException;
 import java.io.IOException;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
 
-public class ScenesPage extends BorderPane {
-    public ScenesPage() {
-        final String FXML_PATH = "ScenesPage.fxml";
+public class SettingsPage extends BorderPane {
+    public SettingsPage() {
+        final String FXML_PATH = "SettingsPage.fxml";
         try {
             var loader = new FXMLLoader(getClass().getResource(FXML_PATH));
             loader.setController(this);

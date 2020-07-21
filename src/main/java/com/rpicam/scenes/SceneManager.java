@@ -1,7 +1,7 @@
 package com.rpicam.scenes;
 
 import com.rpicam.config.SceneConfig;
-import com.rpicam.ui.App;
+import com.rpicam.javafx.App;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 

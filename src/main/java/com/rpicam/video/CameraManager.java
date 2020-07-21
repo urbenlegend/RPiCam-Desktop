@@ -1,10 +1,11 @@
 package com.rpicam.video;
 
+import com.rpicam.detection.OCVClassifier;
 import com.rpicam.config.OCVCameraConfig;
 import com.rpicam.config.OCVClassifierConfig;
 import com.rpicam.config.OCVLocalCameraConfig;
 import com.rpicam.config.OCVStreamCameraConfig;
-import com.rpicam.ui.App;
+import com.rpicam.javafx.App;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
@@ -79,10 +80,6 @@ public class CameraManager {
     }
 
     public void addCamera(CameraWorker camera, UUID cameraUUID) {
-        if (camera == null) {
-            return;
-        }
-
         // TODO: Move classifier adding elsewhere
         if (camera instanceof OCVLocalCamera) {
             var ocvCamera = (OCVLocalCamera) camera;

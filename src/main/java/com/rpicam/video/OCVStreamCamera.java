@@ -1,5 +1,7 @@
 package com.rpicam.video;
 
+import com.rpicam.detection.ClassifierResult;
+import com.rpicam.detection.OCVClassifier;
 import com.rpicam.config.OCVCameraConfig;
 import com.rpicam.config.OCVStreamCameraConfig;
 import com.rpicam.exceptions.ConfigException;
@@ -15,7 +17,6 @@ import org.bytedeco.opencv.opencv_core.UMat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 
 public class OCVStreamCamera extends CameraWorker {
-
     private VideoCapture capture = new VideoCapture();
     private String url;
     private String captureApi;
@@ -28,6 +29,35 @@ public class OCVStreamCamera extends CameraWorker {
     private final UMat capMat = new UMat();
     private final UMat processMat = new UMat();
     private final List<OCVClassifier> classifiers = Collections.synchronizedList(new ArrayList<>());
+
+    @Override
+    public OCVStreamCameraConfig toConfig() {
+        var conf = new OCVStreamCameraConfig();
+        conf.url = url;
+        conf.captureApi = captureApi;
+        conf.widthRes = widthRes;
+        conf.heightRes = heightRes;
+        conf.capRate = capRate;
+        conf.procRate = procRate;
+
+        return conf;
+    }
+
+    @Override
+    public void fromConfig(OCVCameraConfig conf) {
+        if (!(conf instanceof OCVStreamCameraConfig)) {
+            throw new ConfigException("Invalid config for OCVLocalCamera");
+        }
+
+        var localConf = (OCVStreamCameraConfig) conf;
+
+        url = localConf.url;
+        captureApi = localConf.captureApi;
+        widthRes = localConf.widthRes;
+        heightRes = localConf.heightRes;
+        capRate = localConf.capRate;
+        procRate = localConf.procRate;
+    }
 
     private void open() {
         int api;
@@ -97,34 +127,5 @@ public class OCVStreamCamera extends CameraWorker {
         getListeners().forEach((listener) -> {
             listener.onClassifierResults(classifierResults);
         });
-    }
-
-    @Override
-    public OCVStreamCameraConfig toConfig() {
-        var conf = new OCVStreamCameraConfig();
-        conf.url = url;
-        conf.captureApi = captureApi;
-        conf.widthRes = widthRes;
-        conf.heightRes = heightRes;
-        conf.capRate = capRate;
-        conf.procRate = procRate;
-
-        return conf;
-    }
-
-    @Override
-    public void fromConfig(OCVCameraConfig conf) {
-        if (!(conf instanceof OCVStreamCameraConfig)) {
-            throw new ConfigException("Invalid config for OCVLocalCamera");
-        }
-
-        var localConf = (OCVStreamCameraConfig) conf;
-
-        url = localConf.url;
-        captureApi = localConf.captureApi;
-        widthRes = localConf.widthRes;
-        heightRes = localConf.heightRes;
-        capRate = localConf.capRate;
-        procRate = localConf.procRate;
     }
 }

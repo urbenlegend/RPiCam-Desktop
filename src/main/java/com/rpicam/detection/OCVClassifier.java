@@ -1,4 +1,4 @@
-package com.rpicam.video;
+package com.rpicam.detection;
 
 import com.rpicam.config.OCVClassifierConfig;
 import java.util.ArrayList;

@@ -1,6 +1,6 @@
 package com.rpicam;
 
-import com.rpicam.ui.App;
+import com.rpicam.javafx.App;
 import org.bytedeco.opencv.global.opencv_core;
 
 public class Main {

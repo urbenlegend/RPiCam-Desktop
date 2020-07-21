@@ -9,8 +9,8 @@ public class ViewInfo {
     public boolean drawDetection;
     public int x;
     public int y;
-    public int w;
-    public int h;
+    public int width;
+    public int height;
 
     public void fromConfig(ViewConfig config) {
         cameraUUID = UUID.fromString(config.cameraUUID);
@@ -18,8 +18,8 @@ public class ViewInfo {
         drawDetection = config.drawDetection;
         x = config.x;
         y = config.y;
-        w = config.w;
-        h = config.h;
+        width = config.width;
+        height = config.height;
     }
 
     public ViewConfig toConfig() {
@@ -29,8 +29,8 @@ public class ViewInfo {
         config.drawDetection = drawDetection;
         config.x = x;
         config.y = y;
-        config.w = w;
-        config.h = h;
+        config.width = width;
+        config.height = height;
         return config;
     }
 }
