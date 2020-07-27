@@ -20,7 +20,7 @@
     {
       "camIndex": 0,
       "type": "local",
-      "uuid": "1b23e934-a1f1-490f-96c8-327800fef38f",
+      "uuid": "f871a4a3-203b-4e41-b280-f96cd3a135c8",
       "captureApi": "CAP_DSHOW",
       "widthRes": 1920,
       "heightRes": 1080,
@@ -33,7 +33,7 @@
       "title": "_ALL_CAMERAS_",
       "views": [
         {
-          "cameraUUID": "1b23e934-a1f1-490f-96c8-327800fef38f",
+          "cameraUUID": "f871a4a3-203b-4e41-b280-f96cd3a135c8",
           "drawStats": true,
           "drawDetection": true,
           "x": 0,

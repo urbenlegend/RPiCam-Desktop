@@ -1,7 +1,7 @@
 package com.rpicam.javafx;
 
 import com.rpicam.config.ConfigManager;
-import com.rpicam.video.CameraManager;
+import com.rpicam.cameras.CameraManager;
 import com.rpicam.scenes.SceneManager;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -16,15 +16,15 @@ public class App extends Application {
     private static CameraManager cameraManager = new CameraManager();
     private static SceneManager sceneManager = new SceneManager();
 
-    public static CameraManager getCameraManager() {
+    public static CameraManager cameraManager() {
         return cameraManager;
     }
 
-    public static ConfigManager getConfigManager() {
+    public static ConfigManager configManager() {
         return configManager;
     }
 
-    public static SceneManager getSceneManager() {
+    public static SceneManager sceneManager() {
         return sceneManager;
     }
 

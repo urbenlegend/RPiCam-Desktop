@@ -16,6 +16,10 @@ public class SceneManager {
         scenes.remove(title);
     }
 
+    public void clearScenes() {
+        scenes.clear();
+    }
+
     public SceneInfo getScene(String title) {
         var scene = scenes.get(title);
         if (scene == null) {
@@ -26,7 +30,7 @@ public class SceneManager {
     }
 
     public void loadConfig() {
-        for (var sceneConfig : App.getConfigManager().getConfig().scenes) {
+        for (var sceneConfig : App.configManager().getConfig().scenes) {
             var scene = new SceneInfo();
             scene.fromConfig(sceneConfig);
             addScene(sceneConfig.title, scene);
@@ -34,7 +38,7 @@ public class SceneManager {
     }
 
     public void saveConfig() {
-        var configRoot = App.getConfigManager().getConfig();
+        var configRoot = App.configManager().getConfig();
         configRoot.scenes = new SceneConfig[scenes.size()];
         scenes.entrySet().stream()
                 .map((entry) -> {

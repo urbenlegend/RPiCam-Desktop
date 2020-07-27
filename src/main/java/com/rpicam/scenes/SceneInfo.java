@@ -34,6 +34,10 @@ public class SceneInfo {
         views.remove(view);
     }
 
+    public void clearViews() {
+        views.clear();
+    }
+
     public ArrayList<ViewInfo> getViews() {
         return views;
     }

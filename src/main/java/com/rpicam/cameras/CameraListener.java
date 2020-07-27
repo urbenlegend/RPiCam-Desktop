@@ -1,4 +1,4 @@
-package com.rpicam.video;
+package com.rpicam.cameras;
 
 import com.rpicam.detection.ClassifierResult;
 import java.util.List;

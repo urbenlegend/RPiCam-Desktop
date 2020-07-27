@@ -1,4 +1,4 @@
-package com.rpicam.video;
+package com.rpicam.cameras;
 
 import com.rpicam.detection.OCVClassifier;
 import com.rpicam.config.OCVCameraConfig;
@@ -11,12 +11,11 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class CameraManager {
-
     private HashMap<UUID, CameraWorker> cameras = new HashMap<>();
     private ArrayList<OCVClassifier> classifiers = new ArrayList<>();
 
     public void loadConfig() {
-        var configRoot = App.getConfigManager().getConfig();
+        var configRoot = App.configManager().getConfig();
         for (var conf : configRoot.classifiers) {
             var classifier = new OCVClassifier(conf.path, conf.title, conf.color);
             classifiers.add(classifier);
@@ -27,7 +26,6 @@ public class CameraManager {
             // TODO: Add other camera types
             if (conf instanceof OCVLocalCameraConfig) {
                 newCamera = new OCVLocalCamera();
-
             }
             else if (conf instanceof OCVStreamCameraConfig) {
                 newCamera = new OCVStreamCamera();
@@ -39,7 +37,7 @@ public class CameraManager {
     }
 
     public void saveConfig() {
-        var configRoot = App.getConfigManager().getConfig();
+        var configRoot = App.configManager().getConfig();
 
         ArrayList<OCVClassifierConfig> classifierConfs = new ArrayList<>();
         for (var classifier : classifiers) {

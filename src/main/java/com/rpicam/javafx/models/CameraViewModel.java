@@ -1,10 +1,11 @@
 package com.rpicam.javafx.models;
 
 import com.rpicam.detection.ClassifierResult;
+import com.rpicam.javafx.App;
+import com.rpicam.scenes.ViewInfo;
 import java.nio.ByteBuffer;
 import java.util.List;
 import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -17,18 +18,25 @@ import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2BGRA;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.UMat;
-import com.rpicam.video.CameraWorker;
-import com.rpicam.video.CameraListener;
+import com.rpicam.cameras.CameraWorker;
+import com.rpicam.cameras.CameraListener;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 
-public class CameraModel implements CameraListener {
+public class CameraViewModel implements CameraListener {
     private CameraWorker camera;
     private final UMat bgraMat = new UMat();
 
     private SimpleObjectProperty<Image> frame = new SimpleObjectProperty<>();
     private SimpleListProperty<ClassifierResult> classifierResults = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private SimpleBooleanProperty drawDetection = new SimpleBooleanProperty();
+    private SimpleBooleanProperty drawStats = new SimpleBooleanProperty();
 
-    public CameraModel(CameraWorker aCamera) {
-        camera = aCamera;
+    public void init(ViewInfo info) {
+        camera = App.cameraManager().getCamera(info.cameraUUID);
+        drawDetection.set(info.drawDetection);
+        drawStats.set(info.drawStats);
         camera.addWeakListener(this);
     }
 
@@ -59,11 +67,43 @@ public class CameraModel implements CameraListener {
         }
     }
 
+    public List<ClassifierResult> getClassifierResults() {
+        return classifierResults.get();
+    }
+
     public SimpleListProperty<ClassifierResult> classifierResultsProperty() {
         return classifierResults;
     }
 
-    public ObjectProperty<Image> frameProperty() {
+    public Image getFrame() {
+        return frame.get();
+    }
+
+    public ReadOnlyObjectProperty<Image> frameProperty() {
         return frame;
+    }
+
+    public boolean isDrawDetection() {
+        return drawDetection.get();
+    }
+
+    public void setDrawDetection(boolean enableDrawDetection) {
+        drawDetection.set(enableDrawDetection);
+    }
+
+    public BooleanProperty drawDetectionProperty() {
+        return drawDetection;
+    }
+
+    public boolean isDrawStats() {
+        return drawStats.get();
+    }
+
+    public void setDrawStats(boolean enableDrawStats) {
+        drawStats.set(enableDrawStats);
+    }
+
+    public BooleanProperty drawStatsProperty() {
+        return drawStats;
     }
 }

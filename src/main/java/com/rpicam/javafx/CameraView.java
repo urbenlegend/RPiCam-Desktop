@@ -1,14 +1,12 @@
 package com.rpicam.javafx;
 
-import com.rpicam.javafx.models.CameraModel;
+import com.rpicam.javafx.models.CameraViewModel;
 import com.rpicam.detection.ClassifierResult;
 import com.rpicam.exceptions.UIException;
 import java.io.IOException;
 import javafx.beans.property.ReadOnlyDoubleProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.canvas.Canvas;
@@ -25,12 +23,10 @@ public class CameraView extends StackPane {
     @FXML
     private Canvas classifierHud;
 
-    private SimpleObjectProperty<CameraModel> cameraModel = new SimpleObjectProperty<>();
+    private CameraViewModel viewModel;
     private SimpleDoubleProperty frameWidth = new SimpleDoubleProperty();
     private SimpleDoubleProperty frameHeight = new SimpleDoubleProperty();
     private SimpleListProperty<ClassifierResult> classifierResults = new SimpleListProperty<>();
-    private SimpleBooleanProperty drawDetection = new SimpleBooleanProperty();
-    private SimpleBooleanProperty drawStats = new SimpleBooleanProperty();
 
     public CameraView() {
         final String FXML_PATH = "CameraView.fxml";
@@ -55,9 +51,6 @@ public class CameraView extends StackPane {
         classifierHud.widthProperty().bind(widthProperty());
         classifierHud.heightProperty().bind(heightProperty());
 
-        statsHud.visibleProperty().bind(drawStats);
-        classifierHud.visibleProperty().bind(drawDetection);
-
         // Expose camera frame dimensions so that
         // external code can resize CameraView easily
         frameView.imageProperty().addListener((obs, oldVal, newVal) -> {
@@ -73,12 +66,7 @@ public class CameraView extends StackPane {
             });
         });
 
-        // Bind model properties if we detect a new model is set
-        cameraModel.addListener((obs, oldVal, newVal) -> {
-            frameView.imageProperty().bind(newVal.frameProperty());
-            classifierResults.bind(newVal.classifierResultsProperty());
-            // TODO: Bind stats results
-        });
+        setViewModel(new CameraViewModel());
     }
 
     public void clearClassifiers() {
@@ -131,23 +119,33 @@ public class CameraView extends StackPane {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public ReadOnlyDoubleProperty frameHeightProperty() {
-        return frameHeight;
+    public double getFrameWidth() {
+        return frameWidth.get();
     }
 
     public ReadOnlyDoubleProperty frameWidthProperty() {
         return frameWidth;
     }
 
-    public SimpleBooleanProperty drawDetectionProperty() {
-        return drawDetection;
+    public double getFrameHeight() {
+        return frameHeight.get();
     }
 
-    public SimpleBooleanProperty drawStatsProperty() {
-        return drawStats;
+    public ReadOnlyDoubleProperty frameHeightProperty() {
+        return frameHeight;
     }
 
-    public SimpleObjectProperty<CameraModel> cameraModelProperty() {
-        return cameraModel;
+    public CameraViewModel getViewModel() {
+        return viewModel;
+    }
+
+    public void setViewModel(CameraViewModel aViewModel) {
+        viewModel = aViewModel;
+
+        frameView.imageProperty().bind(viewModel.frameProperty());
+        // TODO: Bind stats results
+        classifierResults.bind(viewModel.classifierResultsProperty());
+        statsHud.visibleProperty().bind(viewModel.drawStatsProperty());
+        classifierHud.visibleProperty().bind(viewModel.drawDetectionProperty());
     }
 }

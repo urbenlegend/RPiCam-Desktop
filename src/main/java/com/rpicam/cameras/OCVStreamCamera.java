@@ -1,9 +1,9 @@
-package com.rpicam.video;
+package com.rpicam.cameras;
 
 import com.rpicam.detection.ClassifierResult;
 import com.rpicam.detection.OCVClassifier;
 import com.rpicam.config.OCVCameraConfig;
-import com.rpicam.config.OCVLocalCameraConfig;
+import com.rpicam.config.OCVStreamCameraConfig;
 import com.rpicam.exceptions.ConfigException;
 import com.rpicam.exceptions.VideoIOException;
 import java.util.ArrayList;
@@ -13,15 +13,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.bytedeco.opencv.global.opencv_videoio;
-import static org.bytedeco.opencv.global.opencv_videoio.CAP_PROP_FRAME_HEIGHT;
-import static org.bytedeco.opencv.global.opencv_videoio.CAP_PROP_FRAME_WIDTH;
 import org.bytedeco.opencv.opencv_core.UMat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 
-public class OCVLocalCamera extends CameraWorker {
-
+public class OCVStreamCamera extends CameraWorker {
     private VideoCapture capture = new VideoCapture();
-    private int camIndex;
+    private String url;
     private String captureApi;
     private int widthRes;
     private int heightRes;
@@ -33,11 +30,10 @@ public class OCVLocalCamera extends CameraWorker {
     private final UMat processMat = new UMat();
     private final List<OCVClassifier> classifiers = Collections.synchronizedList(new ArrayList<>());
 
-
     @Override
-    public OCVLocalCameraConfig toConfig() {
-        var conf = new OCVLocalCameraConfig();
-        conf.camIndex = camIndex;
+    public OCVStreamCameraConfig toConfig() {
+        var conf = new OCVStreamCameraConfig();
+        conf.url = url;
         conf.captureApi = captureApi;
         conf.widthRes = widthRes;
         conf.heightRes = heightRes;
@@ -49,12 +45,13 @@ public class OCVLocalCamera extends CameraWorker {
 
     @Override
     public void fromConfig(OCVCameraConfig conf) {
-        if (!(conf instanceof OCVLocalCameraConfig)) {
+        if (!(conf instanceof OCVStreamCameraConfig)) {
             throw new ConfigException("Invalid config for OCVLocalCamera");
         }
 
-        var localConf = (OCVLocalCameraConfig) conf;
-        camIndex = localConf.camIndex;
+        var localConf = (OCVStreamCameraConfig) conf;
+
+        url = localConf.url;
         captureApi = localConf.captureApi;
         widthRes = localConf.widthRes;
         heightRes = localConf.heightRes;
@@ -71,12 +68,9 @@ public class OCVLocalCamera extends CameraWorker {
             throw new IllegalArgumentException("Invalid camera api specified: " + captureApi, ex);
         }
 
-        if (!capture.open(camIndex, api)) {
-            throw new VideoIOException("Could not open camera " + camIndex);
+        if (!capture.open(url, api)) {
+            throw new VideoIOException("Could not open " + url);
         }
-
-        capture.set(CAP_PROP_FRAME_WIDTH, widthRes);
-        capture.set(CAP_PROP_FRAME_HEIGHT, heightRes);
     }
 
     private void close() {

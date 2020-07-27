@@ -1,14 +1,11 @@
 package com.rpicam.javafx;
 
 import com.rpicam.exceptions.UIException;
+import com.rpicam.javafx.models.CamerasPageModel;
 import com.rpicam.scenes.ViewInfo;
-import com.rpicam.javafx.models.CameraModel;
-import com.rpicam.video.CameraWorker;
-import com.rpicam.video.OCVLocalCamera;
-import com.rpicam.video.OCVStreamCamera;
 import java.io.IOException;
-import java.util.Map;
-import java.util.UUID;
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
@@ -19,8 +16,6 @@ import javafx.scene.layout.FlowPane;
 import org.controlsfx.control.PopOver;
 
 public class CamerasPage extends BorderPane {
-    private static final String SCENE_TITLE = "_ALL_CAMERAS_";
-
     @FXML
     private Button addCameraBtn;
     @FXML
@@ -32,6 +27,9 @@ public class CamerasPage extends BorderPane {
 
     private PopOver addCameraPopOver;
     private CameraSettings cameraSettings;
+
+    private CamerasPageModel viewModel;
+    private SimpleListProperty<ViewInfo> views = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     public CamerasPage() {
         final String FXML_PATH = "CamerasPage.fxml";
@@ -51,12 +49,22 @@ public class CamerasPage extends BorderPane {
         addCameraPopOver = new PopOver(cameraSettings);
         addCameraPopOver.setArrowLocation(PopOver.ArrowLocation.BOTTOM_LEFT);
 
-        cameraSettings.resultsProperty().addListener((obs, oldVal, newVal) -> {
+        cameraSettings.resultsProperty().addListener((obs, oldSettings, newSettings) -> {
             addCameraPopOver.hide();
-            addNewCamera(newVal);
+            viewModel.addNewCamera(newSettings);
         });
 
-        updateViews();
+        views.addListener((obs, oldViews, newViews) -> {
+            cameraFlowPane.getChildren().clear();
+
+            for (var view : newViews) {
+                var cameraView = createCameraView();
+                cameraView.getViewModel().init(view);
+                cameraFlowPane.getChildren().add(cameraView);
+            }
+        });
+
+        setViewModel(new CamerasPageModel());
     }
 
     @FXML
@@ -64,80 +72,8 @@ public class CamerasPage extends BorderPane {
         addCameraPopOver.show(addCameraBtn);
     }
 
-    private void updateViews() {
-        cameraFlowPane.getChildren().clear();
-
-        var cameraManager = App.getCameraManager();
-        var scene = App.getSceneManager().getScene(SCENE_TITLE);
-
-        for (var view : scene.getViews()) {
-            var camera = cameraManager.getCamera(view.cameraUUID);
-            var cameraView = createViewFromCamera(camera);
-            cameraView.drawStatsProperty().set(view.drawStats);
-            cameraView.drawDetectionProperty().set(view.drawDetection);
-            cameraFlowPane.getChildren().add(cameraView);
-        }
-    }
-
-    private void addNewCamera(Map<String, String> cameraPropMap) {
-        CameraWorker camera = createCameraFromProps(cameraPropMap);
-
-        try {
-            // Add new camera to camera manager
-            camera.start();
-            var cameraManager = App.getCameraManager();
-            UUID cameraUUID = cameraManager.addCamera(camera);
-
-            // Create new view for camera
-            var viewInfo = new ViewInfo();
-            viewInfo.cameraUUID = cameraUUID;
-            viewInfo.drawStats = Boolean.parseBoolean(cameraPropMap.get("drawStats"));
-            viewInfo.drawDetection = Boolean.parseBoolean(cameraPropMap.get("drawDetection"));
-            var scene = App.getSceneManager().getScene(SCENE_TITLE);
-            scene.addView(viewInfo);
-            updateViews();
-        }
-        catch (Exception ex) {
-            // TODO: Display error dialog
-            ex.printStackTrace();
-        }
-    }
-
-    private CameraWorker createCameraFromProps(Map<String, String> cameraPropMap) {
-        switch (cameraPropMap.get("type")) {
-            case "local" -> {
-                var newCamera = new OCVLocalCamera();
-                var config = newCamera.toConfig();
-                config.camIndex = Integer.parseInt(cameraPropMap.get("camIndex"));
-                config.captureApi = cameraPropMap.get("captureApi");
-                config.widthRes = Integer.parseInt(cameraPropMap.get("widthRes"));
-                config.heightRes = Integer.parseInt(cameraPropMap.get("heightRes"));
-                config.capRate = 1000 / Integer.parseInt(cameraPropMap.get("capFPS"));
-                config.procRate = 1000 / Integer.parseInt(cameraPropMap.get("procFPS"));
-                newCamera.fromConfig(config);
-                return newCamera;
-            }
-            case "path" -> {
-                var newCamera = new OCVStreamCamera();
-                var config = newCamera.toConfig();
-                config.url = cameraPropMap.get("url");
-                config.captureApi = cameraPropMap.get("captureApi");
-                config.widthRes = Integer.parseInt(cameraPropMap.get("widthRes"));
-                config.heightRes = Integer.parseInt(cameraPropMap.get("heightRes"));
-                config.capRate = 1000 / Integer.parseInt(cameraPropMap.get("capFPS"));
-                config.procRate = 1000 / Integer.parseInt(cameraPropMap.get("procFPS"));
-                newCamera.fromConfig(config);
-                return newCamera;
-            }
-        }
-
-        return null;
-    }
-
-    private CameraView createViewFromCamera(CameraWorker camera) {
-        var cameraModel = new CameraModel(camera);
+    private CameraView createCameraView() {
         var cameraView = new CameraView();
-        cameraView.cameraModelProperty().set(cameraModel);
 
         cameraView.prefWidthProperty().bind(zoomSlider.valueProperty()
                 .multiply(cameraScrollPane.widthProperty().subtract(2)));
@@ -148,5 +84,12 @@ public class CamerasPage extends BorderPane {
         return cameraView;
     }
 
+    public CamerasPageModel getViewModel() {
+        return viewModel;
+    }
 
+    public void setViewModel(CamerasPageModel aViewModel) {
+        viewModel = aViewModel;
+        views.bind(viewModel.viewsProperty());
+    }
 }

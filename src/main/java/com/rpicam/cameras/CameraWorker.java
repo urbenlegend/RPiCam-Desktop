@@ -1,4 +1,4 @@
-package com.rpicam.video;
+package com.rpicam.cameras;
 
 import com.rpicam.config.OCVCameraConfig;
 import com.rpicam.util.Listenable;
