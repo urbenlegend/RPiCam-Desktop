@@ -6,6 +6,8 @@ import java.io.IOException;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -25,7 +27,7 @@ public class Dashboard extends GridPane {
 
     private Timeline sidebarTimeline;
 
-    private DashboardModel viewModel;
+    private SimpleObjectProperty<DashboardModel> viewModel = new SimpleObjectProperty<>();
 
     public Dashboard() {
         final String FXML_PATH = "Dashboard.fxml";
@@ -46,7 +48,11 @@ public class Dashboard extends GridPane {
         scenesPage = new ScenesPage();
         settingsPage = new SettingsPage();
 
-        setViewModel(new DashboardModel());
+        viewModel.addListener((obs, oldModel, newModel) -> {
+            camerasPage.getViewModel().init(newModel.getAllCamerasScene());
+        });
+
+        viewModel.set(new DashboardModel());
 
         setupAnimations();
         showScenesPage();
@@ -108,11 +114,14 @@ public class Dashboard extends GridPane {
     }
 
     public DashboardModel getViewModel() {
-        return viewModel;
+        return viewModel.get();
     }
 
     public void setViewModel(DashboardModel aViewModel) {
-        viewModel = aViewModel;
-        camerasPage.getViewModel().init(viewModel.getAllCamerasScene());
+        viewModel.set(aViewModel);
+    }
+
+    public ObjectProperty<DashboardModel> viewModelProperty() {
+        return viewModel;
     }
 }

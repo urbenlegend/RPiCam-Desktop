@@ -4,9 +4,11 @@ import com.rpicam.javafx.models.CameraViewModel;
 import com.rpicam.detection.ClassifierResult;
 import com.rpicam.exceptions.UIException;
 import java.io.IOException;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.canvas.Canvas;
@@ -23,7 +25,7 @@ public class CameraView extends StackPane {
     @FXML
     private Canvas classifierHud;
 
-    private CameraViewModel viewModel;
+    private SimpleObjectProperty<CameraViewModel> viewModel = new SimpleObjectProperty<>();
     private SimpleDoubleProperty frameWidth = new SimpleDoubleProperty();
     private SimpleDoubleProperty frameHeight = new SimpleDoubleProperty();
     private SimpleListProperty<ClassifierResult> classifierResults = new SimpleListProperty<>();
@@ -66,7 +68,16 @@ public class CameraView extends StackPane {
             });
         });
 
-        setViewModel(new CameraViewModel());
+        // Bind model properties if we detect a new model is set
+        viewModel.addListener((obs, oldVal, newVal) -> {
+            frameView.imageProperty().bind(newVal.frameProperty());
+            // TODO: Bind stats results
+            classifierResults.bind(newVal.classifierResultsProperty());
+            statsHud.visibleProperty().bind(newVal.drawStatsProperty());
+            classifierHud.visibleProperty().bind(newVal.drawDetectionProperty());
+        });
+
+        viewModel.set(new CameraViewModel());
     }
 
     public void clearClassifiers() {
@@ -136,16 +147,14 @@ public class CameraView extends StackPane {
     }
 
     public CameraViewModel getViewModel() {
-        return viewModel;
+        return viewModel.get();
     }
 
     public void setViewModel(CameraViewModel aViewModel) {
-        viewModel = aViewModel;
+        viewModel.set(aViewModel);
+    }
 
-        frameView.imageProperty().bind(viewModel.frameProperty());
-        // TODO: Bind stats results
-        classifierResults.bind(viewModel.classifierResultsProperty());
-        statsHud.visibleProperty().bind(viewModel.drawStatsProperty());
-        classifierHud.visibleProperty().bind(viewModel.drawDetectionProperty());
+    public ObjectProperty<CameraViewModel> viewModelProperty() {
+        return viewModel;
     }
 }

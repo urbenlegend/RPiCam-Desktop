@@ -4,7 +4,9 @@ import com.rpicam.exceptions.UIException;
 import com.rpicam.javafx.models.CamerasPageModel;
 import com.rpicam.scenes.ViewInfo;
 import java.io.IOException;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -28,7 +30,7 @@ public class CamerasPage extends BorderPane {
     private PopOver addCameraPopOver;
     private CameraSettings cameraSettings;
 
-    private CamerasPageModel viewModel;
+    private SimpleObjectProperty<CamerasPageModel> viewModel = new SimpleObjectProperty<>();
     private SimpleListProperty<ViewInfo> views = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     public CamerasPage() {
@@ -51,7 +53,7 @@ public class CamerasPage extends BorderPane {
 
         cameraSettings.resultsProperty().addListener((obs, oldSettings, newSettings) -> {
             addCameraPopOver.hide();
-            viewModel.addNewCamera(newSettings);
+            getViewModel().addNewCamera(newSettings);
         });
 
         views.addListener((obs, oldViews, newViews) -> {
@@ -64,7 +66,11 @@ public class CamerasPage extends BorderPane {
             }
         });
 
-        setViewModel(new CamerasPageModel());
+        viewModel.addListener((obs1, oldModel, newModel) -> {
+            views.bind(newModel.viewsProperty());
+        });
+
+        viewModel.set(new CamerasPageModel());
     }
 
     @FXML
@@ -85,11 +91,14 @@ public class CamerasPage extends BorderPane {
     }
 
     public CamerasPageModel getViewModel() {
-        return viewModel;
+        return viewModel.get();
     }
 
     public void setViewModel(CamerasPageModel aViewModel) {
-        viewModel = aViewModel;
-        views.bind(viewModel.viewsProperty());
+        viewModel.set(aViewModel);
+    }
+
+    public ObjectProperty<CamerasPageModel> viewModelProperty() {
+        return viewModel;
     }
 }
