@@ -4,7 +4,7 @@ import com.rpicam.detection.OCVClassifier;
 import com.rpicam.config.OCVCameraConfig;
 import com.rpicam.config.OCVClassifierConfig;
 import com.rpicam.config.OCVLocalCameraConfig;
-import com.rpicam.config.OCVStreamCameraConfig;
+import com.rpicam.config.VlcjCameraConfig;
 import com.rpicam.javafx.App;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,8 +27,8 @@ public class CameraManager {
             if (conf instanceof OCVLocalCameraConfig) {
                 newCamera = new OCVLocalCamera();
             }
-            else if (conf instanceof OCVStreamCameraConfig) {
-                newCamera = new OCVStreamCamera();
+            else if (conf instanceof VlcjCameraConfig) {
+                newCamera = new VlcjCamera();
             }
 
             newCamera.fromConfig(conf);
@@ -82,7 +82,13 @@ public class CameraManager {
         if (camera instanceof OCVLocalCamera) {
             var ocvCamera = (OCVLocalCamera) camera;
             for (var c : classifiers) {
-                ocvCamera.addClassifier(c);
+                ocvCamera.addClassifier(c.clone());
+            }
+        }
+        else if (camera instanceof VlcjCamera) {
+            var vlcjCamera = (VlcjCamera) camera;
+            for (var c : classifiers) {
+                vlcjCamera.addClassifier(c.clone());
             }
         }
 

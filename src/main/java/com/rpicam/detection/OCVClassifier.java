@@ -3,15 +3,17 @@ package com.rpicam.detection;
 import com.rpicam.config.OCVClassifierConfig;
 import java.util.ArrayList;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static org.bytedeco.opencv.global.opencv_objdetect.CASCADE_SCALE_IMAGE;
 import org.bytedeco.opencv.opencv_core.UMat;
 import org.bytedeco.opencv.opencv_core.RectVector;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
 
-public class OCVClassifier implements Function<UMat, ArrayList<ClassifierResult>> {
+public class OCVClassifier implements Function<UMat, ArrayList<ClassifierResult>>, Cloneable {
 
-    private transient CascadeClassifier classifier;
+    private CascadeClassifier classifier;
     private String color = "";
     private String path = "";
     private String title = "";
@@ -47,8 +49,12 @@ public class OCVClassifier implements Function<UMat, ArrayList<ClassifierResult>
 
     private void setPath(String aPath) {
         path = aPath;
+        initClassifier();
+    }
+
+    private void initClassifier() {
         classifier = new CascadeClassifier();
-        classifier.load(this.path);
+        classifier.load(path);
     }
 
     public OCVClassifierConfig toConfig() {
@@ -63,5 +69,18 @@ public class OCVClassifier implements Function<UMat, ArrayList<ClassifierResult>
         setPath(conf.path);
         title = conf.title;
         color = conf.color;
+    }
+
+    @Override
+    public OCVClassifier clone() {
+        try {
+            var cloneObj = (OCVClassifier) super.clone();
+            cloneObj.initClassifier();
+            return cloneObj;
+        }
+        catch (CloneNotSupportedException ex) {
+            Logger.getLogger(OCVClassifier.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
 }

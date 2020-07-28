@@ -5,7 +5,7 @@ import com.rpicam.scenes.SceneInfo;
 import com.rpicam.scenes.ViewInfo;
 import com.rpicam.cameras.CameraWorker;
 import com.rpicam.cameras.OCVLocalCamera;
-import com.rpicam.cameras.OCVStreamCamera;
+import com.rpicam.cameras.VlcjCamera;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -64,14 +64,10 @@ public class CamerasPageModel {
                 return newCamera;
             }
             case "path" -> {
-                var newCamera = new OCVStreamCamera();
+                var newCamera = new VlcjCamera();
                 var config = newCamera.toConfig();
                 config.url = cameraPropMap.get("url");
-                config.captureApi = cameraPropMap.get("captureApi");
-                config.widthRes = Integer.parseInt(cameraPropMap.get("widthRes"));
-                config.heightRes = Integer.parseInt(cameraPropMap.get("heightRes"));
-                config.capRate = 1000 / Integer.parseInt(cameraPropMap.get("capFPS"));
-                config.procRate = 1000 / Integer.parseInt(cameraPropMap.get("procFPS"));
+                config.procRate = Integer.parseInt(cameraPropMap.get("procFPS"));
                 newCamera.fromConfig(config);
                 return newCamera;
             }

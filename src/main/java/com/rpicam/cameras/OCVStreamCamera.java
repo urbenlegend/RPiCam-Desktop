@@ -20,8 +20,6 @@ public class OCVStreamCamera extends CameraWorker {
     private VideoCapture capture = new VideoCapture();
     private String url;
     private String captureApi;
-    private int widthRes;
-    private int heightRes;
     private int capRate;
     private int procRate;
 
@@ -35,8 +33,6 @@ public class OCVStreamCamera extends CameraWorker {
         var conf = new OCVStreamCameraConfig();
         conf.url = url;
         conf.captureApi = captureApi;
-        conf.widthRes = widthRes;
-        conf.heightRes = heightRes;
         conf.capRate = capRate;
         conf.procRate = procRate;
 
@@ -53,8 +49,6 @@ public class OCVStreamCamera extends CameraWorker {
 
         url = localConf.url;
         captureApi = localConf.captureApi;
-        widthRes = localConf.widthRes;
-        heightRes = localConf.heightRes;
         capRate = localConf.capRate;
         procRate = localConf.procRate;
     }

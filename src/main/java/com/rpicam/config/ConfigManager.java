@@ -58,7 +58,7 @@ class CameraDeserializer implements JsonDeserializer<OCVCameraConfig> {
     static {
         typeMap.put("", OCVCameraConfig.class);
         typeMap.put("local", OCVLocalCameraConfig.class);
-        typeMap.put("path", OCVStreamCameraConfig.class);
+        typeMap.put("path", VlcjCameraConfig.class);
     }
 
     @Override

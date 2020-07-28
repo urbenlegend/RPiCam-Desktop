@@ -60,11 +60,22 @@ public class CameraViewModel implements CameraListener {
         });
     }
 
+    @Override
+    public void onFrame(ByteBuffer buffer, int width, int height) {
+        Platform.runLater(() -> {
+            frame.set(wrapByteBuffer(buffer, width, height));
+        });
+    }
+
     private Image wrapBgraUMat(UMat bgraMat) {
         try (Mat tempMat = bgraMat.getMat(ACCESS_READ)) {
             var pixelBuf = new PixelBuffer<ByteBuffer>(tempMat.cols(), tempMat.rows(), tempMat.createBuffer(), PixelFormat.getByteBgraPreInstance());
             return new WritableImage(pixelBuf);
         }
+    }
+
+    private Image wrapByteBuffer(ByteBuffer buffer, int width, int height) {
+        return new WritableImage(new PixelBuffer<>(width, height, buffer, PixelFormat.getByteBgraPreInstance()));
     }
 
     public List<ClassifierResult> getClassifierResults() {
