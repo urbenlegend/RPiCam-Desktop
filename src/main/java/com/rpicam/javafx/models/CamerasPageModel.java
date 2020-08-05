@@ -58,8 +58,8 @@ public class CamerasPageModel {
                 config.captureApi = cameraPropMap.get("captureApi");
                 config.widthRes = Integer.parseInt(cameraPropMap.get("widthRes"));
                 config.heightRes = Integer.parseInt(cameraPropMap.get("heightRes"));
-                config.capRate = 1000 / Integer.parseInt(cameraPropMap.get("capFPS"));
-                config.procRate = 1000 / Integer.parseInt(cameraPropMap.get("procFPS"));
+                config.capRate = 1000 / Integer.parseInt(cameraPropMap.get("capRate"));
+                config.procRate = Integer.parseInt(cameraPropMap.get("procRate"));
                 newCamera.fromConfig(config);
                 return newCamera;
             }
@@ -67,7 +67,7 @@ public class CamerasPageModel {
                 var newCamera = new VlcjCamera();
                 var config = newCamera.toConfig();
                 config.url = cameraPropMap.get("url");
-                config.procRate = Integer.parseInt(cameraPropMap.get("procFPS"));
+                config.procRate = Integer.parseInt(cameraPropMap.get("procRate"));
                 newCamera.fromConfig(config);
                 return newCamera;
             }

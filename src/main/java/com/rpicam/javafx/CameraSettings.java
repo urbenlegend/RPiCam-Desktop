@@ -37,9 +37,9 @@ public class CameraSettings extends VBox {
     @FXML
     private TextField heightBox;
     @FXML
-    private TextField capFpsBox;
+    private TextField capRateBox;
     @FXML
-    private TextField procFpsBox;
+    private TextField procRateBox;
     @FXML
     private ListView<String> classifierView;
     @FXML
@@ -109,8 +109,8 @@ public class CameraSettings extends VBox {
         resultsMap.put("captureApi", captureApiSelectBox.getValue().toString());
         resultsMap.put("widthRes", widthBox.getText());
         resultsMap.put("heightRes", heightBox.getText());
-        resultsMap.put("capFPS", capFpsBox.getText());
-        resultsMap.put("procFPS", procFpsBox.getText());
+        resultsMap.put("capRate", capRateBox.getText());
+        resultsMap.put("procRate", procRateBox.getText());
         resultsMap.put("drawDetection", Boolean.toString(detectBoxToggle.isSelected()));
         resultsMap.put("drawStats", Boolean.toString(statsToggle.isSelected()));
         results.set(resultsMap);

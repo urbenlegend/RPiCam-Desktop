@@ -12,7 +12,10 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2BGRA;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
 import org.bytedeco.opencv.global.opencv_videoio;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.UMat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 
@@ -22,9 +25,11 @@ public class OCVStreamCamera extends CameraWorker {
     private String captureApi;
     private int capRate;
     private int procRate;
+    private int procCount = 0;
 
     private ScheduledExecutorService schedulePool;
-    private final UMat capMat = new UMat();
+    private final Mat capMat = new Mat();
+    private final Mat bgraMat = new Mat();
     private final UMat processMat = new UMat();
     private final List<OCVClassifier> classifiers = Collections.synchronizedList(new ArrayList<>());
 
@@ -79,7 +84,6 @@ public class OCVStreamCamera extends CameraWorker {
         open();
         schedulePool = Executors.newScheduledThreadPool(2);
         schedulePool.scheduleAtFixedRate(this::capFrameThread, 0, capRate, TimeUnit.MILLISECONDS);
-        schedulePool.scheduleAtFixedRate(this::processFrameThread, 0, procRate, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -98,28 +102,28 @@ public class OCVStreamCamera extends CameraWorker {
     }
 
     private void capFrameThread() {
-        synchronized (capMat) {
-            if (!capture.read(capMat)) {
-                throw new VideoIOException("could not grab next frame from camera");
-            }
+        if (!capture.read(capMat)) {
+            throw new VideoIOException("could not grab next frame from camera");
+        }
+        
+        cvtColor(capMat, bgraMat, COLOR_BGR2BGRA);
+        getListeners().forEach((listener) -> {
+            listener.onFrame(bgraMat.createBuffer(), bgraMat.cols(), bgraMat.rows());
+        });
+        
+        if (procCount % procRate == 0) {
+            capMat.copyTo(processMat);
+
+            var classifierResults = new ArrayList<ClassifierResult>();
+            classifiers.forEach(c -> {
+                classifierResults.addAll(c.apply(processMat));
+            });
+
             getListeners().forEach((listener) -> {
-                listener.onFrame(capMat);
+                listener.onClassifierResults(classifierResults);
             });
         }
-    }
-
-    private void processFrameThread() {
-        synchronized (capMat) {
-            capMat.copyTo(processMat);
-        }
-
-        var classifierResults = new ArrayList<ClassifierResult>();
-        classifiers.forEach(c -> {
-            classifierResults.addAll(c.apply(processMat));
-        });
-
-        getListeners().forEach((listener) -> {
-            listener.onClassifierResults(classifierResults);
-        });
+        
+        procCount++;
     }
 }

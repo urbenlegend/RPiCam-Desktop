@@ -17,46 +17,7 @@
     }
   ],
   "cameras": [
-    {
-      "camIndex": 0,
-      "captureApi": "CAP_DSHOW",
-      "widthRes": 1920,
-      "heightRes": 1080,
-      "capRate": 33,
-      "procRate": 166,
-      "type": "local",
-      "uuid": "e312c5b3-59aa-407d-b4f9-4ecfc07d754f"
-    },
-    {
-      "url": "./data/trd.mkv",
-      "procRate": 6,
-      "type": "path",
-      "uuid": "3a128c97-d7d7-462c-81bc-5cc2dc2c7bbb"
-    }
   ],
   "scenes": [
-    {
-      "title": "_ALL_CAMERAS_",
-      "views": [
-        {
-          "cameraUUID": "3a128c97-d7d7-462c-81bc-5cc2dc2c7bbb",
-          "drawStats": true,
-          "drawDetection": true,
-          "x": 0,
-          "y": 0,
-          "width": 0,
-          "height": 0
-        },
-        {
-          "cameraUUID": "e312c5b3-59aa-407d-b4f9-4ecfc07d754f",
-          "drawStats": true,
-          "drawDetection": true,
-          "x": 0,
-          "y": 0,
-          "width": 0,
-          "height": 0
-        }
-      ]
-    }
   ]
 }

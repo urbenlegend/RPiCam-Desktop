@@ -76,22 +76,22 @@
                                     <Tooltip text="Capture API" />
                                  </tooltip></ComboBox>
                               <Label minWidth="-Infinity" text="Video Quality" textOverrun="CLIP" GridPane.rowIndex="3" />
-                              <TextField fx:id="widthBox" maxWidth="1.7976931348623157E308" promptText="Resolution Width" text="1920" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                              <TextField fx:id="widthBox" maxWidth="1.7976931348623157E308" promptText="Resolution Width" GridPane.columnIndex="1" GridPane.rowIndex="3">
                                  <tooltip>
                                     <Tooltip text="Resolution Width" />
                                  </tooltip></TextField>
-                              <TextField fx:id="heightBox" promptText="Resolution Height" text="1080" GridPane.columnIndex="2" GridPane.rowIndex="3">
+                              <TextField fx:id="heightBox" promptText="Resolution Height" GridPane.columnIndex="2" GridPane.rowIndex="3">
                                  <tooltip>
                                     <Tooltip text="Resolution Height" />
                                  </tooltip></TextField>
                               <Label minWidth="-Infinity" text="Framerate" GridPane.rowIndex="4" />
-                              <TextField fx:id="capFpsBox" promptText="Capture FPS" text="30" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                              <TextField fx:id="capRateBox" promptText="Capture Rate" text="30" GridPane.columnIndex="1" GridPane.rowIndex="4">
                                  <tooltip>
                                     <Tooltip text="Capture FPS" />
                                  </tooltip></TextField>
-                              <TextField fx:id="procFpsBox" promptText="Processing FPS" text="6" GridPane.columnIndex="2" GridPane.rowIndex="4">
+                              <TextField fx:id="procRateBox" promptText="Processing Rate" text="5" GridPane.columnIndex="2" GridPane.rowIndex="4">
                                  <tooltip>
-                                    <Tooltip text="Processing FPS" />
+                                    <Tooltip text="Processing Rate" />
                                  </tooltip></TextField>
                               <Label minWidth="-Infinity" text="Capture API" GridPane.rowIndex="2" />
                            </children>
