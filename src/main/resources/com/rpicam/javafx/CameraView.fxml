@@ -3,11 +3,13 @@
 <?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.shape.Rectangle?>
 
 <fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="0.0" minWidth="0.0" type="StackPane" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <ImageView fx:id="frameView" fitHeight="480.0" fitWidth="640.0" pickOnBounds="true" preserveRatio="true" />
       <Canvas fx:id="statsHud" height="480.0" width="640.0" />
       <Canvas fx:id="classifierHud" height="480.0" width="640.0" />
+      <Rectangle fx:id="selectionBorder" fill="#ffffff00" height="480.0" stroke="#00a2d3" strokeType="INSIDE" strokeWidth="5.0" width="640.0" />
    </children>
 </fx:root>

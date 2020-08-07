@@ -3,9 +3,15 @@ package com.rpicam.javafx;
 import com.rpicam.javafx.models.CameraViewModel;
 import com.rpicam.detection.ClassifierResult;
 import com.rpicam.exceptions.UIException;
+import com.rpicam.javafx.util.SelectMode;
+import com.rpicam.javafx.util.Selectable;
+import com.rpicam.javafx.util.SelectionGroup;
+import com.rpicam.scenes.ViewInfo;
 import java.io.IOException;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -13,22 +19,30 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.TextAlignment;
 
-public class CameraView extends StackPane {
+public class CameraView extends StackPane implements Selectable {
     @FXML
     private ImageView frameView;
     @FXML
     private Canvas statsHud;
     @FXML
     private Canvas classifierHud;
+    @FXML
+    private Rectangle selectionBorder;
 
+    private SimpleObjectProperty<ViewInfo> viewInfo = new SimpleObjectProperty<>();
     private SimpleObjectProperty<CameraViewModel> viewModel = new SimpleObjectProperty<>();
     private SimpleDoubleProperty frameWidth = new SimpleDoubleProperty();
     private SimpleDoubleProperty frameHeight = new SimpleDoubleProperty();
     private SimpleListProperty<ClassifierResult> classifierResults = new SimpleListProperty<>();
+    private SimpleBooleanProperty selected = new SimpleBooleanProperty();
+    private SimpleObjectProperty<SelectionGroup> selectionGroup = new SimpleObjectProperty<>();
 
     public CameraView() {
         final String FXML_PATH = "CameraView.fxml";
@@ -52,7 +66,14 @@ public class CameraView extends StackPane {
         statsHud.heightProperty().bind(heightProperty());
         classifierHud.widthProperty().bind(widthProperty());
         classifierHud.heightProperty().bind(heightProperty());
-
+        selectionBorder.widthProperty().bind(widthProperty());
+        selectionBorder.heightProperty().bind(heightProperty());
+        
+        bindData();
+        setupEventHandlers();
+    }
+    
+    private void bindData() {
         // Expose camera frame dimensions so that
         // external code can resize CameraView easily
         frameView.imageProperty().addListener((obs, oldVal, newVal) -> {
@@ -67,6 +88,8 @@ public class CameraView extends StackPane {
                 drawClassifier(r);
             });
         });
+        
+        selectionBorder.visibleProperty().bind(selected);
 
         // Bind model properties if we detect a new model is set
         viewModel.addListener((obs, oldVal, newVal) -> {
@@ -77,7 +100,25 @@ public class CameraView extends StackPane {
             classifierHud.visibleProperty().bind(newVal.drawDetectionProperty());
         });
 
-        viewModel.set(new CameraViewModel());
+        viewInfo.addListener((obs, oldVal, newVal) -> {
+            var newViewModel = new CameraViewModel();
+            newViewModel.init(newVal);
+            viewModel.set(newViewModel);
+        });
+    }
+    
+    private void setupEventHandlers() {
+        addEventHandler(MouseEvent.MOUSE_PRESSED, (event) -> {
+            if (event.getButton() == MouseButton.PRIMARY) {
+                if (event.isShiftDown()) {
+                    select(SelectMode.APPEND);
+                }
+                else {
+                    select(SelectMode.SINGLE);
+                }
+            }
+            event.consume();
+        });
     }
 
     public void clearClassifiers() {
@@ -127,7 +168,31 @@ public class CameraView extends StackPane {
     }
 
     private void drawStats() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+    
+    public ViewInfo getViewInfo() {
+        return viewInfo.get();
+    }
+    
+    public void setViewInfo(ViewInfo info) {
+        viewInfo.set(info);
+    }
+    
+    public ObjectProperty<ViewInfo> viewInfoProperty() {
+        return viewInfo;
+    }
+    
+    public CameraViewModel getViewModel() {
+        return viewModel.get();
+    }
+
+    public void setViewModel(CameraViewModel aViewModel) {
+        viewModel.set(aViewModel);
+    }
+
+    public ObjectProperty<CameraViewModel> viewModelProperty() {
+        return viewModel;
     }
 
     public double getFrameWidth() {
@@ -146,15 +211,35 @@ public class CameraView extends StackPane {
         return frameHeight;
     }
 
-    public CameraViewModel getViewModel() {
-        return viewModel.get();
+    @Override
+    public boolean isSelected() {
+        return selected.get();
+    }
+    
+    @Override
+    public void select(SelectMode mode) {        
+        if (selectionGroup.get() != null) {
+            selectionGroup.get().select(this, mode);
+        }
     }
 
-    public void setViewModel(CameraViewModel aViewModel) {
-        viewModel.set(aViewModel);
+    @Override
+    public BooleanProperty selectedProperty() {
+        return selected;
     }
 
-    public ObjectProperty<CameraViewModel> viewModelProperty() {
-        return viewModel;
+    @Override
+    public SelectionGroup getSelectionGroup() {
+        return selectionGroup.get();
+    }
+
+    @Override
+    public void setSelectionGroup(SelectionGroup group) {
+        selectionGroup.set(group);
+    }
+
+    @Override
+    public ObjectProperty<SelectionGroup> selectionGroupProperty() {
+        return selectionGroup;
     }
 }

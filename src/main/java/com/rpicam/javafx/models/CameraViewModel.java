@@ -16,6 +16,7 @@ import javafx.scene.image.WritableImage;
 import com.rpicam.cameras.CameraWorker;
 import com.rpicam.cameras.CameraListener;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ListProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
@@ -56,7 +57,7 @@ public class CameraViewModel implements CameraListener {
         return classifierResults.get();
     }
 
-    public SimpleListProperty<ClassifierResult> classifierResultsProperty() {
+    public ListProperty<ClassifierResult> classifierResultsProperty() {
         return classifierResults;
     }
 

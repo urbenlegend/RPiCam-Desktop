@@ -75,12 +75,12 @@
                                  <tooltip>
                                     <Tooltip text="Capture API" />
                                  </tooltip></ComboBox>
-                              <Label minWidth="-Infinity" text="Video Quality" textOverrun="CLIP" GridPane.rowIndex="3" />
-                              <TextField fx:id="widthBox" maxWidth="1.7976931348623157E308" promptText="Resolution Width" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                              <Label minWidth="-Infinity" text="Video Size" textOverrun="CLIP" GridPane.rowIndex="3" />
+                              <TextField fx:id="widthBox" maxWidth="1.7976931348623157E308" promptText="Resolution Width" text="0" GridPane.columnIndex="1" GridPane.rowIndex="3">
                                  <tooltip>
                                     <Tooltip text="Resolution Width" />
                                  </tooltip></TextField>
-                              <TextField fx:id="heightBox" promptText="Resolution Height" GridPane.columnIndex="2" GridPane.rowIndex="3">
+                              <TextField fx:id="heightBox" promptText="Resolution Height" text="0" GridPane.columnIndex="2" GridPane.rowIndex="3">
                                  <tooltip>
                                     <Tooltip text="Resolution Height" />
                                  </tooltip></TextField>

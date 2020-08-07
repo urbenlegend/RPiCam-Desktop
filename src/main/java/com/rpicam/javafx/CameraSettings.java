@@ -54,7 +54,6 @@ public class CameraSettings extends VBox {
     public CameraSettings() {
         final String FXML_PATH = "CameraSettings.fxml";
         try {
-
             FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_PATH));
             loader.setController(this);
             loader.setRoot(this);
@@ -74,9 +73,11 @@ public class CameraSettings extends VBox {
             if (selectedBtn == urlRadioBtn) {
                 urlTextBox.setDisable(false);
                 cameraSelectBox.setDisable(true);
+                captureApiSelectBox.setDisable(true);
             } else if (selectedBtn == localRadioBtn) {
                 urlTextBox.setDisable(true);
                 cameraSelectBox.setDisable(false);
+                captureApiSelectBox.setDisable(false);
             }
         });
         sourceTg.selectToggle(urlRadioBtn);

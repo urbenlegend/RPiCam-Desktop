@@ -82,7 +82,7 @@ public class OCVStreamCamera extends CameraWorker {
             return;
         }
         open();
-        schedulePool = Executors.newScheduledThreadPool(2);
+        schedulePool = Executors.newScheduledThreadPool(1);
         schedulePool.scheduleAtFixedRate(this::capFrameThread, 0, capRate, TimeUnit.MILLISECONDS);
     }
 

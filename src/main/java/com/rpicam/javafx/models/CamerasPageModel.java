@@ -75,6 +75,13 @@ public class CamerasPageModel {
 
         return null;
     }
+    
+    public void removeCameraByViewInfo(ViewInfo view) {
+        scene.removeView(view);
+        updateViews();
+        var cameraManager = App.cameraManager();
+        cameraManager.removeCamera(view.cameraUUID);
+    }
 
     public List<ViewInfo> getViews() {
         return views.get();

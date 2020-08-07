@@ -37,7 +37,6 @@ public class OCVLocalCamera extends CameraWorker {
     private final UMat processMat = new UMat();
     private final List<OCVClassifier> classifiers = Collections.synchronizedList(new ArrayList<>());
 
-
     @Override
     public OCVLocalCameraConfig toConfig() {
         var conf = new OCVLocalCameraConfig();
@@ -79,8 +78,10 @@ public class OCVLocalCamera extends CameraWorker {
             throw new VideoIOException("Could not open camera " + camIndex);
         }
 
-        capture.set(CAP_PROP_FRAME_WIDTH, widthRes);
-        capture.set(CAP_PROP_FRAME_HEIGHT, heightRes);
+        if (widthRes > 0 && heightRes > 0) {
+            capture.set(CAP_PROP_FRAME_WIDTH, widthRes);
+            capture.set(CAP_PROP_FRAME_HEIGHT, heightRes);
+        }
     }
 
     private void close() {

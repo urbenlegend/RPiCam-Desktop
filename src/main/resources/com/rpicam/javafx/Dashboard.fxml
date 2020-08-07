@@ -88,10 +88,13 @@
             </Button>
             <Label text="RPiCam" textFill="WHITE" textOverrun="CLIP">
                <font>
-                  <Font name="Bauhaus 93" size="30.0" />
+                  <Font size="30.0" />
                </font>
             </Label>
-            <Label alignment="BOTTOM_CENTER" prefHeight="27.0" prefWidth="31.0" text="v0.0.1" textFill="WHITE" textOverrun="CLIP" />
+            <Label alignment="BOTTOM_CENTER" prefHeight="28.0" text="v0.0.1" textFill="WHITE" textOverrun="CLIP">
+               <font>
+                  <Font size="12.0" />
+               </font></Label>
          </children>
          <padding>
             <Insets left="5.0" />

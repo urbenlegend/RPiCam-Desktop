@@ -16,8 +16,11 @@
       "title": "Full Body"
     }
   ],
-  "cameras": [
-  ],
+  "cameras": [],
   "scenes": [
+    {
+      "title": "_ALL_CAMERAS_",
+      "views": []
+    }
   ]
 }
