@@ -1,13 +1,10 @@
 package com.rpicam.javafx;
 
 import com.rpicam.exceptions.UIException;
-import com.rpicam.javafx.models.DashboardModel;
 import java.io.IOException;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -27,7 +24,7 @@ public class Dashboard extends GridPane {
 
     private Timeline sidebarTimeline;
 
-    private SimpleObjectProperty<DashboardModel> viewModel = new SimpleObjectProperty<>();
+    private DashboardModel viewModel = new DashboardModel();
 
     public Dashboard() {
         final String FXML_PATH = "Dashboard.fxml";
@@ -48,11 +45,7 @@ public class Dashboard extends GridPane {
         scenesPage = new ScenesPage();
         settingsPage = new SettingsPage();
 
-        viewModel.addListener((obs, oldModel, newModel) -> {
-            camerasPage.getViewModel().init(newModel.getAllCamerasScene());
-        });
-
-        viewModel.set(new DashboardModel());
+        camerasPage.setSceneInfo(viewModel.getAllCamerasScene());
 
         setupAnimations();
         showScenesPage();
@@ -111,17 +104,5 @@ public class Dashboard extends GridPane {
     private void showSettingsPage() {
         pageTitle.setText("Settings");
         setPage(settingsPage);
-    }
-
-    public DashboardModel getViewModel() {
-        return viewModel.get();
-    }
-
-    public void setViewModel(DashboardModel aViewModel) {
-        viewModel.set(aViewModel);
-    }
-
-    public ObjectProperty<DashboardModel> viewModelProperty() {
-        return viewModel;
     }
 }

@@ -1,6 +1,5 @@
 package com.rpicam.javafx;
 
-import com.rpicam.javafx.models.CameraViewModel;
 import com.rpicam.detection.ClassifierResult;
 import com.rpicam.exceptions.UIException;
 import com.rpicam.javafx.util.SelectMode;
@@ -35,9 +34,10 @@ public class CameraView extends StackPane implements Selectable {
     private Canvas classifierHud;
     @FXML
     private Rectangle selectionBorder;
-
-    private SimpleObjectProperty<ViewInfo> viewInfo = new SimpleObjectProperty<>();
-    private SimpleObjectProperty<CameraViewModel> viewModel = new SimpleObjectProperty<>();
+    
+    private CameraViewModel viewModel = new CameraViewModel();
+    private ViewInfo viewInfo;
+    
     private SimpleDoubleProperty frameWidth = new SimpleDoubleProperty();
     private SimpleDoubleProperty frameHeight = new SimpleDoubleProperty();
     private SimpleListProperty<ClassifierResult> classifierResults = new SimpleListProperty<>();
@@ -73,6 +73,15 @@ public class CameraView extends StackPane implements Selectable {
         setupEventHandlers();
     }
     
+    public ViewInfo getViewInfo() {
+        return viewInfo;
+    }
+    
+    public void setViewInfo(ViewInfo info) {
+        viewInfo = info;
+        viewModel.setViewInfo(info);
+    }
+    
     private void bindData() {
         // Expose camera frame dimensions so that
         // external code can resize CameraView easily
@@ -91,20 +100,12 @@ public class CameraView extends StackPane implements Selectable {
         
         selectionBorder.visibleProperty().bind(selected);
 
-        // Bind model properties if we detect a new model is set
-        viewModel.addListener((obs, oldVal, newVal) -> {
-            frameView.imageProperty().bind(newVal.frameProperty());
-            // TODO: Bind stats results
-            classifierResults.bind(newVal.classifierResultsProperty());
-            statsHud.visibleProperty().bind(newVal.drawStatsProperty());
-            classifierHud.visibleProperty().bind(newVal.drawDetectionProperty());
-        });
-
-        viewInfo.addListener((obs, oldVal, newVal) -> {
-            var newViewModel = new CameraViewModel();
-            newViewModel.init(newVal);
-            viewModel.set(newViewModel);
-        });
+        // Bind model properties
+        frameView.imageProperty().bind(viewModel.frameProperty());
+        // TODO: Bind stats results
+        classifierResults.bind(viewModel.classifierResultsProperty());
+        statsHud.visibleProperty().bind(viewModel.drawStatsProperty());
+        classifierHud.visibleProperty().bind(viewModel.drawDetectionProperty());
     }
     
     private void setupEventHandlers() {
@@ -169,30 +170,6 @@ public class CameraView extends StackPane implements Selectable {
 
     private void drawStats() {
         throw new UnsupportedOperationException("Not supported yet.");
-    }
-    
-    public ViewInfo getViewInfo() {
-        return viewInfo.get();
-    }
-    
-    public void setViewInfo(ViewInfo info) {
-        viewInfo.set(info);
-    }
-    
-    public ObjectProperty<ViewInfo> viewInfoProperty() {
-        return viewInfo;
-    }
-    
-    public CameraViewModel getViewModel() {
-        return viewModel.get();
-    }
-
-    public void setViewModel(CameraViewModel aViewModel) {
-        viewModel.set(aViewModel);
-    }
-
-    public ObjectProperty<CameraViewModel> viewModelProperty() {
-        return viewModel;
     }
 
     public double getFrameWidth() {

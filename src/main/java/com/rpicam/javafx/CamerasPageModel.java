@@ -1,6 +1,5 @@
-package com.rpicam.javafx.models;
+package com.rpicam.javafx;
 
-import com.rpicam.javafx.App;
 import com.rpicam.scenes.SceneInfo;
 import com.rpicam.scenes.ViewInfo;
 import com.rpicam.cameras.CameraWorker;
@@ -17,13 +16,11 @@ public class CamerasPageModel {
     private SceneInfo scene;
     private SimpleListProperty<ViewInfo> views = new SimpleListProperty<>(FXCollections.observableArrayList());
 
-    public void init(SceneInfo aScene) {
+    public void setSceneInfo(SceneInfo aScene) {
         scene = aScene;
-        updateViews();
-    }
-
-    public void updateViews() {
-        views.setAll(scene.getViews());
+        scene.addPropertyChangeListener("views", event -> {
+            views.setAll(scene.getViews());
+        });
     }
 
     public void addNewCamera(Map<String, String> cameraPropMap) {
@@ -41,7 +38,6 @@ public class CamerasPageModel {
             viewInfo.drawStats = Boolean.parseBoolean(cameraPropMap.get("drawStats"));
             viewInfo.drawDetection = Boolean.parseBoolean(cameraPropMap.get("drawDetection"));
             scene.addView(viewInfo);
-            updateViews();
         }
         catch (Exception ex) {
             // TODO: Display error dialog
@@ -78,7 +74,6 @@ public class CamerasPageModel {
     
     public void removeCameraByViewInfo(ViewInfo view) {
         scene.removeView(view);
-        updateViews();
         var cameraManager = App.cameraManager();
         cameraManager.removeCamera(view.cameraUUID);
     }

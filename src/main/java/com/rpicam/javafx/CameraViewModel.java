@@ -1,7 +1,6 @@
-package com.rpicam.javafx.models;
+package com.rpicam.javafx;
 
 import com.rpicam.detection.ClassifierResult;
-import com.rpicam.javafx.App;
 import com.rpicam.scenes.ViewInfo;
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -28,7 +27,7 @@ public class CameraViewModel implements CameraListener {
     private SimpleBooleanProperty drawDetection = new SimpleBooleanProperty();
     private SimpleBooleanProperty drawStats = new SimpleBooleanProperty();
 
-    public void init(ViewInfo info) {
+    public void setViewInfo(ViewInfo info) {
         camera = App.cameraManager().getCamera(info.cameraUUID);
         drawDetection.set(info.drawDetection);
         drawStats.set(info.drawStats);

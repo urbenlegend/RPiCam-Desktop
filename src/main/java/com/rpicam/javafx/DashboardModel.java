@@ -1,4 +1,4 @@
-package com.rpicam.javafx.models;
+package com.rpicam.javafx;
 
 import com.rpicam.javafx.App;
 import com.rpicam.scenes.SceneInfo;

@@ -1,17 +1,14 @@
 package com.rpicam.javafx;
 
 import com.rpicam.exceptions.UIException;
-import com.rpicam.javafx.models.CamerasPageModel;
 import com.rpicam.javafx.util.SelectionGroup;
+import com.rpicam.scenes.SceneInfo;
 import com.rpicam.scenes.ViewInfo;
 import java.io.IOException;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
@@ -34,7 +31,9 @@ public class CamerasPage extends BorderPane {
     private CameraSettings addCameraSettings;
     private SelectionGroup cameraSelectGroup = new SelectionGroup();
 
-    private SimpleObjectProperty<CamerasPageModel> viewModel = new SimpleObjectProperty<>();
+    private CamerasPageModel viewModel = new CamerasPageModel();
+    private SceneInfo sceneInfo;
+    
     private SimpleListProperty<ViewInfo> views = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     public CamerasPage() {
@@ -59,11 +58,16 @@ public class CamerasPage extends BorderPane {
         setupEventHandlers();
     }
     
+    public void setSceneInfo(SceneInfo info) {
+        sceneInfo = info;
+        viewModel.setSceneInfo(sceneInfo);
+    }
+    
     private void bindData() {
         addCameraSettings.resultsProperty().addListener((obs, oldSettings, newSettings) -> {
             addCameraPopOver.hide();
             cameraSelectGroup.unselectAll();
-            getViewModel().addNewCamera(newSettings);
+            viewModel.addNewCamera(newSettings);
         });
 
         views.addListener((obs, oldViews, newViews) -> {
@@ -76,11 +80,7 @@ public class CamerasPage extends BorderPane {
             }
         });
 
-        viewModel.addListener((obs, oldModel, newModel) -> {
-            views.bind(newModel.viewsProperty());
-        });
-
-        viewModel.set(new CamerasPageModel());
+        views.bind(viewModel.viewsProperty());
     }
     
     private void setupEventHandlers() {
@@ -98,7 +98,7 @@ public class CamerasPage extends BorderPane {
     private void onRemoveCameraClicked() {
         for (var selected : cameraSelectGroup.getSelectedItems()) {
             var cameraView = (CameraView) selected;
-            getViewModel().removeCameraByViewInfo(cameraView.getViewInfo());
+            viewModel.removeCameraByViewInfo(cameraView.getViewInfo());
         }
         cameraSelectGroup.unselectAll();
     }
@@ -115,17 +115,5 @@ public class CamerasPage extends BorderPane {
         cameraView.setSelectionGroup(cameraSelectGroup);
 
         return cameraView;
-    }
-
-    public CamerasPageModel getViewModel() {
-        return viewModel.get();
-    }
-
-    public void setViewModel(CamerasPageModel aViewModel) {
-        viewModel.set(aViewModel);
-    }
-
-    public ObjectProperty<CamerasPageModel> viewModelProperty() {
-        return viewModel;
     }
 }
