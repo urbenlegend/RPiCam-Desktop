@@ -39,7 +39,7 @@ public class CameraViewModel implements ViewModel {
         drawDetection.set(viewInfo.drawDetection);
         drawStats.set(viewInfo.drawStats);
     }
-    
+
     @Override
     public void onViewAdded() {
         cameraClassifierListener = event -> {
@@ -50,21 +50,22 @@ public class CameraViewModel implements ViewModel {
         };
         cameraFrameListener = event -> {
             var image = (ByteBufferImage) event.getNewValue();
+            var jfxImage = wrapByteBufferImage(image);
             Platform.runLater(() -> {
-                frame.set(wrapByteBufferImage(image));
+                frame.set(jfxImage);
             });
         };
 
         camera.addPropertyChangeListener("classifierResults", cameraClassifierListener);
         camera.addPropertyChangeListener("frame", cameraFrameListener);
     }
-    
+
     @Override
     public void onViewRemoved() {
         camera.removePropertyChangeListener("classifierResults", cameraClassifierListener);
         camera.removePropertyChangeListener("frame", cameraFrameListener);
     }
-    
+
     public ViewInfo getViewInfo() {
         return viewInfo;
     }

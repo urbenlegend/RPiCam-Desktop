@@ -13,6 +13,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.google.gson.JsonSyntaxException;
+import com.rpicam.exceptions.ConfigException;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
@@ -39,7 +41,12 @@ public class ConfigManager {
 
     public void loadConfigFile(Path configPath) throws IOException {
         var configStr = Files.readString(configPath, StandardCharsets.US_ASCII);
-        configRoot = gson.fromJson(configStr, ConfigRoot.class);
+        try {
+            configRoot = gson.fromJson(configStr, ConfigRoot.class);
+        }
+        catch (JsonSyntaxException e) {
+            throw new ConfigException(configPath.toString() + "is an invalid config file", e);
+        }
     }
 
     public void saveConfigFile(Path configPath) throws IOException {

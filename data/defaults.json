@@ -20,10 +20,5 @@
     }
   ],
   "cameras": [],
-  "scenes": [
-    {
-      "title": "_ALL_CAMERAS_",
-      "views": []
-    }
-  ]
+  "scenes": []
 }
