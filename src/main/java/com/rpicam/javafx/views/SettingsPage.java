@@ -1,11 +1,13 @@
 package com.rpicam.javafx.views;
 
 import com.rpicam.exceptions.UIException;
+import com.rpicam.javafx.util.View;
+import com.rpicam.javafx.util.ViewModel;
 import java.io.IOException;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
 
-public class SettingsPage extends BorderPane {
+public class SettingsPage extends BorderPane implements View {
     public SettingsPage() {
         final String FXML_PATH = "SettingsPage.fxml";
         try {
@@ -22,4 +24,8 @@ public class SettingsPage extends BorderPane {
         // TODO
     }
 
+    @Override
+    public ViewModel getViewModel() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

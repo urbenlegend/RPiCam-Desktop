@@ -2,6 +2,8 @@ package com.rpicam.javafx.views;
 
 import com.rpicam.javafx.viewmodels.DashboardModel;
 import com.rpicam.exceptions.UIException;
+import com.rpicam.javafx.util.View;
+import com.rpicam.javafx.util.ViewModel;
 import java.io.IOException;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -14,7 +16,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.util.Duration;
 
-public class Dashboard extends GridPane {
+public class Dashboard extends GridPane implements View {
     @FXML
     private Label pageTitle;
     private ArchivesPage archivesPage;
@@ -105,5 +107,10 @@ public class Dashboard extends GridPane {
     private void showSettingsPage() {
         pageTitle.setText("Settings");
         setPage(settingsPage);
+    }
+
+    @Override
+    public ViewModel getViewModel() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

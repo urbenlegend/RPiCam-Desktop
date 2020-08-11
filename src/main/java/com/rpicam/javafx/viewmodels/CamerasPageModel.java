@@ -8,7 +8,6 @@ import com.rpicam.cameras.OCVLocalCamera;
 import com.rpicam.cameras.VlcjCamera;
 import com.rpicam.javafx.App;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -28,9 +27,9 @@ public class CamerasPageModel implements ViewModel {
     
     @Override
     public void onViewAdded() {
+        views.setAll(scene.getViews());
         scenePropertyListener = event -> {
-            var newViews = (ArrayList<ViewInfo>) event.getNewValue();
-            views.setAll(newViews);
+            views.setAll(scene.getViews());
         };
         scene.addPropertyChangeListener("views", scenePropertyListener);
     }

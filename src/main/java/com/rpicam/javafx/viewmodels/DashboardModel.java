@@ -1,12 +1,12 @@
 package com.rpicam.javafx.viewmodels;
 
 import com.rpicam.javafx.App;
-import com.rpicam.javafx.App;
+import com.rpicam.javafx.util.ViewModel;
 import com.rpicam.scenes.SceneInfo;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public class DashboardModel {
+public class DashboardModel implements ViewModel {
     private SimpleObjectProperty<SceneInfo> allCamerasScene = new SimpleObjectProperty<>();
 
     public DashboardModel() {

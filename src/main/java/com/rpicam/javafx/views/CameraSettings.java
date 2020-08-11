@@ -1,6 +1,8 @@
 package com.rpicam.javafx.views;
 
 import com.rpicam.exceptions.UIException;
+import com.rpicam.javafx.util.View;
+import com.rpicam.javafx.util.ViewModel;
 import java.io.IOException;
 import javafx.beans.property.ReadOnlyMapProperty;
 import javafx.beans.property.SimpleMapProperty;
@@ -17,7 +19,7 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.VBox;
 
-public class CameraSettings extends VBox {
+public class CameraSettings extends VBox implements View {
     @FXML
     private Accordion settingsAccordion;
     @FXML
@@ -115,5 +117,10 @@ public class CameraSettings extends VBox {
         resultsMap.put("drawDetection", Boolean.toString(detectBoxToggle.isSelected()));
         resultsMap.put("drawStats", Boolean.toString(statsToggle.isSelected()));
         results.set(resultsMap);
+    }
+
+    @Override
+    public ViewModel getViewModel() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }
