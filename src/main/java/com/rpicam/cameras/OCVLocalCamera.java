@@ -6,6 +6,8 @@ import com.rpicam.config.OCVCameraConfig;
 import com.rpicam.config.OCVLocalCameraConfig;
 import com.rpicam.exceptions.ConfigException;
 import com.rpicam.exceptions.VideoIOException;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +23,8 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.UMat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 
-public class OCVLocalCamera extends CameraWorker {
+public class OCVLocalCamera implements CameraWorker {
+    private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private VideoCapture capture = new VideoCapture();
     private int camIndex;
     private String captureApi;
@@ -95,7 +98,7 @@ public class OCVLocalCamera extends CameraWorker {
         }
         open();
         schedulePool = Executors.newScheduledThreadPool(1);
-        schedulePool.scheduleAtFixedRate(this::capFrameThread, 0, capRate, TimeUnit.MILLISECONDS);
+        schedulePool.scheduleAtFixedRate(this::processFrame, 0, capRate, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -113,15 +116,13 @@ public class OCVLocalCamera extends CameraWorker {
         classifiers.remove(c);
     }
 
-    private void capFrameThread() {
+    private void processFrame() {
         if (!capture.read(capMat)) {
             throw new VideoIOException("could not grab next frame from camera");
         }
         
         cvtColor(capMat, bgraMat, COLOR_BGR2BGRA);
-        getListeners().forEach((listener) -> {
-            listener.onFrame(bgraMat.createBuffer(), bgraMat.cols(), bgraMat.rows());
-        });
+        pcs.firePropertyChange("frame", null, new ByteBufferImage(bgraMat.createBuffer(), bgraMat.cols(), bgraMat.rows()));
         
         if (procCount % procRate == 0) {
             capMat.copyTo(processMat);
@@ -130,12 +131,20 @@ public class OCVLocalCamera extends CameraWorker {
             classifiers.forEach(c -> {
                 classifierResults.addAll(c.apply(processMat));
             });
-
-            getListeners().forEach((listener) -> {
-                listener.onClassifierResults(classifierResults);
-            });
+            
+            pcs.firePropertyChange("classifierResults", null, classifierResults);
         }
         
         procCount++;
+    }
+    
+    @Override
+    public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
+        pcs.addPropertyChangeListener(propertyName, listener);
+    }
+
+    @Override
+    public void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
+        pcs.removePropertyChangeListener(propertyName, listener);
     }
 }

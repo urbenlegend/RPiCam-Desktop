@@ -1,5 +1,6 @@
-package com.rpicam.javafx;
+package com.rpicam.javafx.viewmodels;
 
+import com.rpicam.javafx.App;
 import com.rpicam.javafx.App;
 import com.rpicam.scenes.SceneInfo;
 import javafx.beans.property.ObjectProperty;

@@ -37,4 +37,15 @@
                 <goal>javafx:jlink</goal>
             </goals>
         </action>
+        <action>
+            <actionName>javadoc</actionName>
+            <packagings>
+                <packaging>*</packaging>
+            </packagings>
+            <goals>
+                <goal>clean</goal>
+                <goal>compile</goal>
+                <goal>javadoc:javadoc</goal>
+            </goals>
+        </action>
     </actions>

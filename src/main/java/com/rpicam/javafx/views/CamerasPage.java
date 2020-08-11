@@ -1,8 +1,9 @@
-package com.rpicam.javafx;
+package com.rpicam.javafx.views;
 
+import com.rpicam.javafx.viewmodels.CamerasPageModel;
 import com.rpicam.exceptions.UIException;
 import com.rpicam.javafx.util.SelectionGroup;
-import com.rpicam.scenes.SceneInfo;
+import com.rpicam.javafx.util.View;
 import com.rpicam.scenes.ViewInfo;
 import java.io.IOException;
 import javafx.beans.property.SimpleListProperty;
@@ -17,7 +18,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import org.controlsfx.control.PopOver;
 
-public class CamerasPage extends BorderPane {
+public class CamerasPage extends BorderPane implements View {
     @FXML
     private Button addCameraBtn;
     @FXML
@@ -32,8 +33,6 @@ public class CamerasPage extends BorderPane {
     private SelectionGroup cameraSelectGroup = new SelectionGroup();
 
     private CamerasPageModel viewModel = new CamerasPageModel();
-    private SceneInfo sceneInfo;
-    
     private SimpleListProperty<ViewInfo> views = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     public CamerasPage() {
@@ -58,12 +57,16 @@ public class CamerasPage extends BorderPane {
         setupEventHandlers();
     }
     
-    public void setSceneInfo(SceneInfo info) {
-        sceneInfo = info;
-        viewModel.setSceneInfo(sceneInfo);
-    }
-    
     private void bindData() {
+        parentProperty().addListener((obs, oldParent, newParent) -> {
+            if (newParent != null) {
+                viewModel.onViewAdded();
+            }
+            else {
+                viewModel.onViewRemoved();
+            }
+        });
+        
         addCameraSettings.resultsProperty().addListener((obs, oldSettings, newSettings) -> {
             addCameraPopOver.hide();
             cameraSelectGroup.unselectAll();
@@ -75,7 +78,7 @@ public class CamerasPage extends BorderPane {
 
             for (var view : newViews) {
                 var cameraView = createCameraView();
-                cameraView.setViewInfo(view);
+                cameraView.getViewModel().init(view);
                 cameraFlowPane.getChildren().add(cameraView);
             }
         });
@@ -98,7 +101,7 @@ public class CamerasPage extends BorderPane {
     private void onRemoveCameraClicked() {
         for (var selected : cameraSelectGroup.getSelectedItems()) {
             var cameraView = (CameraView) selected;
-            viewModel.removeCameraByViewInfo(cameraView.getViewInfo());
+            viewModel.removeCameraByViewInfo(cameraView.getViewModel().getViewInfo());
         }
         cameraSelectGroup.unselectAll();
     }
@@ -115,5 +118,10 @@ public class CamerasPage extends BorderPane {
         cameraView.setSelectionGroup(cameraSelectGroup);
 
         return cameraView;
+    }
+
+    @Override
+    public CamerasPageModel getViewModel() {
+        return viewModel;
     }
 }

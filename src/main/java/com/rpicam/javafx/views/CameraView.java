@@ -1,11 +1,12 @@
-package com.rpicam.javafx;
+package com.rpicam.javafx.views;
 
+import com.rpicam.javafx.viewmodels.CameraViewModel;
 import com.rpicam.detection.ClassifierResult;
 import com.rpicam.exceptions.UIException;
 import com.rpicam.javafx.util.SelectMode;
 import com.rpicam.javafx.util.Selectable;
 import com.rpicam.javafx.util.SelectionGroup;
-import com.rpicam.scenes.ViewInfo;
+import com.rpicam.javafx.util.View;
 import java.io.IOException;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -25,7 +26,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.TextAlignment;
 
-public class CameraView extends StackPane implements Selectable {
+public class CameraView extends StackPane implements View, Selectable {
     @FXML
     private ImageView frameView;
     @FXML
@@ -36,8 +37,6 @@ public class CameraView extends StackPane implements Selectable {
     private Rectangle selectionBorder;
     
     private CameraViewModel viewModel = new CameraViewModel();
-    private ViewInfo viewInfo;
-    
     private SimpleDoubleProperty frameWidth = new SimpleDoubleProperty();
     private SimpleDoubleProperty frameHeight = new SimpleDoubleProperty();
     private SimpleListProperty<ClassifierResult> classifierResults = new SimpleListProperty<>();
@@ -73,16 +72,16 @@ public class CameraView extends StackPane implements Selectable {
         setupEventHandlers();
     }
     
-    public ViewInfo getViewInfo() {
-        return viewInfo;
-    }
-    
-    public void setViewInfo(ViewInfo info) {
-        viewInfo = info;
-        viewModel.setViewInfo(info);
-    }
-    
     private void bindData() {
+        parentProperty().addListener((obs, oldParent, newParent) -> {
+            if (newParent != null) {
+                viewModel.onViewAdded();
+            }
+            else {
+                viewModel.onViewRemoved();
+            }
+        });
+        
         // Expose camera frame dimensions so that
         // external code can resize CameraView easily
         frameView.imageProperty().addListener((obs, oldVal, newVal) -> {
@@ -186,6 +185,11 @@ public class CameraView extends StackPane implements Selectable {
 
     public ReadOnlyDoubleProperty frameHeightProperty() {
         return frameHeight;
+    }
+    
+    @Override
+    public CameraViewModel getViewModel() {
+        return viewModel;
     }
 
     @Override

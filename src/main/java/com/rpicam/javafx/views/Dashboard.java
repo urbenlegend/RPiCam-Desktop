@@ -1,5 +1,6 @@
-package com.rpicam.javafx;
+package com.rpicam.javafx.views;
 
+import com.rpicam.javafx.viewmodels.DashboardModel;
 import com.rpicam.exceptions.UIException;
 import java.io.IOException;
 import javafx.animation.KeyFrame;
@@ -45,7 +46,7 @@ public class Dashboard extends GridPane {
         scenesPage = new ScenesPage();
         settingsPage = new SettingsPage();
 
-        camerasPage.setSceneInfo(viewModel.getAllCamerasScene());
+        camerasPage.getViewModel().init(viewModel.getAllCamerasScene());
 
         setupAnimations();
         showScenesPage();

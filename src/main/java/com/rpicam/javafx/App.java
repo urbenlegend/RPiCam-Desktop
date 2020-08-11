@@ -1,5 +1,6 @@
 package com.rpicam.javafx;
 
+import com.rpicam.javafx.views.Dashboard;
 import com.rpicam.config.ConfigManager;
 import com.rpicam.cameras.CameraManager;
 import com.rpicam.scenes.SceneManager;
@@ -9,6 +10,15 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+/**
+ * App is the JavaFX {@link javafx.application.Application} instance and serves
+ * as the main "hub" for the rest of the program. It creates and initializes the
+ * backend code
+ * ({@link com.rpicam.config.ConfigManager}, {@link com.rpicam.cameras.CameraManager},
+ * and {@link com.rpicam.scenes.SceneManager}), the JavaFX window
+ * (javafx.stage.Stage and javafx.scene.Scene), and the frontend UI
+ * ({@link com.rpicam.javafx.Dashboard})
+ */
 public class App extends Application {
     private static final String CONFIG_PATH = "./data/config.json";
 

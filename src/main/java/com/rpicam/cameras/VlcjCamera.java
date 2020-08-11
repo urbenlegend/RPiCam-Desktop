@@ -5,6 +5,8 @@ import com.rpicam.config.OCVCameraConfig;
 import com.rpicam.config.VlcjCameraConfig;
 import com.rpicam.detection.ClassifierResult;
 import com.rpicam.exceptions.ConfigException;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,7 +25,8 @@ import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormatCall
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.RenderCallback;
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.format.RV32BufferFormat;
 
-public class VlcjCamera extends CameraWorker {
+public class VlcjCamera implements CameraWorker {
+    private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private String url;
     private int procRate;
     private int procCount = 0;
@@ -91,9 +94,7 @@ public class VlcjCamera extends CameraWorker {
     }
 
     private void processFrame(ByteBuffer buffer, int width, int height) {
-        getListeners().forEach((listener) -> {
-            listener.onFrame(buffer, width, height);
-        });
+        pcs.firePropertyChange("frame", null, new ByteBufferImage(buffer, width, height));
 
         if (procCount % procRate == 0) {
             var tempMat = new Mat(height, width, CV_8UC4, new BytePointer(buffer));
@@ -104,12 +105,20 @@ public class VlcjCamera extends CameraWorker {
                 classifierResults.addAll(c.apply(processMat));
             });
 
-            getListeners().forEach((listener) -> {
-                listener.onClassifierResults(classifierResults);
-            });
+            pcs.firePropertyChange("classifierResults", null, classifierResults);
         }
 
         procCount++;
+    }
+
+    @Override
+    public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
+        pcs.addPropertyChangeListener(propertyName, listener);
+    }
+
+    @Override
+    public void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
+        pcs.removePropertyChangeListener(propertyName, listener);
     }
 
     private class PixelBufferBufferFormatCallback implements BufferFormatCallback {

@@ -1,10 +1,14 @@
-package com.rpicam.javafx;
+package com.rpicam.javafx.viewmodels;
 
+import com.rpicam.javafx.util.ViewModel;
 import com.rpicam.scenes.SceneInfo;
 import com.rpicam.scenes.ViewInfo;
 import com.rpicam.cameras.CameraWorker;
 import com.rpicam.cameras.OCVLocalCamera;
 import com.rpicam.cameras.VlcjCamera;
+import com.rpicam.javafx.App;
+import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -12,15 +16,28 @@ import javafx.beans.property.ReadOnlyListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 
-public class CamerasPageModel {
+public class CamerasPageModel implements ViewModel {
     private SceneInfo scene;
+    private PropertyChangeListener scenePropertyListener;
+    
     private SimpleListProperty<ViewInfo> views = new SimpleListProperty<>(FXCollections.observableArrayList());
 
-    public void setSceneInfo(SceneInfo aScene) {
+    public void init(SceneInfo aScene) {
         scene = aScene;
-        scene.addPropertyChangeListener("views", event -> {
-            views.setAll(scene.getViews());
-        });
+    }
+    
+    @Override
+    public void onViewAdded() {
+        scenePropertyListener = event -> {
+            var newViews = (ArrayList<ViewInfo>) event.getNewValue();
+            views.setAll(newViews);
+        };
+        scene.addPropertyChangeListener("views", scenePropertyListener);
+    }
+    
+    @Override
+    public void onViewRemoved() {
+        scene.removePropertyChangeListener("views", scenePropertyListener);
     }
 
     public void addNewCamera(Map<String, String> cameraPropMap) {
