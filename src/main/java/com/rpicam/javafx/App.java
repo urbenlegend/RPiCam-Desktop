@@ -17,7 +17,7 @@ import javafx.stage.Stage;
  * ({@link com.rpicam.config.ConfigManager}, {@link com.rpicam.cameras.CameraManager},
  * and {@link com.rpicam.scenes.SceneManager}), the JavaFX window
  * (javafx.stage.Stage and javafx.scene.Scene), and the frontend UI
- * ({@link com.rpicam.javafx.Dashboard})
+ * ({@link com.rpicam.javafx.views.Dashboard})
  */
 public class App extends Application {
     private static final String CONFIG_PATH = "./data/config.json";

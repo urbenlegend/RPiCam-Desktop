@@ -70,8 +70,8 @@ public class CameraSettings extends VBox implements View {
     public void initialize() {
         urlRadioBtn.setToggleGroup(sourceTg);
         localRadioBtn.setToggleGroup(sourceTg);
-        sourceTg.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
-            var selectedBtn = (RadioButton) newVal;
+        sourceTg.selectedToggleProperty().addListener((obs, oldSource, newSource) -> {
+            var selectedBtn = (RadioButton) newSource;
             if (selectedBtn == urlRadioBtn) {
                 urlTextBox.setDisable(false);
                 cameraSelectBox.setDisable(true);

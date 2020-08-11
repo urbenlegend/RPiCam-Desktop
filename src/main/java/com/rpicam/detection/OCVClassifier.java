@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2GRAY;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
 import static org.bytedeco.opencv.global.opencv_objdetect.CASCADE_SCALE_IMAGE;
 import org.bytedeco.opencv.opencv_core.UMat;
 import org.bytedeco.opencv.opencv_core.RectVector;
@@ -12,7 +14,7 @@ import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
 
 public class OCVClassifier implements Function<UMat, ArrayList<ClassifierResult>>, Cloneable {
-
+    private UMat grayMat = new UMat();
     private CascadeClassifier classifier;
     private String color = "";
     private String path = "";
@@ -26,11 +28,12 @@ public class OCVClassifier implements Function<UMat, ArrayList<ClassifierResult>
 
     @Override
     public ArrayList<ClassifierResult> apply(UMat frame) {
+        cvtColor(frame, grayMat, COLOR_BGR2GRAY);
         var detectedObjs = new RectVector();
-        int minSize = Math.round(frame.rows() * 0.1f);
+        int minSize = Math.round(grayMat.rows() * 0.1f);
 
         // TODO: Check if correct parameters are being used
-        classifier.detectMultiScale(frame,
+        classifier.detectMultiScale(grayMat,
                 detectedObjs,
                 1.1,
                 3,

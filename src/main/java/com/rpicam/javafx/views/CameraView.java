@@ -84,15 +84,15 @@ public class CameraView extends StackPane implements View, Selectable {
         
         // Expose camera frame dimensions so that
         // external code can resize CameraView easily
-        frameView.imageProperty().addListener((obs, oldVal, newVal) -> {
-            frameWidth.set(newVal.getWidth());
-            frameHeight.set(newVal.getHeight());
+        frameView.imageProperty().addListener((obs, oldImage, newImage) -> {
+            frameWidth.set(newImage.getWidth());
+            frameHeight.set(newImage.getHeight());
         });
         // TODO: Add listener for stats results
         // Draw classifiers whenever we get new results
-        classifierResults.addListener((obs, oldVal, newVal) -> {
+        classifierResults.addListener((obs, oldResults, newResults) -> {
             clearClassifiers();
-            newVal.forEach(r -> {
+            newResults.forEach(r -> {
                 drawClassifier(r);
             });
         });
