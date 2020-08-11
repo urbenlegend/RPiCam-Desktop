@@ -78,6 +78,7 @@ public class OCVClassifier implements Function<UMat, ArrayList<ClassifierResult>
     public OCVClassifier clone() {
         try {
             var cloneObj = (OCVClassifier) super.clone();
+            cloneObj.grayMat = grayMat.clone();
             cloneObj.initClassifier();
             return cloneObj;
         }
