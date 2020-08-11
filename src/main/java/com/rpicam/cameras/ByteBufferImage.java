@@ -7,10 +7,10 @@ public class ByteBufferImage {
     private int width;
     private int height;
 
-    public ByteBufferImage(ByteBuffer aBuffer, int aWidth, int aHeight) {
-        buffer = aBuffer;
-        width = aWidth;
-        height = aHeight;
+    public ByteBufferImage(ByteBuffer buffer, int width, int height) {
+        this.buffer = buffer;
+        this.width = width;
+        this.height = height;
     }
 
     public ByteBuffer getBuffer() {

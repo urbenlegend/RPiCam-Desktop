@@ -18,7 +18,6 @@ import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2BGRA;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
 import org.bytedeco.opencv.global.opencv_videoio;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.UMat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 
 public class OCVStreamCamera implements CameraWorker {
@@ -33,7 +32,6 @@ public class OCVStreamCamera implements CameraWorker {
     private ScheduledExecutorService schedulePool;
     private final Mat capMat = new Mat();
     private final Mat bgraMat = new Mat();
-    private final UMat processMat = new UMat();
     private final List<OCVClassifier> classifiers = Collections.synchronizedList(new ArrayList<>());
 
     @Override
@@ -108,21 +106,19 @@ public class OCVStreamCamera implements CameraWorker {
         if (!capture.read(capMat)) {
             throw new VideoIOException("could not grab next frame from camera");
         }
-        
+
         cvtColor(capMat, bgraMat, COLOR_BGR2BGRA);
         pcs.firePropertyChange("frame", null, new ByteBufferImage(bgraMat.createBuffer(), bgraMat.cols(), bgraMat.rows()));
-        
-        if (procCount % procRate == 0) {
-            capMat.copyTo(processMat);
 
+        if (procCount % procRate == 0) {
             var classifierResults = new ArrayList<ClassifierResult>();
             classifiers.forEach(c -> {
-                classifierResults.addAll(c.apply(processMat));
+                classifierResults.addAll(c.apply(capMat));
             });
 
             pcs.firePropertyChange("classifierResults", null, classifierResults);
         }
-        
+
         procCount++;
     }
 

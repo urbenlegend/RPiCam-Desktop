@@ -14,7 +14,6 @@ import java.util.List;
 import org.bytedeco.javacpp.BytePointer;
 import static org.bytedeco.opencv.global.opencv_core.CV_8UC4;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.UMat;
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
@@ -31,7 +30,6 @@ public class VlcjCamera implements CameraWorker {
     private int procRate;
     private int procCount = 0;
 
-    private final UMat processMat = new UMat();
     private final List<OCVClassifier> classifiers = Collections.synchronizedList(new ArrayList<>());
 
     private MediaPlayerFactory mediaPlayerFactory;
@@ -97,12 +95,11 @@ public class VlcjCamera implements CameraWorker {
         pcs.firePropertyChange("frame", null, new ByteBufferImage(buffer, width, height));
 
         if (procCount % procRate == 0) {
-            var tempMat = new Mat(height, width, CV_8UC4, new BytePointer(buffer));
-            tempMat.copyTo(processMat);
+            var capMat = new Mat(height, width, CV_8UC4, new BytePointer(buffer));
 
             var classifierResults = new ArrayList<ClassifierResult>();
             classifiers.forEach(c -> {
-                classifierResults.addAll(c.apply(processMat));
+                classifierResults.addAll(c.apply(capMat));
             });
 
             pcs.firePropertyChange("classifierResults", null, classifierResults);

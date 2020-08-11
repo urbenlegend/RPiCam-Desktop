@@ -48,11 +48,6 @@
             <version>11.0.2</version>
         </dependency>
         <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>opencv-platform</artifactId>
-            <version>4.3.0-1.5.3</version>
-        </dependency>
-        <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-media</artifactId>
             <version>14.0.2.1</version>
@@ -61,6 +56,11 @@
             <groupId>uk.co.caprica</groupId>
             <artifactId>vlcj</artifactId>
             <version>4.5.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>opencv-platform-gpu</artifactId>
+            <version>4.3.0-1.5.3</version>
         </dependency>
     </dependencies>
     <build>

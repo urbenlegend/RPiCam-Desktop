@@ -17,7 +17,7 @@ public class CameraManager {
     public void loadConfig() {
         var configRoot = App.configManager().getConfig();
         for (var conf : configRoot.classifiers) {
-            var classifier = new OCVClassifier(conf.path, conf.title, conf.color);
+            var classifier = new OCVClassifier(conf.path, conf.title, conf.color, conf.gpu);
             classifiers.add(classifier);
         }
 

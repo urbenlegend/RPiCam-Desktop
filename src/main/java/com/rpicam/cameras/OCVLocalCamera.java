@@ -20,7 +20,6 @@ import org.bytedeco.opencv.global.opencv_videoio;
 import static org.bytedeco.opencv.global.opencv_videoio.CAP_PROP_FRAME_HEIGHT;
 import static org.bytedeco.opencv.global.opencv_videoio.CAP_PROP_FRAME_WIDTH;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.UMat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 
 public class OCVLocalCamera implements CameraWorker {
@@ -37,7 +36,6 @@ public class OCVLocalCamera implements CameraWorker {
     private ScheduledExecutorService schedulePool;
     private final Mat capMat = new Mat();
     private final Mat bgraMat = new Mat();
-    private final UMat processMat = new UMat();
     private final List<OCVClassifier> classifiers = Collections.synchronizedList(new ArrayList<>());
 
     @Override
@@ -120,24 +118,22 @@ public class OCVLocalCamera implements CameraWorker {
         if (!capture.read(capMat)) {
             throw new VideoIOException("could not grab next frame from camera");
         }
-        
+
         cvtColor(capMat, bgraMat, COLOR_BGR2BGRA);
         pcs.firePropertyChange("frame", null, new ByteBufferImage(bgraMat.createBuffer(), bgraMat.cols(), bgraMat.rows()));
-        
-        if (procCount % procRate == 0) {
-            capMat.copyTo(processMat);
 
+        if (procCount % procRate == 0) {
             var classifierResults = new ArrayList<ClassifierResult>();
             classifiers.forEach(c -> {
-                classifierResults.addAll(c.apply(processMat));
+                classifierResults.addAll(c.apply(capMat));
             });
-            
+
             pcs.firePropertyChange("classifierResults", null, classifierResults);
         }
-        
+
         procCount++;
     }
-    
+
     @Override
     public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
         pcs.addPropertyChangeListener(propertyName, listener);

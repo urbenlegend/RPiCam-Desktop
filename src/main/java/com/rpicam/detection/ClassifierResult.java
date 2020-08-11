@@ -6,12 +6,12 @@ public class ClassifierResult {
     public final String title;
     public final String color;
 
-    public ClassifierResult(int aX, int aY, int aW, int aH, String aTitle, String aColor) {
-        x = aX;
-        y = aY;
-        w = aW;
-        h = aH;
-        title = aTitle;
-        color = aColor;
+    public ClassifierResult(int x, int y, int w, int h, String title, String color) {
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+        this.title = title;
+        this.color = color;
     }
 }

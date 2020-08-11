@@ -3,17 +3,20 @@
     {
       "color": "rgb(255,0,0)",
       "path": "./data/upperbody_recognition_model.xml",
-      "title": "Upper Body"
+      "title": "Upper Body",
+      "gpu": true
     },
     {
       "color": "rgb(0,255,0)",
       "path": "./data/facial_recognition_model.xml",
-      "title": "Face"
+      "title": "Face",
+      "gpu": true
     },
     {
       "color": "rgb(0,0,255)",
       "path": "./data/fullbody_recognition_model.xml",
-      "title": "Full Body"
+      "title": "Full Body",
+      "gpu": true
     }
   ],
   "cameras": [],
