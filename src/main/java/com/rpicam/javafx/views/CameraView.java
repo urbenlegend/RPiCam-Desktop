@@ -35,10 +35,10 @@ public class CameraView extends StackPane implements View, Selectable {
     private Canvas classifierHud;
     @FXML
     private Rectangle selectionBorder;
-    
+
     private CameraViewModel viewModel = new CameraViewModel();
-    private SimpleDoubleProperty frameWidth = new SimpleDoubleProperty();
-    private SimpleDoubleProperty frameHeight = new SimpleDoubleProperty();
+    private SimpleDoubleProperty frameWidth = new SimpleDoubleProperty(640);
+    private SimpleDoubleProperty frameHeight = new SimpleDoubleProperty(480);
     private SimpleListProperty<ClassifierResult> classifierResults = new SimpleListProperty<>();
     private SimpleBooleanProperty selected = new SimpleBooleanProperty();
     private SimpleObjectProperty<SelectionGroup> selectionGroup = new SimpleObjectProperty<>();
@@ -67,11 +67,11 @@ public class CameraView extends StackPane implements View, Selectable {
         classifierHud.heightProperty().bind(heightProperty());
         selectionBorder.widthProperty().bind(widthProperty());
         selectionBorder.heightProperty().bind(heightProperty());
-        
+
         bindData();
         setupEventHandlers();
     }
-    
+
     private void bindData() {
         parentProperty().addListener((obs, oldParent, newParent) -> {
             if (newParent != null) {
@@ -81,7 +81,7 @@ public class CameraView extends StackPane implements View, Selectable {
                 viewModel.onViewRemoved();
             }
         });
-        
+
         // Expose camera frame dimensions so that
         // external code can resize CameraView easily
         frameView.imageProperty().addListener((obs, oldImage, newImage) -> {
@@ -96,17 +96,18 @@ public class CameraView extends StackPane implements View, Selectable {
                 drawClassifier(r);
             });
         });
-        
+
         selectionBorder.visibleProperty().bind(selected);
 
         // Bind model properties
         frameView.imageProperty().bind(viewModel.frameProperty());
         // TODO: Bind stats results
         classifierResults.bind(viewModel.classifierResultsProperty());
-        statsHud.visibleProperty().bind(viewModel.drawStatsProperty());
+        // Show stats HUD when user enabled OR when there is no image available
+        statsHud.visibleProperty().bind(viewModel.drawStatsProperty().or(frameView.imageProperty().isNull()));
         classifierHud.visibleProperty().bind(viewModel.drawDetectionProperty());
     }
-    
+
     private void setupEventHandlers() {
         addEventHandler(MouseEvent.MOUSE_PRESSED, (event) -> {
             if (event.getButton() == MouseButton.PRIMARY) {
@@ -139,7 +140,7 @@ public class CameraView extends StackPane implements View, Selectable {
         double scaleX = hudWidth / imageWidth;
         double scaleY = hudHeight / imageHeight;
         double scaleFactor = Math.min(scaleX, scaleY);
-        // Centers the HUD drawing so it draws on top of ImageView after scaling
+        // Center the HUD drawing so it draws on top of ImageView after scaling
         if (scaleX > scaleY) {
             double viewWidth = imageWidth / imageHeight * hudHeight;
             gc.translate(hudWidth / 2 - viewWidth / 2, 0);
@@ -186,7 +187,7 @@ public class CameraView extends StackPane implements View, Selectable {
     public ReadOnlyDoubleProperty frameHeightProperty() {
         return frameHeight;
     }
-    
+
     @Override
     public CameraViewModel getViewModel() {
         return viewModel;
@@ -196,9 +197,9 @@ public class CameraView extends StackPane implements View, Selectable {
     public boolean isSelected() {
         return selected.get();
     }
-    
+
     @Override
-    public void select(SelectMode mode) {        
+    public void select(SelectMode mode) {
         if (selectionGroup.get() != null) {
             selectionGroup.get().select(this, mode);
         }
