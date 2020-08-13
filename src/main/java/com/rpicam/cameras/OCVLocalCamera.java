@@ -1,16 +1,10 @@
 package com.rpicam.cameras;
 
-import com.rpicam.detection.ClassifierResult;
-import com.rpicam.detection.OCVClassifier;
 import com.rpicam.config.OCVCameraConfig;
 import com.rpicam.config.OCVLocalCameraConfig;
 import com.rpicam.exceptions.ConfigException;
 import com.rpicam.exceptions.VideoIOException;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -22,8 +16,7 @@ import static org.bytedeco.opencv.global.opencv_videoio.CAP_PROP_FRAME_WIDTH;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 
-public class OCVLocalCamera implements CameraWorker {
-    private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+public class OCVLocalCamera extends CameraWorker {
     private VideoCapture capture = new VideoCapture();
     private int camIndex;
     private String captureApi;
@@ -36,7 +29,10 @@ public class OCVLocalCamera implements CameraWorker {
     private ScheduledExecutorService schedulePool;
     private final Mat capMat = new Mat();
     private final Mat bgraMat = new Mat();
-    private final List<OCVClassifier> classifiers = Collections.synchronizedList(new ArrayList<>());
+
+    private ByteBufferImage frame;
+    private StatsResult statsResult;
+    private ArrayList<ClassifierResult> classifierResults;
 
     @Override
     public OCVLocalCameraConfig toConfig() {
@@ -106,41 +102,35 @@ public class OCVLocalCamera implements CameraWorker {
         close();
     }
 
-    public void addClassifier(OCVClassifier c) {
-        classifiers.add(c);
-    }
-
-    public void removeClassifier(OCVClassifier c) {
-        classifiers.remove(c);
-    }
-
     private void processFrame() {
         if (!capture.read(capMat)) {
             throw new VideoIOException("could not grab next frame from camera");
         }
 
         cvtColor(capMat, bgraMat, COLOR_BGR2BGRA);
-        pcs.firePropertyChange("frame", null, new ByteBufferImage(bgraMat.createBuffer(), bgraMat.cols(), bgraMat.rows()));
+        var oldFrame = frame;
+        frame = new ByteBufferImage(bgraMat.createBuffer(), bgraMat.cols(), bgraMat.rows());
+        getPropertyChangeSupport().firePropertyChange("frame", oldFrame, frame);
 
         if (procCount % procRate == 0) {
-            var classifierResults = new ArrayList<ClassifierResult>();
-            classifiers.forEach(c -> {
-                classifierResults.addAll(c.apply(capMat));
+            var oldClassifierResults = classifierResults;
+            classifierResults = new ArrayList<>();
+            getClassifiers().forEach(c -> {
+                classifierResults.addAll(c.apply(frame));
             });
-
-            pcs.firePropertyChange("classifierResults", null, classifierResults);
+            getPropertyChangeSupport().firePropertyChange("classifierResults", oldClassifierResults, classifierResults);
         }
 
+        // TODO: Implement real stats
+        var oldStatsResult = statsResult;
+        statsResult = new StatsResult(String.format("%s: Camera %d", this.getClass().getSimpleName(), camIndex),
+                "Camera OK",
+                "30",
+                String.format("%d x %d", capMat.cols(), capMat.rows()),
+                "",
+                "");
+        getPropertyChangeSupport().firePropertyChange("statsResult", oldStatsResult, statsResult);
+
         procCount++;
-    }
-
-    @Override
-    public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
-        pcs.addPropertyChangeListener(propertyName, listener);
-    }
-
-    @Override
-    public void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
-        pcs.removePropertyChangeListener(propertyName, listener);
     }
 }

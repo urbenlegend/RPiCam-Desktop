@@ -1,7 +1,8 @@
 package com.rpicam.javafx.views;
 
 import com.rpicam.javafx.viewmodels.CameraViewModel;
-import com.rpicam.detection.ClassifierResult;
+import com.rpicam.cameras.ClassifierResult;
+import com.rpicam.cameras.StatsResult;
 import com.rpicam.exceptions.UIException;
 import com.rpicam.javafx.util.SelectMode;
 import com.rpicam.javafx.util.Selectable;
@@ -13,7 +14,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -39,7 +39,6 @@ public class CameraView extends StackPane implements View, Selectable {
     private CameraViewModel viewModel = new CameraViewModel();
     private SimpleDoubleProperty frameWidth = new SimpleDoubleProperty(640);
     private SimpleDoubleProperty frameHeight = new SimpleDoubleProperty(480);
-    private SimpleListProperty<ClassifierResult> classifierResults = new SimpleListProperty<>();
     private SimpleBooleanProperty selected = new SimpleBooleanProperty();
     private SimpleObjectProperty<SelectionGroup> selectionGroup = new SimpleObjectProperty<>();
 
@@ -67,12 +66,8 @@ public class CameraView extends StackPane implements View, Selectable {
         classifierHud.heightProperty().bind(heightProperty());
         selectionBorder.widthProperty().bind(widthProperty());
         selectionBorder.heightProperty().bind(heightProperty());
+        selectionBorder.visibleProperty().bind(selected);
 
-        bindData();
-        setupEventHandlers();
-    }
-
-    private void bindData() {
         parentProperty().addListener((obs, oldParent, newParent) -> {
             if (newParent != null) {
                 viewModel.onViewAdded();
@@ -82,27 +77,30 @@ public class CameraView extends StackPane implements View, Selectable {
             }
         });
 
-        // Expose camera frame dimensions so that
-        // external code can resize CameraView easily
+        bindData();
+        setupEventHandlers();
+    }
+
+    private void bindData() {
+        // Expose camera frame dimensions so that external code can resize
+        // CameraView easily
         frameView.imageProperty().addListener((obs, oldImage, newImage) -> {
             frameWidth.set(newImage.getWidth());
             frameHeight.set(newImage.getHeight());
         });
-        // TODO: Add listener for stats results
-        // Draw classifiers whenever we get new results
-        classifierResults.addListener((obs, oldResults, newResults) -> {
-            clearClassifiers();
+        frameView.imageProperty().bind(viewModel.frameProperty());
+
+        viewModel.classifierResultsProperty().addListener((obs, oldResults, newResults) -> {
+            clearClassifierHud();
             newResults.forEach(r -> {
-                drawClassifier(r);
+                drawClassifierHud(r);
             });
         });
+        viewModel.statsResultProperty().addListener((obs, oldResults, newResults) -> {
+            clearStatsHud();
+            drawStatsHud(newResults);
+        });
 
-        selectionBorder.visibleProperty().bind(selected);
-
-        // Bind model properties
-        frameView.imageProperty().bind(viewModel.frameProperty());
-        // TODO: Bind stats results
-        classifierResults.bind(viewModel.classifierResultsProperty());
         // Show stats HUD when user enabled OR when there is no image available
         statsHud.visibleProperty().bind(viewModel.drawStatsProperty().or(frameView.imageProperty().isNull()));
         classifierHud.visibleProperty().bind(viewModel.drawDetectionProperty());
@@ -122,19 +120,61 @@ public class CameraView extends StackPane implements View, Selectable {
         });
     }
 
-    public void clearClassifiers() {
+    private void clearClassifierHud() {
         var gc = classifierHud.getGraphicsContext2D();
         gc.clearRect(0, 0, classifierHud.getWidth(), classifierHud.getHeight());
     }
 
-    public void drawClassifier(ClassifierResult result) {
+    private void drawClassifierHud(ClassifierResult result) {
         var gc = classifierHud.getGraphicsContext2D();
         gc.save();
+        resizeCanvasGC(classifierHud);
+
+        // Draw classifier bounding box
+        Color classifierColor = Color.valueOf(result.color);
+        gc.setStroke(classifierColor);
+        gc.strokeRect(result.x, result.y, result.w, result.h);
+
+        // Draw classifier label
+        gc.setTextAlign(TextAlignment.RIGHT);
+        gc.setFill(classifierColor);
+        gc.fillText(result.title, result.x + result.w, result.y + result.h + 15);
+
+        gc.restore();
+    }
+
+    private void clearStatsHud() {
+        var gc = statsHud.getGraphicsContext2D();
+        gc.clearRect(0, 0, statsHud.getWidth(), statsHud.getHeight());
+    }
+
+    private void drawStatsHud(StatsResult result) {
+        var gc = statsHud.getGraphicsContext2D();
+        gc.save();
+        resizeCanvasGC(statsHud);
+
+        int upperLeftX = 5;
+        int upperLeftY = 5;
+        int lineSpacing = 15;
+        gc.setFill(Color.valueOf("rgb(255, 255, 255)"));
+        gc.setStroke(Color.valueOf("rgb(0, 0, 0)"));
+        gc.fillText(result.cameraName, upperLeftX, upperLeftY + lineSpacing);
+        gc.fillText(result.cameraStatus, upperLeftX, upperLeftY + lineSpacing * 2);
+        gc.fillText(result.fps, upperLeftX, upperLeftY + lineSpacing * 3);
+        gc.fillText(result.resolution, upperLeftX, upperLeftY + lineSpacing * 4);
+        gc.fillText(result.networkStatus, upperLeftX, upperLeftY + lineSpacing * 5);
+        gc.fillText(result.timestamp, upperLeftX, upperLeftY + lineSpacing * 6);
+
+        gc.restore();
+    }
+
+    private void resizeCanvasGC(Canvas canvas) {
+        var gc = canvas.getGraphicsContext2D();
 
         double imageWidth = frameWidth.get();
         double imageHeight = frameHeight.get();
-        double hudWidth = classifierHud.getWidth();
-        double hudHeight = classifierHud.getHeight();
+        double hudWidth = canvas.getWidth();
+        double hudHeight = canvas.getHeight();
 
         // Calculate aspect-ratio aware scale to match ImageView behavior
         double scaleX = hudWidth / imageWidth;
@@ -149,27 +189,6 @@ public class CameraView extends StackPane implements View, Selectable {
             gc.translate(0, hudHeight / 2 - viewHeight / 2);
         }
         gc.scale(scaleFactor, scaleFactor);
-
-        // Draw classifier bounding box
-        Color boxColor = Color.valueOf(result.color);
-        gc.setStroke(boxColor);
-        gc.strokeRect(result.x, result.y, result.w, result.h);
-
-        // Draw classifier label
-        gc.setTextAlign(TextAlignment.RIGHT);
-        gc.setFill(boxColor);
-        gc.fillText(result.title, result.x + result.w, result.y + result.h + 15);
-
-        gc.restore();
-    }
-
-    private void clearStats() {
-        var gc = statsHud.getGraphicsContext2D();
-        gc.clearRect(0, 0, statsHud.getWidth(), statsHud.getHeight());
-    }
-
-    private void drawStats() {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public double getFrameWidth() {

@@ -1,7 +1,6 @@
-package com.rpicam.detection;
+package com.rpicam.cameras;
 
 public class ClassifierResult {
-
     public final int x, y, w, h;
     public final String title;
     public final String color;

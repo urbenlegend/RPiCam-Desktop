@@ -1,10 +1,14 @@
 package com.rpicam.detection;
 
+import com.rpicam.cameras.ByteBufferImage;
+import com.rpicam.cameras.ClassifierResult;
 import com.rpicam.config.OCVClassifierConfig;
 import java.util.ArrayList;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bytedeco.javacpp.BytePointer;
+import static org.bytedeco.opencv.global.opencv_core.CV_8UC4;
 import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2GRAY;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
 import static org.bytedeco.opencv.global.opencv_objdetect.CASCADE_SCALE_IMAGE;
@@ -14,7 +18,7 @@ import org.bytedeco.opencv.opencv_core.RectVector;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
 
-public class OCVClassifier implements Function<Mat, ArrayList<ClassifierResult>>, Cloneable {
+public class OCVClassifier implements Function<ByteBufferImage, ArrayList<ClassifierResult>>, Cloneable {
     private Mat grayMat = new Mat();
     private UMat gpuMat;
     private CascadeClassifier classifier;
@@ -41,9 +45,10 @@ public class OCVClassifier implements Function<Mat, ArrayList<ClassifierResult>>
     }
 
     @Override
-    public ArrayList<ClassifierResult> apply(Mat frame) {
+    public ArrayList<ClassifierResult> apply(ByteBufferImage image) {
+        var imageMat = new Mat(image.height, image.width, CV_8UC4, new BytePointer(image.buffer));
         // Convert frame to grayscale for better detection and efficiency
-        cvtColor(frame, grayMat, COLOR_BGR2GRAY);
+        cvtColor(imageMat, grayMat, COLOR_BGR2GRAY);
 
         var detectedObjs = new RectVector();
         if (gpuMat != null) {

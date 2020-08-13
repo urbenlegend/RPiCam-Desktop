@@ -8,8 +8,9 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class SceneInfo {
-    private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private ArrayList<ViewInfo> views = new ArrayList<>();
+
+    private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
     public void fromConfig(SceneConfig config) {
         for (var viewConfig : config.views) {
@@ -55,7 +56,7 @@ public class SceneInfo {
     public void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
         pcs.removePropertyChangeListener(propertyName, listener);
     }
-    
+
     public void removeAllPropertyChangeListeners() {
         for (var l : pcs.getPropertyChangeListeners()) {
             pcs.removePropertyChangeListener(l);

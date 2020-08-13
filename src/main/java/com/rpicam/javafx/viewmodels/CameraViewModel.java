@@ -1,7 +1,7 @@
 package com.rpicam.javafx.viewmodels;
 
 import com.rpicam.cameras.ByteBufferImage;
-import com.rpicam.detection.ClassifierResult;
+import com.rpicam.cameras.ClassifierResult;
 import com.rpicam.scenes.ViewInfo;
 import java.util.List;
 import javafx.application.Platform;
@@ -13,23 +13,26 @@ import javafx.scene.image.PixelBuffer;
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.WritableImage;
 import com.rpicam.cameras.CameraWorker;
+import com.rpicam.cameras.StatsResult;
 import com.rpicam.javafx.App;
 import com.rpicam.javafx.util.ViewModel;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ListProperty;
+import javafx.beans.property.ReadOnlyListProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
 public class CameraViewModel implements ViewModel {
     private ViewInfo viewInfo;
     private CameraWorker camera;
+
     private PropertyChangeListener cameraClassifierListener;
     private PropertyChangeListener cameraFrameListener;
-
+    private PropertyChangeListener cameraStatsListener;
     private SimpleObjectProperty<Image> frame = new SimpleObjectProperty<>();
     private SimpleListProperty<ClassifierResult> classifierResults = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private SimpleObjectProperty<StatsResult> statsResult = new SimpleObjectProperty<>();
     private SimpleBooleanProperty drawDetection = new SimpleBooleanProperty();
     private SimpleBooleanProperty drawStats = new SimpleBooleanProperty();
 
@@ -42,12 +45,9 @@ public class CameraViewModel implements ViewModel {
 
     @Override
     public void onViewAdded() {
-        cameraClassifierListener = event -> {
-            var results = (ArrayList<ClassifierResult>) event.getNewValue();
-            Platform.runLater(() -> {
-                classifierResults.setAll(results);
-            });
-        };
+        // NOTE: Camera listeners are called from the camera thread rather than
+        // the UI thread so use Platform.runLater() to avoid updating UI from a
+        // non-JavaFX thread
         cameraFrameListener = event -> {
             var image = (ByteBufferImage) event.getNewValue();
             var jfxImage = wrapByteBufferImage(image);
@@ -55,9 +55,22 @@ public class CameraViewModel implements ViewModel {
                 frame.set(jfxImage);
             });
         };
+        cameraClassifierListener = event -> {
+            var results = (ArrayList<ClassifierResult>) event.getNewValue();
+            Platform.runLater(() -> {
+                classifierResults.setAll(results);
+            });
+        };
+        cameraStatsListener = event -> {
+            var stats = (StatsResult) event.getNewValue();
+            Platform.runLater(() -> {
+                statsResult.set(stats);
+            });
+        };
 
-        camera.addPropertyChangeListener("classifierResults", cameraClassifierListener);
         camera.addPropertyChangeListener("frame", cameraFrameListener);
+        camera.addPropertyChangeListener("classifierResults", cameraClassifierListener);
+        camera.addPropertyChangeListener("statsResult", cameraStatsListener);
     }
 
     @Override
@@ -71,15 +84,23 @@ public class CameraViewModel implements ViewModel {
     }
 
     private Image wrapByteBufferImage(ByteBufferImage image) {
-        return new WritableImage(new PixelBuffer<>(image.getWidth(), image.getHeight(), image.getBuffer(), PixelFormat.getByteBgraPreInstance()));
+        return new WritableImage(new PixelBuffer<>(image.width, image.height, image.buffer, PixelFormat.getByteBgraPreInstance()));
     }
 
     public List<ClassifierResult> getClassifierResults() {
         return classifierResults.get();
     }
 
-    public ListProperty<ClassifierResult> classifierResultsProperty() {
+    public ReadOnlyListProperty<ClassifierResult> classifierResultsProperty() {
         return classifierResults;
+    }
+
+    public StatsResult getStatsResult() {
+        return statsResult.get();
+    }
+
+    public ReadOnlyObjectProperty<StatsResult> statsResultProperty() {
+        return statsResult;
     }
 
     public Image getFrame() {

@@ -72,24 +72,15 @@ public class CameraManager {
     }
 
     public UUID addCamera(CameraWorker camera) {
-        UUID cameraUUID = UUID.randomUUID();
+        var cameraUUID = UUID.randomUUID();
         addCamera(camera, cameraUUID);
         return cameraUUID;
     }
 
     public void addCamera(CameraWorker camera, UUID cameraUUID) {
-        // TODO: Move classifier adding elsewhere
-        if (camera instanceof OCVLocalCamera) {
-            var ocvCamera = (OCVLocalCamera) camera;
-            for (var c : classifiers) {
-                ocvCamera.addClassifier(c.clone());
-            }
-        }
-        else if (camera instanceof VlcjCamera) {
-            var vlcjCamera = (VlcjCamera) camera;
-            for (var c : classifiers) {
-                vlcjCamera.addClassifier(c.clone());
-            }
+        // TODO: Consider moving classifier adding elsewhere
+        for (var c : classifiers) {
+            camera.addClassifier(c.clone());
         }
 
         cameras.put(cameraUUID, camera);

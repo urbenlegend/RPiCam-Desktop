@@ -11,20 +11,22 @@ import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.beans.property.ReadOnlyListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 
 public class CamerasPageModel implements ViewModel {
     private SceneInfo scene;
+
     private PropertyChangeListener scenePropertyListener;
-    
     private SimpleListProperty<ViewInfo> views = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     public void init(SceneInfo aScene) {
         scene = aScene;
     }
-    
+
     @Override
     public void onViewAdded() {
         views.setAll(scene.getViews());
@@ -33,7 +35,7 @@ public class CamerasPageModel implements ViewModel {
         };
         scene.addPropertyChangeListener("views", scenePropertyListener);
     }
-    
+
     @Override
     public void onViewRemoved() {
         scene.removePropertyChangeListener("views", scenePropertyListener);
@@ -57,7 +59,7 @@ public class CamerasPageModel implements ViewModel {
         }
         catch (Exception ex) {
             // TODO: Display error dialog
-            ex.printStackTrace();
+            Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed to add camera", ex);
         }
     }
 
@@ -87,7 +89,7 @@ public class CamerasPageModel implements ViewModel {
 
         return null;
     }
-    
+
     public void removeCameraByViewInfo(ViewInfo view) {
         scene.removeView(view);
         var cameraManager = App.cameraManager();
