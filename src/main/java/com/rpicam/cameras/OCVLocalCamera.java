@@ -112,7 +112,7 @@ public class OCVLocalCamera extends CameraWorker {
         pcs.firePropertyChange("frame", null, frame);
 
         if (procCount % procRate == 0) {
-            var classifierResults = new ArrayList<>();
+            var classifierResults = new ArrayList<ClassifierResult>();
             getClassifiers().forEach(c -> {
                 classifierResults.addAll(c.apply(frame));
             });

@@ -7,6 +7,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Font?>
 
 <fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="0.0" minWidth="0.0" stylesheets="@cameraview.css" type="StackPane" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
@@ -16,12 +17,24 @@
          <children>
             <VBox layoutX="15.0" layoutY="15.0" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="15.0">
                <children>
-                  <Label fx:id="cameraNameLabel" text="Camera Name" />
-                  <Label fx:id="videoQualityLabel" text="Video Quality" />
-                  <Label fx:id="cameraStatusLabel" text="Camera Status" />
+                  <Label fx:id="cameraNameLabel" text="Camera Name">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font></Label>
+                  <Label fx:id="videoQualityLabel" text="Video Quality">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font></Label>
+                  <Label fx:id="cameraStatusLabel" text="Camera Status">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font></Label>
                </children>
             </VBox>
-            <Label fx:id="timestampLabel" text="Timestamp" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0" />
+            <Label fx:id="timestampLabel" text="Timestamp" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font></Label>
          </children>
       </AnchorPane>
       <Rectangle fx:id="selectionBorder" fill="#ffffff00" height="480.0" stroke="#00a2d3" strokeType="INSIDE" strokeWidth="5.0" width="640.0" />
