@@ -10,7 +10,7 @@ import java.util.function.Function;
 
 public abstract class CameraWorker {
     private List<Function<ByteBufferImage, ArrayList<ClassifierResult>>> classifiers = Collections.synchronizedList(new ArrayList<>());
-    private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+    private transient PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
     public abstract OCVCameraConfig toConfig();
 

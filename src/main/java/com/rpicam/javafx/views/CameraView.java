@@ -2,7 +2,6 @@ package com.rpicam.javafx.views;
 
 import com.rpicam.javafx.viewmodels.CameraViewModel;
 import com.rpicam.cameras.ClassifierResult;
-import com.rpicam.cameras.StatsResult;
 import com.rpicam.exceptions.UIException;
 import com.rpicam.javafx.util.SelectMode;
 import com.rpicam.javafx.util.Selectable;
@@ -18,9 +17,11 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -30,9 +31,17 @@ public class CameraView extends StackPane implements View, Selectable {
     @FXML
     private ImageView frameView;
     @FXML
-    private Canvas statsHud;
-    @FXML
     private Canvas classifierHud;
+    @FXML
+    private AnchorPane statsHud;
+    @FXML
+    private Label cameraNameLabel;
+    @FXML
+    private Label videoQualityLabel;
+    @FXML
+    private Label cameraStatusLabel;
+    @FXML
+    private Label timestampLabel;
     @FXML
     private Rectangle selectionBorder;
 
@@ -60,8 +69,6 @@ public class CameraView extends StackPane implements View, Selectable {
         // Make all the components have the same size as the main component
         frameView.fitWidthProperty().bind(widthProperty());
         frameView.fitHeightProperty().bind(heightProperty());
-        statsHud.widthProperty().bind(widthProperty());
-        statsHud.heightProperty().bind(heightProperty());
         classifierHud.widthProperty().bind(widthProperty());
         classifierHud.heightProperty().bind(heightProperty());
         selectionBorder.widthProperty().bind(widthProperty());
@@ -96,10 +103,10 @@ public class CameraView extends StackPane implements View, Selectable {
                 drawClassifierHud(r);
             });
         });
-        viewModel.statsResultProperty().addListener((obs, oldResults, newResults) -> {
-            clearStatsHud();
-            drawStatsHud(newResults);
-        });
+        cameraNameLabel.textProperty().bind(viewModel.cameraNameProperty());
+        videoQualityLabel.textProperty().bind(viewModel.videoQualityProperty());
+        cameraStatusLabel.textProperty().bind(viewModel.cameraStatusProperty());
+        timestampLabel.textProperty().bind(viewModel.timestampProperty());
 
         // Show stats HUD when user enabled OR when there is no image available
         statsHud.visibleProperty().bind(viewModel.drawStatsProperty().or(frameView.imageProperty().isNull()));
@@ -139,31 +146,6 @@ public class CameraView extends StackPane implements View, Selectable {
         gc.setTextAlign(TextAlignment.RIGHT);
         gc.setFill(classifierColor);
         gc.fillText(result.title, result.x + result.w, result.y + result.h + 15);
-
-        gc.restore();
-    }
-
-    private void clearStatsHud() {
-        var gc = statsHud.getGraphicsContext2D();
-        gc.clearRect(0, 0, statsHud.getWidth(), statsHud.getHeight());
-    }
-
-    private void drawStatsHud(StatsResult result) {
-        var gc = statsHud.getGraphicsContext2D();
-        gc.save();
-        resizeCanvasGC(statsHud);
-
-        int upperLeftX = 5;
-        int upperLeftY = 5;
-        int lineSpacing = 15;
-        gc.setFill(Color.valueOf("rgb(255, 255, 255)"));
-        gc.setStroke(Color.valueOf("rgb(0, 0, 0)"));
-        gc.fillText(result.cameraName, upperLeftX, upperLeftY + lineSpacing);
-        gc.fillText(result.cameraStatus, upperLeftX, upperLeftY + lineSpacing * 2);
-        gc.fillText(result.fps, upperLeftX, upperLeftY + lineSpacing * 3);
-        gc.fillText(result.resolution, upperLeftX, upperLeftY + lineSpacing * 4);
-        gc.fillText(result.networkStatus, upperLeftX, upperLeftY + lineSpacing * 5);
-        gc.fillText(result.timestamp, upperLeftX, upperLeftY + lineSpacing * 6);
 
         gc.restore();
     }

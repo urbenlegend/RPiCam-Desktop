@@ -4,6 +4,9 @@ import com.rpicam.config.OCVCameraConfig;
 import com.rpicam.config.OCVLocalCameraConfig;
 import com.rpicam.exceptions.ConfigException;
 import com.rpicam.exceptions.VideoIOException;
+import java.beans.PropertyChangeSupport;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -29,10 +32,6 @@ public class OCVLocalCamera extends CameraWorker {
     private ScheduledExecutorService schedulePool;
     private final Mat capMat = new Mat();
     private final Mat bgraMat = new Mat();
-
-    private ByteBufferImage frame;
-    private StatsResult statsResult;
-    private ArrayList<ClassifierResult> classifierResults;
 
     @Override
     public OCVLocalCameraConfig toConfig() {
@@ -108,28 +107,24 @@ public class OCVLocalCamera extends CameraWorker {
         }
 
         cvtColor(capMat, bgraMat, COLOR_BGR2BGRA);
-        var oldFrame = frame;
-        frame = new ByteBufferImage(bgraMat.createBuffer(), bgraMat.cols(), bgraMat.rows());
-        getPropertyChangeSupport().firePropertyChange("frame", oldFrame, frame);
+        var frame = new ByteBufferImage(bgraMat.createBuffer(), bgraMat.cols(), bgraMat.rows());
+        PropertyChangeSupport pcs = getPropertyChangeSupport();
+        pcs.firePropertyChange("frame", null, frame);
 
         if (procCount % procRate == 0) {
-            var oldClassifierResults = classifierResults;
-            classifierResults = new ArrayList<>();
+            var classifierResults = new ArrayList<>();
             getClassifiers().forEach(c -> {
                 classifierResults.addAll(c.apply(frame));
             });
-            getPropertyChangeSupport().firePropertyChange("classifierResults", oldClassifierResults, classifierResults);
+            pcs.firePropertyChange("classifierResults", null, classifierResults);
         }
 
-        // TODO: Implement real stats
-        var oldStatsResult = statsResult;
-        statsResult = new StatsResult(String.format("%s: Camera %d", this.getClass().getSimpleName(), camIndex),
-                "Camera OK",
-                "30",
-                String.format("%d x %d", capMat.cols(), capMat.rows()),
-                "",
-                "");
-        getPropertyChangeSupport().firePropertyChange("statsResult", oldStatsResult, statsResult);
+        // Fire off stat changes
+        // TODO: Implement proper stats generation
+        pcs.firePropertyChange("cameraName", null, String.format("%s: Camera %d", this.getClass().getSimpleName(), camIndex));
+        pcs.firePropertyChange("videoQuality", null, String.format("%d x %d @ %d fps", capMat.cols(), capMat.rows(), 30));
+        pcs.firePropertyChange("cameraStatus", null, "Camera OK");
+        pcs.firePropertyChange("timestamp", null, LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
         procCount++;
     }

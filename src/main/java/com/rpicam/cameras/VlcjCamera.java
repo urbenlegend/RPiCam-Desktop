@@ -3,7 +3,10 @@ package com.rpicam.cameras;
 import com.rpicam.config.OCVCameraConfig;
 import com.rpicam.config.VlcjCameraConfig;
 import com.rpicam.exceptions.ConfigException;
+import java.beans.PropertyChangeSupport;
 import java.nio.ByteBuffer;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,10 +27,6 @@ public class VlcjCamera extends CameraWorker {
     private String url;
     private int procRate;
     private int procCount = 0;
-
-    private ByteBufferImage frame;
-    private StatsResult statsResult;
-    private ArrayList<ClassifierResult> classifierResults;
 
     @Override
     public VlcjCameraConfig toConfig() {
@@ -76,28 +75,24 @@ public class VlcjCamera extends CameraWorker {
     }
 
     private void processFrame(ByteBuffer buffer, int width, int height) {
-        var oldFrame = frame;
-        frame = new ByteBufferImage(buffer, width, height);
-        getPropertyChangeSupport().firePropertyChange("frame", oldFrame, frame);
+        var frame = new ByteBufferImage(buffer, width, height);
+        PropertyChangeSupport pcs = getPropertyChangeSupport();
+        pcs.firePropertyChange("frame", null, frame);
 
         if (procCount % procRate == 0) {
-            var oldClassifierResults = classifierResults;
-            classifierResults = new ArrayList<>();
+            var classifierResults = new ArrayList<>();
             getClassifiers().forEach(c -> {
                 classifierResults.addAll(c.apply(frame));
             });
-            getPropertyChangeSupport().firePropertyChange("classifierResults", oldClassifierResults, classifierResults);
+            pcs.firePropertyChange("classifierResults", null, classifierResults);
         }
 
-        // TODO: Implement real stats
-        var oldStatsResult = statsResult;
-        statsResult = new StatsResult(String.format("%s: %s", this.getClass().getSimpleName(), url),
-                "Camera OK",
-                "30",
-                String.format("%d x %d", width, height),
-                "",
-                "");
-        getPropertyChangeSupport().firePropertyChange("statsResult", oldStatsResult, statsResult);
+        // Fire off stat changes
+        // TODO: Implement proper stats generation
+        pcs.firePropertyChange("cameraName", null, String.format("%s: %s", this.getClass().getSimpleName(), url));
+        pcs.firePropertyChange("videoQuality", null, String.format("%d x %d @ %d fps", width, height, 30));
+        pcs.firePropertyChange("cameraStatus", null, "Camera OK");
+        pcs.firePropertyChange("timestamp", null, LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
         procCount++;
     }

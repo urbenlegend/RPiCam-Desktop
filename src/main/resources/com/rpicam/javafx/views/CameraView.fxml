@@ -1,15 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Rectangle?>
 
-<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="0.0" minWidth="0.0" type="StackPane" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="0.0" minWidth="0.0" stylesheets="@cameraview.css" type="StackPane" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <ImageView fx:id="frameView" fitHeight="480.0" fitWidth="640.0" pickOnBounds="true" preserveRatio="true" />
       <Canvas fx:id="classifierHud" height="480.0" width="640.0" />
-      <Canvas fx:id="statsHud" height="480.0" width="640.0" />
+      <AnchorPane fx:id="statsHud">
+         <children>
+            <VBox layoutX="15.0" layoutY="15.0" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="15.0">
+               <children>
+                  <Label fx:id="cameraNameLabel" text="Camera Name" />
+                  <Label fx:id="videoQualityLabel" text="Video Quality" />
+                  <Label fx:id="cameraStatusLabel" text="Camera Status" />
+               </children>
+            </VBox>
+            <Label fx:id="timestampLabel" text="Timestamp" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0" />
+         </children>
+      </AnchorPane>
       <Rectangle fx:id="selectionBorder" fill="#ffffff00" height="480.0" stroke="#00a2d3" strokeType="INSIDE" strokeWidth="5.0" width="640.0" />
    </children>
 </fx:root>

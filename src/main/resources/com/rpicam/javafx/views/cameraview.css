@@ -1,0 +1,5 @@
+.label .text {
+    -fx-fill: white;
+    -fx-stroke: black;
+    -fx-stroke-width: 0.5px;
+}

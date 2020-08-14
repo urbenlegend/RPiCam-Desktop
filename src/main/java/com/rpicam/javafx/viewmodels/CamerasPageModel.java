@@ -20,8 +20,8 @@ import javafx.collections.FXCollections;
 public class CamerasPageModel implements ViewModel {
     private SceneInfo scene;
 
-    private PropertyChangeListener scenePropertyListener;
     private SimpleListProperty<ViewInfo> views = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private PropertyChangeListener scenePropertyListener;
 
     public void init(SceneInfo aScene) {
         scene = aScene;

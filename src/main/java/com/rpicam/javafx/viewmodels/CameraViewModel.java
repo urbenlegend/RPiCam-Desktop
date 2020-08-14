@@ -13,7 +13,6 @@ import javafx.scene.image.PixelBuffer;
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.WritableImage;
 import com.rpicam.cameras.CameraWorker;
-import com.rpicam.cameras.StatsResult;
 import com.rpicam.javafx.App;
 import com.rpicam.javafx.util.ViewModel;
 import java.beans.PropertyChangeListener;
@@ -22,19 +21,27 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyListProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 public class CameraViewModel implements ViewModel {
     private ViewInfo viewInfo;
     private CameraWorker camera;
 
-    private PropertyChangeListener cameraClassifierListener;
-    private PropertyChangeListener cameraFrameListener;
-    private PropertyChangeListener cameraStatsListener;
     private SimpleObjectProperty<Image> frame = new SimpleObjectProperty<>();
     private SimpleListProperty<ClassifierResult> classifierResults = new SimpleListProperty<>(FXCollections.observableArrayList());
-    private SimpleObjectProperty<StatsResult> statsResult = new SimpleObjectProperty<>();
     private SimpleBooleanProperty drawDetection = new SimpleBooleanProperty();
     private SimpleBooleanProperty drawStats = new SimpleBooleanProperty();
+    private SimpleStringProperty cameraName = new SimpleStringProperty();
+    private SimpleStringProperty videoQuality = new SimpleStringProperty();
+    private SimpleStringProperty cameraStatus = new SimpleStringProperty();
+    private SimpleStringProperty timestamp = new SimpleStringProperty();
+    private PropertyChangeListener cameraFrameListener;
+    private PropertyChangeListener cameraClassifierListener;
+    private PropertyChangeListener cameraNameListener;
+    private PropertyChangeListener videoQualityListener;
+    private PropertyChangeListener cameraStatusListener;
+    private PropertyChangeListener timestampListener;
 
     public void init(ViewInfo info) {
         viewInfo = info;
@@ -61,22 +68,47 @@ public class CameraViewModel implements ViewModel {
                 classifierResults.setAll(results);
             });
         };
-        cameraStatsListener = event -> {
-            var stats = (StatsResult) event.getNewValue();
+        cameraNameListener = event -> {
+            var name = (String) event.getNewValue();
             Platform.runLater(() -> {
-                statsResult.set(stats);
+                cameraName.set(name);
+            });
+        };
+        videoQualityListener = event -> {
+            var quality = (String) event.getNewValue();
+            Platform.runLater(() -> {
+                videoQuality.set(quality);
+            });
+        };
+        cameraStatusListener = event -> {
+            var status = (String) event.getNewValue();
+            Platform.runLater(() -> {
+                cameraStatus.set(status);
+            });
+        };
+        timestampListener = event -> {
+            var time = (String) event.getNewValue();
+            Platform.runLater(() -> {
+                timestamp.set(time);
             });
         };
 
         camera.addPropertyChangeListener("frame", cameraFrameListener);
         camera.addPropertyChangeListener("classifierResults", cameraClassifierListener);
-        camera.addPropertyChangeListener("statsResult", cameraStatsListener);
+        camera.addPropertyChangeListener("cameraName", cameraNameListener);
+        camera.addPropertyChangeListener("videoQuality", videoQualityListener);
+        camera.addPropertyChangeListener("cameraStatus", cameraStatusListener);
+        camera.addPropertyChangeListener("timestamp", timestampListener);
     }
 
     @Override
     public void onViewRemoved() {
-        camera.removePropertyChangeListener("classifierResults", cameraClassifierListener);
         camera.removePropertyChangeListener("frame", cameraFrameListener);
+        camera.removePropertyChangeListener("classifierResults", cameraClassifierListener);
+        camera.removePropertyChangeListener("cameraName", cameraNameListener);
+        camera.removePropertyChangeListener("videoQuality", videoQualityListener);
+        camera.removePropertyChangeListener("cameraStatus", cameraStatusListener);
+        camera.removePropertyChangeListener("timestamp", timestampListener);
     }
 
     public ViewInfo getViewInfo() {
@@ -93,14 +125,6 @@ public class CameraViewModel implements ViewModel {
 
     public ReadOnlyListProperty<ClassifierResult> classifierResultsProperty() {
         return classifierResults;
-    }
-
-    public StatsResult getStatsResult() {
-        return statsResult.get();
-    }
-
-    public ReadOnlyObjectProperty<StatsResult> statsResultProperty() {
-        return statsResult;
     }
 
     public Image getFrame() {
@@ -133,5 +157,37 @@ public class CameraViewModel implements ViewModel {
 
     public BooleanProperty drawStatsProperty() {
         return drawStats;
+    }
+
+    public String getCameraName() {
+        return cameraName.get();
+    }
+
+    public StringProperty cameraNameProperty() {
+        return cameraName;
+    }
+
+    public String getVideoQuality() {
+        return videoQuality.get();
+    }
+
+    public StringProperty videoQualityProperty() {
+        return videoQuality;
+    }
+
+    public String getCameraStatus() {
+        return cameraStatus.get();
+    }
+
+    public StringProperty cameraStatusProperty() {
+        return cameraStatus;
+    }
+
+    public String getTimestamp() {
+        return timestamp.get();
+    }
+
+    public StringProperty timestampProperty() {
+        return timestamp;
     }
 }
