@@ -15,26 +15,31 @@
       <Canvas fx:id="classifierHud" height="480.0" width="640.0" />
       <AnchorPane fx:id="statsHud">
          <children>
-            <VBox layoutX="15.0" layoutY="15.0" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="15.0">
+            <VBox layoutX="15.0" layoutY="15.0" styleClass="hudBackground" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="15.0">
                <children>
-                  <Label fx:id="cameraNameLabel" text="Camera Name">
+                  <Label fx:id="cameraNameLabel" text="Camera Name" textFill="WHITE">
                      <font>
                         <Font name="System Bold" size="14.0" />
                      </font></Label>
-                  <Label fx:id="videoQualityLabel" text="Video Quality">
+                  <Label fx:id="videoQualityLabel" text="Video Quality" textFill="WHITE">
                      <font>
                         <Font name="System Bold" size="14.0" />
                      </font></Label>
-                  <Label fx:id="cameraStatusLabel" text="Camera Status">
+                  <Label fx:id="cameraStatusLabel" text="Camera Status" textFill="WHITE">
                      <font>
                         <Font name="System Bold" size="14.0" />
                      </font></Label>
                </children>
             </VBox>
-            <Label fx:id="timestampLabel" text="Timestamp" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0">
-               <font>
-                  <Font name="System Bold" size="14.0" />
-               </font></Label>
+            <VBox layoutX="15.0" layoutY="445.0" styleClass="hudBackground" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0">
+               <children>
+                  <Label fx:id="timestampLabel" text="Timestamp" textFill="WHITE">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Label>
+               </children>
+            </VBox>
          </children>
       </AnchorPane>
       <Rectangle fx:id="selectionBorder" fill="#ffffff00" height="480.0" stroke="#00a2d3" strokeType="INSIDE" strokeWidth="5.0" width="640.0" />
