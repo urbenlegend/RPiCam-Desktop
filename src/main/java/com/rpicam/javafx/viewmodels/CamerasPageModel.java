@@ -23,8 +23,8 @@ public class CamerasPageModel implements ViewModel {
     private SimpleListProperty<ViewInfo> views = new SimpleListProperty<>(FXCollections.observableArrayList());
     private PropertyChangeListener scenePropertyListener;
 
-    public void init(SceneInfo aScene) {
-        scene = aScene;
+    public CamerasPageModel() {
+        scene = App.sceneManager().getScene("_ALL_CAMERAS_");
     }
 
     @Override

@@ -48,8 +48,6 @@ public class Dashboard extends GridPane implements View {
         scenesPage = new ScenesPage();
         settingsPage = new SettingsPage();
 
-        camerasPage.getViewModel().init(viewModel.getAllCamerasScene());
-
         setupAnimations();
         showScenesPage();
     }
