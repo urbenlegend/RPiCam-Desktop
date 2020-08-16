@@ -83,6 +83,7 @@ public class VlcjCamera extends CameraWorker {
         PropertyChangeSupport pcs = getPropertyChangeSupport();
 
         try {
+            pcs.firePropertyChange("cameraName", null, String.format("%s: %s", this.getClass().getSimpleName(), url));
             var frame = new ByteBufferImage(buffer, width, height);
             pcs.firePropertyChange("frame", null, frame);
 
@@ -92,8 +93,8 @@ public class VlcjCamera extends CameraWorker {
                     classifierResults.addAll(c.apply(frame));
                 });
                 pcs.firePropertyChange("classifierResults", null, classifierResults);
-
             }
+
             // Calculate FPS
             var currentTime = LocalTime.now();
             var fpsCheckDuration = Duration.between(fpsLastCheck, currentTime);
@@ -102,22 +103,18 @@ public class VlcjCamera extends CameraWorker {
                 double fps = fpsFrameCount / fpsCheckSeconds;
                 pcs.firePropertyChange("videoQuality", null, String.format("%d x %d @ %.2f fps", width, height, fps));
                 fpsLastCheck = currentTime;
-                fpsFrameCount = 1;
-            }
-            else {
-                fpsFrameCount++;
+                fpsFrameCount = 0;
             }
 
             // Fire off stat changes
-            pcs.firePropertyChange("cameraName", null, String.format("%s: %s", this.getClass().getSimpleName(), url));
             pcs.firePropertyChange("cameraStatus", null, "Camera OK");
             pcs.firePropertyChange("timestamp", null, LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
+            fpsFrameCount++;
             totalFrames++;
         }
         catch (Throwable t) {
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Camera failed to grab next frame!", t);
-            pcs.firePropertyChange("cameraName", null, String.format("%s: %s", this.getClass().getSimpleName(), url));
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Camera did not finishing processing the next frame!", t);
             pcs.firePropertyChange("cameraStatus", null, String.format("Camera ERROR: %s", t));
         }
     }
