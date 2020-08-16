@@ -5,7 +5,9 @@ import com.rpicam.config.VlcjCameraConfig;
 import com.rpicam.exceptions.ConfigException;
 import java.beans.PropertyChangeSupport;
 import java.nio.ByteBuffer;
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -26,7 +28,10 @@ public class VlcjCamera extends CameraWorker {
     private EmbeddedMediaPlayer player;
     private String url;
     private int procRate;
-    private int procCount = 0;
+
+    private int totalFrames = 0;
+    private int fpsFrameCount = 0;
+    private LocalTime fpsLastCheck = LocalTime.now();
 
     @Override
     public VlcjCameraConfig toConfig() {
@@ -54,7 +59,7 @@ public class VlcjCamera extends CameraWorker {
         mediaPlayerFactory = new MediaPlayerFactory();
         player = mediaPlayerFactory.mediaPlayers().newEmbeddedMediaPlayer();
         player.videoSurface().set(new VlcjCameraSurface());
-        player.events().addMediaPlayerEventListener(new VlcjCameraPlayerEventListener());
+        player.events().addMediaPlayerEventListener(new VlcjCameraEventListener());
     }
 
     private void close() {
@@ -75,26 +80,46 @@ public class VlcjCamera extends CameraWorker {
     }
 
     private void processFrame(ByteBuffer buffer, int width, int height) {
-        var frame = new ByteBufferImage(buffer, width, height);
         PropertyChangeSupport pcs = getPropertyChangeSupport();
-        pcs.firePropertyChange("frame", null, frame);
 
-        if (procCount % procRate == 0) {
-            var classifierResults = new ArrayList<ClassifierResult>();
-            getClassifiers().forEach(c -> {
-                classifierResults.addAll(c.apply(frame));
-            });
-            pcs.firePropertyChange("classifierResults", null, classifierResults);
+        try {
+            var frame = new ByteBufferImage(buffer, width, height);
+            pcs.firePropertyChange("frame", null, frame);
+
+            if (totalFrames % procRate == 0) {
+                var classifierResults = new ArrayList<ClassifierResult>();
+                getClassifiers().forEach(c -> {
+                    classifierResults.addAll(c.apply(frame));
+                });
+                pcs.firePropertyChange("classifierResults", null, classifierResults);
+
+            }
+            // Calculate FPS
+            var currentTime = LocalTime.now();
+            var fpsCheckDuration = Duration.between(fpsLastCheck, currentTime);
+            double fpsCheckSeconds = fpsCheckDuration.getSeconds() + (double) fpsCheckDuration.getNano() / 1000000000;
+            if (fpsCheckSeconds >= 1) {
+                double fps = fpsFrameCount / fpsCheckSeconds;
+                pcs.firePropertyChange("videoQuality", null, String.format("%d x %d @ %.2f fps", width, height, fps));
+                fpsLastCheck = currentTime;
+                fpsFrameCount = 1;
+            }
+            else {
+                fpsFrameCount++;
+            }
+
+            // Fire off stat changes
+            pcs.firePropertyChange("cameraName", null, String.format("%s: %s", this.getClass().getSimpleName(), url));
+            pcs.firePropertyChange("cameraStatus", null, "Camera OK");
+            pcs.firePropertyChange("timestamp", null, LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+
+            totalFrames++;
         }
-
-        // Fire off stat changes
-        // TODO: Implement proper stats generation
-        pcs.firePropertyChange("cameraName", null, String.format("%s: %s", this.getClass().getSimpleName(), url));
-        pcs.firePropertyChange("videoQuality", null, String.format("%d x %d @ %d fps", width, height, 30));
-        pcs.firePropertyChange("cameraStatus", null, "Camera OK");
-        pcs.firePropertyChange("timestamp", null, LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-
-        procCount++;
+        catch (Throwable t) {
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Camera failed to grab next frame!", t);
+            pcs.firePropertyChange("cameraName", null, String.format("%s: %s", this.getClass().getSimpleName(), url));
+            pcs.firePropertyChange("cameraStatus", null, String.format("Camera ERROR: %s", t));
+        }
     }
 
     private class VlcjCameraSurface extends CallbackVideoSurface {
@@ -121,25 +146,11 @@ public class VlcjCamera extends CameraWorker {
         }
     }
 
-    private class VlcjCameraPlayerEventListener extends MediaPlayerEventAdapter {
+    private class VlcjCameraEventListener extends MediaPlayerEventAdapter {
         @Override
         public void error(MediaPlayer mediaPlayer) {
-            Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Error!");
-        }
-
-        @Override
-        public void stopped(MediaPlayer mediaPlayer) {
-            Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Stopped!");
-        }
-
-        @Override
-        public void playing(MediaPlayer mediaPlayer) {
-            Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Playing!");
-        }
-
-        @Override
-        public void opening(MediaPlayer mediaPlayer) {
-            Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Opening!");
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Error!");
+            getPropertyChangeSupport().firePropertyChange("cameraStatus", null, String.format("Camera ERROR: VlcjCameraEventListener reported an error"));
         }
     }
 }

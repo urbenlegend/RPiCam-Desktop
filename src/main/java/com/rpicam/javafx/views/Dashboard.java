@@ -54,8 +54,8 @@ public class Dashboard extends GridPane implements View {
 
     private void setupAnimations() {
         var widthProperty = getColumnConstraints().get(0).maxWidthProperty();
-        var maxWidth = getColumnConstraints().get(0).getMaxWidth();
-        var minWidth = getColumnConstraints().get(0).getMinWidth();
+        double maxWidth = getColumnConstraints().get(0).getMaxWidth();
+        double minWidth = getColumnConstraints().get(0).getMinWidth();
         var kvSideBarOpen = new KeyValue(widthProperty, maxWidth);
         var kfSideBarOpen = new KeyFrame(Duration.millis(0), kvSideBarOpen);
         var kvSideBarClosed = new KeyValue(widthProperty, minWidth);

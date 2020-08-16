@@ -5,12 +5,16 @@ import com.rpicam.config.OCVLocalCameraConfig;
 import com.rpicam.exceptions.ConfigException;
 import com.rpicam.exceptions.VideoIOException;
 import java.beans.PropertyChangeSupport;
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2BGRA;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
 import org.bytedeco.opencv.global.opencv_videoio;
@@ -27,11 +31,13 @@ public class OCVLocalCamera extends CameraWorker {
     private int heightRes;
     private int capRate;
     private int procRate;
-    private int procCount = 0;
 
     private ScheduledExecutorService schedulePool;
     private final Mat capMat = new Mat();
     private final Mat bgraMat = new Mat();
+    private int totalFrames = 0;
+    private int fpsFrameCount = 0;
+    private LocalTime fpsLastCheck = LocalTime.now();
 
     @Override
     public OCVLocalCameraConfig toConfig() {
@@ -102,30 +108,50 @@ public class OCVLocalCamera extends CameraWorker {
     }
 
     private void processFrame() {
-        if (!capture.read(capMat)) {
-            throw new VideoIOException("could not grab next frame from camera");
-        }
-
-        cvtColor(capMat, bgraMat, COLOR_BGR2BGRA);
-        var frame = new ByteBufferImage(bgraMat.createBuffer(), bgraMat.cols(), bgraMat.rows());
         PropertyChangeSupport pcs = getPropertyChangeSupport();
-        pcs.firePropertyChange("frame", null, frame);
 
-        if (procCount % procRate == 0) {
-            var classifierResults = new ArrayList<ClassifierResult>();
-            getClassifiers().forEach(c -> {
-                classifierResults.addAll(c.apply(frame));
-            });
-            pcs.firePropertyChange("classifierResults", null, classifierResults);
+        try {
+            if (!capture.read(capMat)) {
+                throw new VideoIOException("could not grab next frame from camera");
+            }
+            cvtColor(capMat, bgraMat, COLOR_BGR2BGRA);
+            var frame = new ByteBufferImage(bgraMat.createBuffer(), bgraMat.cols(), bgraMat.rows());
+
+            pcs.firePropertyChange("frame", null, frame);
+
+            if (totalFrames % procRate == 0) {
+                var classifierResults = new ArrayList<ClassifierResult>();
+                getClassifiers().forEach(c -> {
+                    classifierResults.addAll(c.apply(frame));
+                });
+                pcs.firePropertyChange("classifierResults", null, classifierResults);
+            }
+
+            // Calculate FPS
+            var currentTime = LocalTime.now();
+            var fpsCheckDuration = Duration.between(fpsLastCheck, currentTime);
+            double fpsCheckSeconds = fpsCheckDuration.getSeconds() + (double) fpsCheckDuration.getNano() / 1000000000;
+            if (fpsCheckSeconds >= 1) {
+                double fps = fpsFrameCount / fpsCheckSeconds;
+                pcs.firePropertyChange("videoQuality", null, String.format("%d x %d @ %.2f fps", capMat.cols(), capMat.rows(), fps));
+                fpsLastCheck = currentTime;
+                fpsFrameCount = 1;
+            }
+            else {
+                fpsFrameCount++;
+            }
+
+            // Fire off stat changes
+            pcs.firePropertyChange("cameraName", null, String.format("%s: Camera %d", this.getClass().getSimpleName(), camIndex));
+            pcs.firePropertyChange("cameraStatus", null, "Camera OK");
+            pcs.firePropertyChange("timestamp", null, LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+
+            totalFrames++;
         }
-
-        // Fire off stat changes
-        // TODO: Implement proper stats generation
-        pcs.firePropertyChange("cameraName", null, String.format("%s: Camera %d", this.getClass().getSimpleName(), camIndex));
-        pcs.firePropertyChange("videoQuality", null, String.format("%d x %d @ %d fps", capMat.cols(), capMat.rows(), 30));
-        pcs.firePropertyChange("cameraStatus", null, "Camera OK");
-        pcs.firePropertyChange("timestamp", null, LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-
-        procCount++;
+        catch (Throwable t) {
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Camera failed to grab next frame!", t);
+            pcs.firePropertyChange("cameraName", null, String.format("%s: Camera %d", this.getClass().getSimpleName(), camIndex));
+            pcs.firePropertyChange("cameraStatus", null, String.format("Camera ERROR: %s", t));
+        }
     }
 }
