@@ -1,5 +1,6 @@
 package com.rpicam.cameras;
 
+import com.rpicam.detection.ClassifierResult;
 import com.rpicam.config.OCVCameraConfig;
 import com.rpicam.config.OCVLocalCameraConfig;
 import com.rpicam.exceptions.ConfigException;

@@ -1,7 +1,7 @@
 package com.rpicam.javafx.views;
 
 import com.rpicam.javafx.viewmodels.CameraViewModel;
-import com.rpicam.cameras.ClassifierResult;
+import com.rpicam.detection.ClassifierResult;
 import com.rpicam.exceptions.UIException;
 import com.rpicam.javafx.util.SelectMode;
 import com.rpicam.javafx.util.Selectable;
@@ -22,6 +22,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -34,6 +35,10 @@ public class CameraView extends StackPane implements View, Selectable {
     private Canvas classifierHud;
     @FXML
     private AnchorPane statsHud;
+    @FXML
+    private HBox statsUpperLeft;
+    @FXML
+    private HBox statsLowerLeft;
     @FXML
     private Label cameraNameLabel;
     @FXML
@@ -48,6 +53,8 @@ public class CameraView extends StackPane implements View, Selectable {
     private CameraViewModel viewModel = new CameraViewModel();
     private SimpleDoubleProperty frameWidth = new SimpleDoubleProperty(640);
     private SimpleDoubleProperty frameHeight = new SimpleDoubleProperty(480);
+    private SimpleDoubleProperty scaleX = new SimpleDoubleProperty();
+    private SimpleDoubleProperty scaleY = new SimpleDoubleProperty();
     private SimpleBooleanProperty selected = new SimpleBooleanProperty();
     private SimpleObjectProperty<SelectionGroup> selectionGroup = new SimpleObjectProperty<>();
 
@@ -74,6 +81,18 @@ public class CameraView extends StackPane implements View, Selectable {
         selectionBorder.widthProperty().bind(widthProperty());
         selectionBorder.heightProperty().bind(heightProperty());
         selectionBorder.visibleProperty().bind(selected);
+
+        // Make stats HUD elements scale with CameraView size
+        scaleX.bind(widthProperty().divide(frameWidth));
+        scaleY.bind(heightProperty().divide(frameHeight));
+        statsUpperLeft.scaleXProperty().bind(scaleX);
+        statsUpperLeft.scaleYProperty().bind(scaleY);
+        statsLowerLeft.scaleXProperty().bind(scaleX);
+        statsLowerLeft.scaleYProperty().bind(scaleY);
+        statsUpperLeft.translateXProperty().bind(statsUpperLeft.widthProperty().subtract(statsUpperLeft.widthProperty().multiply(scaleX)).divide(2).negate());
+        statsUpperLeft.translateYProperty().bind(statsUpperLeft.heightProperty().subtract(statsUpperLeft.heightProperty().multiply(scaleY)).divide(2).negate());
+        statsLowerLeft.translateXProperty().bind(statsLowerLeft.widthProperty().subtract(statsLowerLeft.widthProperty().multiply(scaleX)).divide(2).negate());
+        statsLowerLeft.translateYProperty().bind(statsLowerLeft.heightProperty().subtract(statsLowerLeft.heightProperty().multiply(scaleY)).divide(2));
 
         parentProperty().addListener((obs, oldParent, newParent) -> {
             if (newParent != null) {
@@ -159,11 +178,9 @@ public class CameraView extends StackPane implements View, Selectable {
         double hudHeight = canvas.getHeight();
 
         // Calculate aspect-ratio aware scale to match ImageView behavior
-        double scaleX = hudWidth / imageWidth;
-        double scaleY = hudHeight / imageHeight;
-        double scaleFactor = Math.min(scaleX, scaleY);
+        double scaleFactor = Math.min(scaleX.get(), scaleY.get());
         // Center the HUD drawing so it draws on top of ImageView after scaling
-        if (scaleX > scaleY) {
+        if (scaleX.get() > scaleY.get()) {
             double viewWidth = imageWidth / imageHeight * hudHeight;
             gc.translate(hudWidth / 2 - viewWidth / 2, 0);
         } else {

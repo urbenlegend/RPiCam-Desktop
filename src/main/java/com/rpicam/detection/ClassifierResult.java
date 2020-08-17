@@ -1,4 +1,4 @@
-package com.rpicam.cameras;
+package com.rpicam.detection;
 
 public class ClassifierResult {
     public final int x, y, w, h;

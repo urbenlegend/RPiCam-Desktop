@@ -11,8 +11,6 @@ import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.beans.property.ReadOnlyListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
@@ -42,25 +40,18 @@ public class CamerasPageModel implements ViewModel {
     }
 
     public void addNewCamera(Map<String, String> cameraPropMap) {
+        // Add new camera to camera manager
         CameraWorker camera = createCamera(cameraPropMap);
+        UUID cameraUUID = App.cameraManager().addCamera(camera);
 
-        try {
-            // Add new camera to camera manager
-            camera.start();
-            var cameraManager = App.cameraManager();
-            UUID cameraUUID = cameraManager.addCamera(camera);
+        // Create new view for camera
+        var viewInfo = new ViewInfo();
+        viewInfo.cameraUUID = cameraUUID;
+        viewInfo.drawStats = Boolean.parseBoolean(cameraPropMap.get("drawStats"));
+        viewInfo.drawDetection = Boolean.parseBoolean(cameraPropMap.get("drawDetection"));
+        scene.addView(viewInfo);
 
-            // Create new view for camera
-            var viewInfo = new ViewInfo();
-            viewInfo.cameraUUID = cameraUUID;
-            viewInfo.drawStats = Boolean.parseBoolean(cameraPropMap.get("drawStats"));
-            viewInfo.drawDetection = Boolean.parseBoolean(cameraPropMap.get("drawDetection"));
-            scene.addView(viewInfo);
-        }
-        catch (Exception ex) {
-            // TODO: Display error dialog
-            Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed to add camera", ex);
-        }
+        camera.start();
     }
 
     public CameraWorker createCamera(Map<String, String> cameraPropMap) {

@@ -1,7 +1,6 @@
 package com.rpicam.detection;
 
 import com.rpicam.cameras.ByteBufferImage;
-import com.rpicam.cameras.ClassifierResult;
 import com.rpicam.config.OCVClassifierConfig;
 import java.util.ArrayList;
 import java.util.function.Function;

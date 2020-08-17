@@ -1,7 +1,7 @@
 package com.rpicam.javafx.viewmodels;
 
 import com.rpicam.cameras.ByteBufferImage;
-import com.rpicam.cameras.ClassifierResult;
+import com.rpicam.detection.ClassifierResult;
 import com.rpicam.scenes.ViewInfo;
 import java.util.List;
 import javafx.application.Platform;

@@ -1,5 +1,6 @@
 package com.rpicam.cameras;
 
+import com.rpicam.detection.ClassifierResult;
 import com.rpicam.config.OCVCameraConfig;
 import com.rpicam.config.VlcjCameraConfig;
 import com.rpicam.exceptions.ConfigException;
@@ -147,7 +148,9 @@ public class VlcjCamera extends CameraWorker {
         @Override
         public void error(MediaPlayer mediaPlayer) {
             Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Error!");
-            getPropertyChangeSupport().firePropertyChange("cameraStatus", null, String.format("Camera ERROR: VlcjCameraEventListener reported an error"));
+            PropertyChangeSupport pcs = getPropertyChangeSupport();
+            pcs.firePropertyChange("cameraName", null, String.format("%s: %s", this.getClass().getSimpleName(), url));
+            pcs.firePropertyChange("cameraStatus", null, String.format("Camera ERROR: VlcjCameraEventListener reported an error"));
         }
     }
 }
