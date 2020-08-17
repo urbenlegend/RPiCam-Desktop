@@ -103,8 +103,10 @@ public class OCVLocalCamera extends CameraWorker {
 
     @Override
     public void stop() {
-        schedulePool.shutdownNow();
-        schedulePool = null;
+        if (schedulePool != null) {
+            schedulePool.shutdownNow();
+            schedulePool = null;
+        }
         close();
     }
 
