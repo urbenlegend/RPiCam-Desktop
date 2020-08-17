@@ -43,15 +43,7 @@ public class CameraViewModel implements ViewModel {
     private PropertyChangeListener cameraStatusListener;
     private PropertyChangeListener timestampListener;
 
-    public void init(ViewInfo info) {
-        viewInfo = info;
-        camera = App.cameraManager().getCamera(viewInfo.cameraUUID);
-        drawDetection.set(viewInfo.drawDetection);
-        drawStats.set(viewInfo.drawStats);
-    }
-
-    @Override
-    public void onViewAdded() {
+    public CameraViewModel() {
         // NOTE: Camera listeners are called from the camera thread rather than
         // the UI thread so use Platform.runLater() to avoid updating UI from a
         // non-JavaFX thread
@@ -92,7 +84,17 @@ public class CameraViewModel implements ViewModel {
                 timestamp.set(time);
             });
         };
+    }
 
+    public void init(ViewInfo info) {
+        viewInfo = info;
+        camera = App.cameraManager().getCamera(viewInfo.cameraUUID);
+        drawDetection.set(viewInfo.drawDetection);
+        drawStats.set(viewInfo.drawStats);
+    }
+
+    @Override
+    public void onViewAdded() {
         camera.addPropertyChangeListener("frame", cameraFrameListener);
         camera.addPropertyChangeListener("classifierResults", cameraClassifierListener);
         camera.addPropertyChangeListener("cameraName", cameraNameListener);

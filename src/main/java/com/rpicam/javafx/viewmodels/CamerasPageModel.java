@@ -23,14 +23,14 @@ public class CamerasPageModel implements ViewModel {
 
     public CamerasPageModel() {
         scene = App.sceneManager().getScene("_ALL_CAMERAS_");
+        scenePropertyListener = event -> {
+            views.setAll(scene.getViews());
+        };
     }
 
     @Override
     public void onViewAdded() {
         views.setAll(scene.getViews());
-        scenePropertyListener = event -> {
-            views.setAll(scene.getViews());
-        };
         scene.addPropertyChangeListener("views", scenePropertyListener);
     }
 
