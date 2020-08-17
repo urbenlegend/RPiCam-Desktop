@@ -31,7 +31,7 @@ public class OCVLocalCamera extends CameraWorker {
     private int widthRes;
     private int heightRes;
     private int capRate;
-    private int procRate;
+    private int procInterval;
 
     private ScheduledExecutorService schedulePool;
     private final Mat capMat = new Mat();
@@ -48,7 +48,7 @@ public class OCVLocalCamera extends CameraWorker {
         conf.widthRes = widthRes;
         conf.heightRes = heightRes;
         conf.capRate = capRate;
-        conf.procRate = procRate;
+        conf.procInterval = procInterval;
 
         return conf;
     }
@@ -65,7 +65,7 @@ public class OCVLocalCamera extends CameraWorker {
         widthRes = localConf.widthRes;
         heightRes = localConf.heightRes;
         capRate = localConf.capRate;
-        procRate = localConf.procRate;
+        procInterval = localConf.procInterval;
     }
 
     private void open() {
@@ -81,7 +81,7 @@ public class OCVLocalCamera extends CameraWorker {
             throw new VideoIOException("Could not open camera " + camIndex);
         }
 
-        if (widthRes > 0 && heightRes > 0) {
+        if (widthRes > -1 && heightRes > -1) {
             capture.set(CAP_PROP_FRAME_WIDTH, widthRes);
             capture.set(CAP_PROP_FRAME_HEIGHT, heightRes);
         }
@@ -122,7 +122,7 @@ public class OCVLocalCamera extends CameraWorker {
             var frame = new ByteBufferImage(bgraMat.createBuffer(), bgraMat.cols(), bgraMat.rows());
             pcs.firePropertyChange("frame", null, frame);
 
-            if (totalFrames % procRate == 0) {
+            if (totalFrames % procInterval == 0) {
                 var classifierResults = new ArrayList<ClassifierResult>();
                 getClassifiers().forEach(c -> {
                     classifierResults.addAll(c.apply(frame));

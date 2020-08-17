@@ -41,7 +41,7 @@ public class CameraSettings extends VBox implements View {
     @FXML
     private TextField capRateBox;
     @FXML
-    private TextField procRateBox;
+    private TextField procIntervalBox;
     @FXML
     private ListView<String> classifierView;
     @FXML
@@ -102,18 +102,18 @@ public class CameraSettings extends VBox implements View {
         var selectedSourceType = sourceTg.selectedToggleProperty().get();
         if (selectedSourceType == localRadioBtn) {
             resultsMap.put("type", "local");
-            resultsMap.put("camIndex", cameraSelectBox.getValue().toString());
+            resultsMap.put("camIndex", cameraSelectBox.getValue());
 
         }
         else if (selectedSourceType == urlRadioBtn) {
             resultsMap.put("type", "path");
             resultsMap.put("url", urlTextBox.getText());
         }
-        resultsMap.put("captureApi", captureApiSelectBox.getValue().toString());
+        resultsMap.put("captureApi", captureApiSelectBox.getValue());
         resultsMap.put("widthRes", widthBox.getText());
         resultsMap.put("heightRes", heightBox.getText());
         resultsMap.put("capRate", capRateBox.getText());
-        resultsMap.put("procRate", procRateBox.getText());
+        resultsMap.put("procInterval", procIntervalBox.getText());
         resultsMap.put("drawDetection", Boolean.toString(detectBoxToggle.isSelected()));
         resultsMap.put("drawStats", Boolean.toString(statsToggle.isSelected()));
         results.set(resultsMap);

@@ -6,6 +6,7 @@ module com.rpicam {
     requires com.google.gson;
     requires org.controlsfx.controls;
     requires uk.co.caprica.vlcj;
+    requires org.apache.commons.lang3;
 
     opens com.rpicam.javafx.views to javafx.fxml;
     exports com.rpicam.javafx to javafx.graphics;

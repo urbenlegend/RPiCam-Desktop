@@ -6,7 +6,7 @@ public class OCVLocalCameraConfig extends OCVCameraConfig {
     public int widthRes;
     public int heightRes;
     public int capRate;
-    public int procRate;
+    public int procInterval;
 
     public OCVLocalCameraConfig() {
         type = "local";

@@ -28,7 +28,7 @@ public class VlcjCamera extends CameraWorker {
     private MediaPlayerFactory mediaPlayerFactory;
     private EmbeddedMediaPlayer player;
     private String url;
-    private int procRate;
+    private int procInterval;
 
     private int totalFrames = 0;
     private int fpsFrameCount = 0;
@@ -38,7 +38,7 @@ public class VlcjCamera extends CameraWorker {
     public VlcjCameraConfig toConfig() {
         var conf = new VlcjCameraConfig();
         conf.url = url;
-        conf.procRate = procRate;
+        conf.procInterval = procInterval;
 
         return conf;
     }
@@ -52,7 +52,7 @@ public class VlcjCamera extends CameraWorker {
         var localConf = (VlcjCameraConfig) conf;
 
         url = localConf.url;
-        procRate = localConf.procRate;
+        procInterval = localConf.procInterval;
     }
 
     private void open() {
@@ -88,7 +88,7 @@ public class VlcjCamera extends CameraWorker {
             var frame = new ByteBufferImage(buffer, width, height);
             pcs.firePropertyChange("frame", null, frame);
 
-            if (totalFrames % procRate == 0) {
+            if (totalFrames % procInterval == 0) {
                 var classifierResults = new ArrayList<ClassifierResult>();
                 getClassifiers().forEach(c -> {
                     classifierResults.addAll(c.apply(frame));
@@ -147,10 +147,18 @@ public class VlcjCamera extends CameraWorker {
     private class VlcjCameraEventListener extends MediaPlayerEventAdapter {
         @Override
         public void error(MediaPlayer mediaPlayer) {
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Error!");
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "VlcjCamera reported an error");
             PropertyChangeSupport pcs = getPropertyChangeSupport();
             pcs.firePropertyChange("cameraName", null, String.format("%s: %s", this.getClass().getSimpleName(), url));
             pcs.firePropertyChange("cameraStatus", null, String.format("Camera ERROR: VlcjCameraEventListener reported an error"));
+        }
+
+        @Override
+        public void stopped(MediaPlayer mediaPlayer) {
+            Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "VlcjCamera stopped");
+            PropertyChangeSupport pcs = getPropertyChangeSupport();
+            pcs.firePropertyChange("cameraName", null, String.format("%s: %s", this.getClass().getSimpleName(), url));
+            pcs.firePropertyChange("cameraStatus", null, String.format("Camera STOPPED: Source terminated"));
         }
     }
 }

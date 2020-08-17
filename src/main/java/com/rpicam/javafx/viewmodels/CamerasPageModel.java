@@ -1,5 +1,6 @@
 package com.rpicam.javafx.viewmodels;
 
+import com.rpicam.Constants;
 import com.rpicam.javafx.util.ViewModel;
 import com.rpicam.scenes.SceneInfo;
 import com.rpicam.scenes.ViewInfo;
@@ -14,6 +15,7 @@ import java.util.UUID;
 import javafx.beans.property.ReadOnlyListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
+import org.apache.commons.lang3.math.NumberUtils;
 
 public class CamerasPageModel implements ViewModel {
     private SceneInfo scene;
@@ -61,10 +63,10 @@ public class CamerasPageModel implements ViewModel {
                 var config = newCamera.toConfig();
                 config.camIndex = Integer.parseInt(cameraPropMap.get("camIndex"));
                 config.captureApi = cameraPropMap.get("captureApi");
-                config.widthRes = Integer.parseInt(cameraPropMap.get("widthRes"));
-                config.heightRes = Integer.parseInt(cameraPropMap.get("heightRes"));
-                config.capRate = 1000 / Integer.parseInt(cameraPropMap.get("capRate"));
-                config.procRate = Integer.parseInt(cameraPropMap.get("procRate"));
+                config.widthRes = NumberUtils.toInt(cameraPropMap.get("widthRes"), 0);
+                config.heightRes = NumberUtils.toInt(cameraPropMap.get("heightRes"), 0);
+                config.capRate = 1000 / NumberUtils.toInt(cameraPropMap.get("capRate"), Constants.CAP_RATE_DEFAULT);
+                config.procInterval = NumberUtils.toInt(cameraPropMap.get("procInterval"), Constants.PROC_INTERVAL_DEFAULT);
                 newCamera.fromConfig(config);
                 return newCamera;
             }
@@ -72,7 +74,7 @@ public class CamerasPageModel implements ViewModel {
                 var newCamera = new VlcjCamera();
                 var config = newCamera.toConfig();
                 config.url = cameraPropMap.get("url");
-                config.procRate = Integer.parseInt(cameraPropMap.get("procRate"));
+                config.procInterval = NumberUtils.toInt(cameraPropMap.get("procInterval"), Constants.PROC_INTERVAL_DEFAULT);
                 newCamera.fromConfig(config);
                 return newCamera;
             }
