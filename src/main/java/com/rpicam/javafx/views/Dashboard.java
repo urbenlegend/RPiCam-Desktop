@@ -76,6 +76,9 @@ public class Dashboard extends GridPane implements View {
     }
 
     private void setPage(Parent page) {
+        if (currentPage == page) {
+            return;
+        }
         if (currentPage != null) {
             getChildren().remove(currentPage);
         }
