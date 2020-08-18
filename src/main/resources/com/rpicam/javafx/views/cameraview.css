@@ -1,3 +1,7 @@
 .hudBackground {
     -fx-background-color: rgba(0, 0, 0, 0.5);
 }
+
+.noVideoPane {
+    -fx-background-color: black;
+}

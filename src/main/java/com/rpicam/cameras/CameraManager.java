@@ -9,6 +9,8 @@ import com.rpicam.javafx.App;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CameraManager {
     private HashMap<UUID, CameraWorker> cameras = new HashMap<>();
@@ -61,13 +63,23 @@ public class CameraManager {
 
     public void startCameras() {
         for (var c : cameras.values()) {
-            c.start();
+            try {
+                c.start();
+            }
+            catch (Throwable t) {
+                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Camera failed to start", t);
+            }
         }
     }
 
     public void stopCameras() {
         for (var c : cameras.values()) {
-            c.stop();
+            try {
+                c.stop();
+            }
+            catch (Throwable t) {
+                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Camera failed to stop", t);
+            }
         }
     }
 

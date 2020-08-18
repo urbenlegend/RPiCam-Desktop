@@ -23,6 +23,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -30,6 +31,11 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.TextAlignment;
 
 public class CameraView extends StackPane implements View, Selectable {
+    public static final int DEFAULT_WIDTH = 640;
+    public static final int DEFAULT_HEIGHT = 480;
+
+    @FXML
+    private BorderPane noVideoPane;
     @FXML
     private ImageView frameView;
     @FXML
@@ -52,11 +58,8 @@ public class CameraView extends StackPane implements View, Selectable {
     private Rectangle selectionBorder;
 
     private CameraViewModel viewModel = new CameraViewModel();
-    private SimpleDoubleProperty frameWidth = new SimpleDoubleProperty(640);
-    private SimpleDoubleProperty frameHeight = new SimpleDoubleProperty(480);
-    private SimpleDoubleProperty scaleX = new SimpleDoubleProperty();
-    private SimpleDoubleProperty scaleY = new SimpleDoubleProperty();
-    private SimpleDoubleProperty scaleFactor = new SimpleDoubleProperty();
+    private SimpleDoubleProperty frameWidth = new SimpleDoubleProperty(DEFAULT_WIDTH);
+    private SimpleDoubleProperty frameHeight = new SimpleDoubleProperty(DEFAULT_HEIGHT);
     private SimpleBooleanProperty selected = new SimpleBooleanProperty();
     private SimpleObjectProperty<SelectionGroup> selectionGroup = new SimpleObjectProperty<>();
 
@@ -84,20 +87,20 @@ public class CameraView extends StackPane implements View, Selectable {
         selectionBorder.heightProperty().bind(heightProperty());
         selectionBorder.visibleProperty().bind(selected);
 
-        // Calculate scale factors for scaling HUDs
-        scaleX.bind(widthProperty().divide(frameWidth));
-        scaleY.bind(heightProperty().divide(frameHeight));
-        scaleFactor.bind(Bindings.min(scaleX, scaleY));
+        // Calculate scale factors for scaling stats HUD. Scale by
+        // default width and height so that it isn't too small for HD
+        var statsHudScale = new SimpleDoubleProperty();
+        statsHudScale.bind(Bindings.min(widthProperty().divide(DEFAULT_WIDTH), heightProperty().divide(DEFAULT_HEIGHT)));
 
         // Make stats HUD elements scale with CameraView size
-        statsUpperLeft.scaleXProperty().bind(scaleFactor);
-        statsUpperLeft.scaleYProperty().bind(scaleFactor);
-        statsLowerLeft.scaleXProperty().bind(scaleFactor);
-        statsLowerLeft.scaleYProperty().bind(scaleFactor);
-        statsUpperLeft.translateXProperty().bind(statsUpperLeft.widthProperty().subtract(statsUpperLeft.widthProperty().multiply(scaleFactor)).divide(2).negate());
-        statsUpperLeft.translateYProperty().bind(statsUpperLeft.heightProperty().subtract(statsUpperLeft.heightProperty().multiply(scaleFactor)).divide(2).negate());
-        statsLowerLeft.translateXProperty().bind(statsLowerLeft.widthProperty().subtract(statsLowerLeft.widthProperty().multiply(scaleFactor)).divide(2).negate());
-        statsLowerLeft.translateYProperty().bind(statsLowerLeft.heightProperty().subtract(statsLowerLeft.heightProperty().multiply(scaleFactor)).divide(2));
+        statsUpperLeft.scaleXProperty().bind(statsHudScale);
+        statsUpperLeft.scaleYProperty().bind(statsHudScale);
+        statsLowerLeft.scaleXProperty().bind(statsHudScale);
+        statsLowerLeft.scaleYProperty().bind(statsHudScale);
+        statsUpperLeft.translateXProperty().bind(statsUpperLeft.widthProperty().subtract(statsUpperLeft.widthProperty().multiply(statsHudScale)).divide(2).negate());
+        statsUpperLeft.translateYProperty().bind(statsUpperLeft.heightProperty().subtract(statsUpperLeft.heightProperty().multiply(statsHudScale)).divide(2).negate());
+        statsLowerLeft.translateXProperty().bind(statsLowerLeft.widthProperty().subtract(statsLowerLeft.widthProperty().multiply(statsHudScale)).divide(2).negate());
+        statsLowerLeft.translateYProperty().bind(statsLowerLeft.heightProperty().subtract(statsLowerLeft.heightProperty().multiply(statsHudScale)).divide(2));
 
         parentProperty().addListener((obs, oldParent, newParent) -> {
             if (newParent != null) {
@@ -127,6 +130,7 @@ public class CameraView extends StackPane implements View, Selectable {
                 drawClassifierHud(r);
             });
         });
+
         cameraNameLabel.textProperty().bind(viewModel.cameraNameProperty());
         videoStatusLabel.textProperty().bind(viewModel.videoStatusProperty());
         cameraStatusLabel.textProperty().bind(viewModel.cameraStatusProperty());
@@ -135,6 +139,7 @@ public class CameraView extends StackPane implements View, Selectable {
         // Show stats HUD when user enabled OR when there is no image available
         statsHud.visibleProperty().bind(viewModel.drawStatsProperty().or(frameView.imageProperty().isNull()));
         classifierHud.visibleProperty().bind(viewModel.drawDetectionProperty());
+        noVideoPane.visibleProperty().bind(frameView.imageProperty().isNull());
     }
 
     private void setupEventHandlers() {
@@ -182,15 +187,19 @@ public class CameraView extends StackPane implements View, Selectable {
         double hudWidth = canvas.getWidth();
         double hudHeight = canvas.getHeight();
 
+        // Calculate aspect-ratio aware scale to match ImageView behavior
+        double scaleX = hudWidth / imageWidth;
+        double scaleY = hudHeight / imageHeight;
+        double scaleFactor = Math.min(scaleX, scaleY);
         // Center the HUD drawing so it draws on top of ImageView after scaling
-        if (scaleX.get() > scaleY.get()) {
+        if (scaleX > scaleY) {
             double viewWidth = imageWidth / imageHeight * hudHeight;
             gc.translate(hudWidth / 2 - viewWidth / 2, 0);
         } else {
             double viewHeight = imageHeight / imageWidth * hudWidth;
             gc.translate(0, hudHeight / 2 - viewHeight / 2);
         }
-        gc.scale(scaleFactor.get(), scaleFactor.get());
+        gc.scale(scaleFactor, scaleFactor);
     }
 
     public double getFrameWidth() {
