@@ -43,7 +43,7 @@ public class CameraView extends StackPane implements View, Selectable {
     @FXML
     private Label cameraNameLabel;
     @FXML
-    private Label videoQualityLabel;
+    private Label videoStatusLabel;
     @FXML
     private Label cameraStatusLabel;
     @FXML
@@ -128,7 +128,7 @@ public class CameraView extends StackPane implements View, Selectable {
             });
         });
         cameraNameLabel.textProperty().bind(viewModel.cameraNameProperty());
-        videoQualityLabel.textProperty().bind(viewModel.videoQualityProperty());
+        videoStatusLabel.textProperty().bind(viewModel.videoStatusProperty());
         cameraStatusLabel.textProperty().bind(viewModel.cameraStatusProperty());
         timestampLabel.textProperty().bind(viewModel.timestampProperty());
 

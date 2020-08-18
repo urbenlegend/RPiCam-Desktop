@@ -33,13 +33,13 @@ public class CameraViewModel implements ViewModel {
     private SimpleBooleanProperty drawDetection = new SimpleBooleanProperty();
     private SimpleBooleanProperty drawStats = new SimpleBooleanProperty();
     private SimpleStringProperty cameraName = new SimpleStringProperty();
-    private SimpleStringProperty videoQuality = new SimpleStringProperty();
+    private SimpleStringProperty videoStatus = new SimpleStringProperty();
     private SimpleStringProperty cameraStatus = new SimpleStringProperty();
     private SimpleStringProperty timestamp = new SimpleStringProperty();
     private PropertyChangeListener cameraFrameListener;
     private PropertyChangeListener cameraClassifierListener;
     private PropertyChangeListener cameraNameListener;
-    private PropertyChangeListener videoQualityListener;
+    private PropertyChangeListener videoStatusListener;
     private PropertyChangeListener cameraStatusListener;
     private PropertyChangeListener timestampListener;
 
@@ -66,10 +66,10 @@ public class CameraViewModel implements ViewModel {
                 cameraName.set(name);
             });
         };
-        videoQualityListener = event -> {
-            var quality = (String) event.getNewValue();
+        videoStatusListener = event -> {
+            var status = (String) event.getNewValue();
             Platform.runLater(() -> {
-                videoQuality.set(quality);
+                videoStatus.set(status);
             });
         };
         cameraStatusListener = event -> {
@@ -97,8 +97,15 @@ public class CameraViewModel implements ViewModel {
     public void onViewAdded() {
         camera.addPropertyChangeListener("frame", cameraFrameListener);
         camera.addPropertyChangeListener("classifierResults", cameraClassifierListener);
+
+        // Prefetch stats properties that may have fired before view was added
+        // Useful for displaying error messages when camera fails on start
+        cameraName.set(camera.getCameraName());
+        videoStatus.set(camera.getVideoStatus());
+        cameraStatus.set(camera.getCameraStatus());
+
         camera.addPropertyChangeListener("cameraName", cameraNameListener);
-        camera.addPropertyChangeListener("videoQuality", videoQualityListener);
+        camera.addPropertyChangeListener("videoStatus", videoStatusListener);
         camera.addPropertyChangeListener("cameraStatus", cameraStatusListener);
         camera.addPropertyChangeListener("timestamp", timestampListener);
     }
@@ -108,7 +115,7 @@ public class CameraViewModel implements ViewModel {
         camera.removePropertyChangeListener("frame", cameraFrameListener);
         camera.removePropertyChangeListener("classifierResults", cameraClassifierListener);
         camera.removePropertyChangeListener("cameraName", cameraNameListener);
-        camera.removePropertyChangeListener("videoQuality", videoQualityListener);
+        camera.removePropertyChangeListener("videoStatus", videoStatusListener);
         camera.removePropertyChangeListener("cameraStatus", cameraStatusListener);
         camera.removePropertyChangeListener("timestamp", timestampListener);
     }
@@ -169,12 +176,12 @@ public class CameraViewModel implements ViewModel {
         return cameraName;
     }
 
-    public String getVideoQuality() {
-        return videoQuality.get();
+    public String getVideoStatus() {
+        return videoStatus.get();
     }
 
-    public StringProperty videoQualityProperty() {
-        return videoQuality;
+    public StringProperty videoStatusProperty() {
+        return videoStatus;
     }
 
     public String getCameraStatus() {
