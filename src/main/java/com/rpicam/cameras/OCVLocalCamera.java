@@ -105,6 +105,9 @@ public class OCVLocalCamera extends CameraWorker {
     public void stop() {
         if (schedulePool != null) {
             schedulePool.shutdownNow();
+            try {
+                schedulePool.awaitTermination(1, TimeUnit.SECONDS);
+            } catch (InterruptedException ex) {}
             schedulePool = null;
         }
         close();
