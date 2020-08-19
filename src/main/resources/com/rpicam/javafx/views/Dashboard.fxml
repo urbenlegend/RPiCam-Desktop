@@ -25,17 +25,6 @@
    <children>
       <VBox alignment="TOP_CENTER" spacing="5.0" styleClass="sidebar" GridPane.rowIndex="1" GridPane.rowSpan="2147483647">
          <children>
-            <Button alignment="TOP_LEFT" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" minWidth="0.0" mnemonicParsing="false" onAction="#showScenesPage" styleClass="sidebar-button" text="Scenes" textFill="WHITE" textOverrun="CLIP">
-               <font>
-                  <Font size="16.0" />
-               </font>
-               <padding>
-                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-               </padding>
-               <graphic>
-                  <FontIcon iconColor="WHITE" iconLiteral="mdi-monitor" iconSize="24" />
-               </graphic>
-            </Button>
             <Button alignment="TOP_LEFT" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" minWidth="0.0" mnemonicParsing="false" onAction="#showCamerasPage" styleClass="sidebar-button" text="Cameras" textFill="WHITE" textOverrun="CLIP">
                <font>
                   <Font size="16.0" />
@@ -45,6 +34,17 @@
                </padding>
                <graphic>
                   <FontIcon iconColor="WHITE" iconLiteral="mdi-video" iconSize="24" />
+               </graphic>
+            </Button>
+            <Button alignment="TOP_LEFT" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" minWidth="0.0" mnemonicParsing="false" onAction="#showScenesPage" styleClass="sidebar-button" text="Scenes" textFill="WHITE" textOverrun="CLIP">
+               <font>
+                  <Font size="16.0" />
+               </font>
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding>
+               <graphic>
+                  <FontIcon iconColor="WHITE" iconLiteral="mdi-monitor" iconSize="24" />
                </graphic>
             </Button>
             <Button alignment="TOP_LEFT" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" minWidth="0.0" mnemonicParsing="false" onAction="#showArchivesPage" styleClass="sidebar-button" text="Archives" textFill="WHITE" textOverrun="CLIP">

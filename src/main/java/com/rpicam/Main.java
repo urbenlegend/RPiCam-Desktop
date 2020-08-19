@@ -16,9 +16,10 @@ public class Main {
      * @param args program arguments passed on application startup
      */
     public static void main(String[] args) {
-        // Setup OpenCL
-        opencv_core.setUseOpenCL(true);
-
+        // Setup OpenCL if available
+        if (opencv_core.haveOpenCL()) {
+            opencv_core.setUseOpenCL(true);
+        }
         App.main(args);
     }
 }

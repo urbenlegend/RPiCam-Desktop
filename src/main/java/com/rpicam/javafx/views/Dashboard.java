@@ -19,9 +19,9 @@ import javafx.util.Duration;
 public class Dashboard extends GridPane implements View {
     @FXML
     private Label pageTitle;
-    private ArchivesPage archivesPage;
     private CamerasPage camerasPage;
     private ScenesPage scenesPage;
+    private ArchivesPage archivesPage;
     private SettingsPage settingsPage;
     private Node currentPage;
 
@@ -43,13 +43,13 @@ public class Dashboard extends GridPane implements View {
 
     @FXML
     public void initialize() {
-        archivesPage = new ArchivesPage();
         camerasPage = new CamerasPage();
         scenesPage = new ScenesPage();
+        archivesPage = new ArchivesPage();
         settingsPage = new SettingsPage();
 
         setupAnimations();
-        showScenesPage();
+        showCamerasPage();
     }
 
     private void setupAnimations() {
@@ -87,12 +87,6 @@ public class Dashboard extends GridPane implements View {
     }
 
     @FXML
-    private void showArchivesPage() {
-        pageTitle.setText("Archives");
-        setPage(archivesPage);
-    }
-
-    @FXML
     private void showCamerasPage() {
         pageTitle.setText("Cameras");
         setPage(camerasPage);
@@ -102,6 +96,12 @@ public class Dashboard extends GridPane implements View {
     private void showScenesPage() {
         pageTitle.setText("Scenes");
         setPage(scenesPage);
+    }
+
+    @FXML
+    private void showArchivesPage() {
+        pageTitle.setText("Archives");
+        setPage(archivesPage);
     }
 
     @FXML

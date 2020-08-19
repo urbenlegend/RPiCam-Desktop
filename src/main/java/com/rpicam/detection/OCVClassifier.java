@@ -7,10 +7,12 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_core;
 import static org.bytedeco.opencv.global.opencv_core.CV_8UC4;
 import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2GRAY;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
 import static org.bytedeco.opencv.global.opencv_objdetect.CASCADE_SCALE_IMAGE;
+import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.UMat;
 import org.bytedeco.opencv.opencv_core.RectVector;
@@ -20,6 +22,7 @@ import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
 public class OCVClassifier implements Function<ByteBufferImage, ArrayList<ClassifierResult>>, Cloneable {
     private Mat grayMat = new Mat();
     private UMat gpuMat;
+    private GpuMat cudaMat;
     private CascadeClassifier classifier;
     private String path = "";
     private String color = "";
@@ -40,7 +43,12 @@ public class OCVClassifier implements Function<ByteBufferImage, ArrayList<Classi
 
         // Allocate GPU memory if gpu flag is enabled
         if (gpu) {
-            gpuMat = new UMat();
+            if (opencv_core.useOpenCL()) {
+                gpuMat = new UMat();
+            }
+            else {
+                cudaMat = new GpuMat();
+            }
         }
     }
 
@@ -60,6 +68,17 @@ public class OCVClassifier implements Function<ByteBufferImage, ArrayList<Classi
         if (gpuMat != null) {
             grayMat.copyTo(gpuMat);
             classifier.detectMultiScale(gpuMat,
+                    detectedObjs,
+                    scaleFactor,
+                    minNeighbors,
+                    CASCADE_SCALE_IMAGE,
+                    new Size(minSize, minSize),
+                    new Size()
+            );
+        }
+        else if (cudaMat != null) {
+            grayMat.copyTo(cudaMat);
+            classifier.detectMultiScale(cudaMat,
                     detectedObjs,
                     scaleFactor,
                     minNeighbors,
@@ -95,7 +114,7 @@ public class OCVClassifier implements Function<ByteBufferImage, ArrayList<Classi
         conf.scaleFactor = scaleFactor;
         conf.minNeighbors = minNeighbors;
         conf.minSizeFactor = minSizeFactor;
-        conf.gpu = gpuMat != null;
+        conf.gpu = gpuMat != null || cudaMat != null;
         return conf;
     }
 
@@ -106,6 +125,9 @@ public class OCVClassifier implements Function<ByteBufferImage, ArrayList<Classi
             cloneObj.grayMat = grayMat.clone();
             if (gpuMat != null) {
                 cloneObj.gpuMat = gpuMat.clone();
+            }
+            if (cudaMat != null) {
+                cloneObj.cudaMat = cudaMat.clone();
             }
             cloneObj.initClassifier();
             return cloneObj;
