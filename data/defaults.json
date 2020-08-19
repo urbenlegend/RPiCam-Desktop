@@ -1,21 +1,30 @@
 {
   "classifiers": [
     {
-      "color": "rgb(255,0,0)",
-      "path": "./data/upperbody_recognition_model.xml",
+      "path": "./data/haarcascade_upperbody.xml",
       "title": "Upper Body",
+      "color": "rgb(255,0,0)",
+      "scaleFactor": 1.05,
+      "minNeighbors": 3,
+      "minSizeFactor": 0.1,
       "gpu": true
     },
     {
-      "color": "rgb(0,255,0)",
-      "path": "./data/facial_recognition_model.xml",
+      "path": "./data/haarcascade_frontalface_alt.xml",
       "title": "Face",
+      "color": "rgb(0,255,0)",
+      "scaleFactor": 1.1,
+      "minNeighbors": 3,
+      "minSizeFactor": 0.1,
       "gpu": true
     },
     {
-      "color": "rgb(0,0,255)",
-      "path": "./data/fullbody_recognition_model.xml",
+      "path": "./data/haarcascade_fullbody.xml",
       "title": "Full Body",
+      "color": "rgb(0,0,255)",
+      "scaleFactor": 1.01,
+      "minNeighbors": 3,
+      "minSizeFactor": 0.1,
       "gpu": true
     }
   ],

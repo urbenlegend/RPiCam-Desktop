@@ -21,14 +21,20 @@ public class OCVClassifier implements Function<ByteBufferImage, ArrayList<Classi
     private Mat grayMat = new Mat();
     private UMat gpuMat;
     private CascadeClassifier classifier;
-    private String color = "";
     private String path = "";
+    private String color = "";
     private String title = "";
+    private double scaleFactor;
+    private int minNeighbors;
+    private float minSizeFactor;
 
-    public OCVClassifier(String path, String title, String color, boolean gpu) {
+    public OCVClassifier(String path, String title, String color, double scaleFactor, int minNeighbors, float minSizeFactor, boolean gpu) {
         this.path = path;
-        this.color = color;
         this.title = title;
+        this.color = color;
+        this.scaleFactor = scaleFactor;
+        this.minNeighbors = minNeighbors;
+        this.minSizeFactor = minSizeFactor;
 
         initClassifier();
 
@@ -49,27 +55,24 @@ public class OCVClassifier implements Function<ByteBufferImage, ArrayList<Classi
         // Convert frame to grayscale for better detection and efficiency
         cvtColor(imageMat, grayMat, COLOR_BGR2GRAY);
 
+        int minSize = Math.round(grayMat.rows() * minSizeFactor);
         var detectedObjs = new RectVector();
         if (gpuMat != null) {
             grayMat.copyTo(gpuMat);
-            int minSize = Math.round(gpuMat.rows() * 0.1f);
-            // TODO: Check if correct parameters are being used
             classifier.detectMultiScale(gpuMat,
                     detectedObjs,
-                    1.1,
-                    3,
+                    scaleFactor,
+                    minNeighbors,
                     CASCADE_SCALE_IMAGE,
                     new Size(minSize, minSize),
                     new Size()
             );
         }
         else {
-            int minSize = Math.round(grayMat.rows() * 0.1f);
-            // TODO: Check if correct parameters are being used
             classifier.detectMultiScale(grayMat,
                     detectedObjs,
-                    1.1,
-                    3,
+                    scaleFactor,
+                    minNeighbors,
                     CASCADE_SCALE_IMAGE,
                     new Size(minSize, minSize),
                     new Size()
@@ -89,6 +92,9 @@ public class OCVClassifier implements Function<ByteBufferImage, ArrayList<Classi
         conf.path = path;
         conf.title = title;
         conf.color = color;
+        conf.scaleFactor = scaleFactor;
+        conf.minNeighbors = minNeighbors;
+        conf.minSizeFactor = minSizeFactor;
         conf.gpu = gpuMat != null;
         return conf;
     }

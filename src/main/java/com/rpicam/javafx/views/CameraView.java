@@ -8,7 +8,6 @@ import com.rpicam.javafx.util.Selectable;
 import com.rpicam.javafx.util.SelectionGroup;
 import com.rpicam.javafx.util.View;
 import java.io.IOException;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
@@ -90,7 +89,7 @@ public class CameraView extends StackPane implements View, Selectable {
         // Calculate scale factors for scaling stats HUD. Scale by
         // default width and height so that it isn't too small for HD
         var statsHudScale = new SimpleDoubleProperty();
-        statsHudScale.bind(Bindings.min(widthProperty().divide(DEFAULT_WIDTH), heightProperty().divide(DEFAULT_HEIGHT)));
+        statsHudScale.bind(widthProperty().divide(DEFAULT_WIDTH));
 
         // Make stats HUD elements scale with CameraView size
         statsUpperLeft.scaleXProperty().bind(statsHudScale);
