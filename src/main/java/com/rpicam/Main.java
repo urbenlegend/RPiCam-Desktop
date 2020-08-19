@@ -17,7 +17,7 @@ public class Main {
      */
     public static void main(String[] args) {
         // Setup OpenCL if available
-        if (opencv_core.haveOpenCL()) {
+        if (opencv_core.getCudaEnabledDeviceCount() < 1) {
             opencv_core.setUseOpenCL(true);
         }
         App.main(args);
