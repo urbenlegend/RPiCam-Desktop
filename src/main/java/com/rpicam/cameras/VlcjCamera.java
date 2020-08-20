@@ -80,16 +80,15 @@ public class VlcjCamera extends CameraWorker {
         close();
     }
 
-    private void processFrame(ByteBuffer buffer, int width, int height) {
+    private void processFrame(ByteBufferImage image) {
         try {
-            var newFrame = new ByteBufferImage(buffer, width, height);
-            setFrame(newFrame);
+            setFrame(image);
 
             // Run classifiers
             if (totalFrames % procInterval == 0) {
                 var newClassifierResults = new ArrayList<ClassifierResult>();
                 getClassifiers().forEach(c -> {
-                    newClassifierResults.addAll(c.apply(newFrame));
+                    newClassifierResults.addAll(c.apply(image));
                 });
                 setClassifierResults(newClassifierResults);
             }
@@ -100,7 +99,7 @@ public class VlcjCamera extends CameraWorker {
             double fpsCheckSeconds = fpsCheckDuration.getSeconds() + (double) fpsCheckDuration.getNano() / 1000000000;
             if (fpsCheckSeconds >= 1) {
                 double fps = fpsFrameCount / fpsCheckSeconds;
-                setVideoStatus(String.format("%d x %d @ %.2f fps", width, height, fps));
+                setVideoStatus(String.format("%d x %d @ %.2f fps", image.width, image.height, fps));
                 fpsLastCheck = currentTime;
                 fpsFrameCount = 0;
             }
@@ -132,7 +131,8 @@ public class VlcjCamera extends CameraWorker {
                 new RenderCallback() {
                     @Override
                     public void display(MediaPlayer mediaPlayer, ByteBuffer[] nativeBuffers, BufferFormat bufferFormat) {
-                        VlcjCamera.this.processFrame(nativeBuffers[0], bufferFormat.getWidth(), bufferFormat.getHeight());
+                        var image = new ByteBufferImage(nativeBuffers[0], bufferFormat.getWidth(), bufferFormat.getHeight(), ByteBufferImage.Format.BGRA);
+                        VlcjCamera.this.processFrame(image);
                     }
                 },
                 true,

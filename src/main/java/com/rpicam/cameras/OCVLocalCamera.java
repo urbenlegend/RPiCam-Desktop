@@ -126,17 +126,16 @@ public class OCVLocalCamera extends CameraWorker {
             }
             // Convert to bgra for display
             cvtColor(capMat, bgraMat, COLOR_BGR2BGRA);
-            var newFrame = new ByteBufferImage(bgraMat.createBuffer(), bgraMat.cols(), bgraMat.rows());
+            var newFrame = new ByteBufferImage(bgraMat.createBuffer(), bgraMat.cols(), bgraMat.rows(), ByteBufferImage.Format.BGRA);
             setFrame(newFrame);
 
             // Run classifiers
-
             if (totalFrames % procInterval == 0) {
-                var newClassifierResults = new ArrayList<ClassifierResult>();
-                getClassifiers().forEach(c -> {
-                    newClassifierResults.addAll(c.apply(newFrame));
-                });
-                setClassifierResults(newClassifierResults);
+                    var newClassifierResults = new ArrayList<ClassifierResult>();
+                    getClassifiers().forEach(c -> {
+                        newClassifierResults.addAll(c.apply(newFrame));
+                    });
+                    setClassifierResults(newClassifierResults);
             }
 
             // Calculate FPS

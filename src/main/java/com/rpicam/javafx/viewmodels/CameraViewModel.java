@@ -125,6 +125,9 @@ public class CameraViewModel implements ViewModel {
     }
 
     private Image wrapByteBufferImage(ByteBufferImage image) {
+        if (image.format != ByteBufferImage.Format.BGRA) {
+            throw new IllegalArgumentException("Only BGRA images are supported");
+        }
         return new WritableImage(new PixelBuffer<>(image.width, image.height, image.buffer, PixelFormat.getByteBgraPreInstance()));
     }
 

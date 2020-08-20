@@ -8,8 +8,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
+import static org.bytedeco.opencv.global.opencv_core.CV_8UC3;
 import static org.bytedeco.opencv.global.opencv_core.CV_8UC4;
 import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2GRAY;
+import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGRA2GRAY;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
 import static org.bytedeco.opencv.global.opencv_objdetect.CASCADE_SCALE_IMAGE;
 import org.bytedeco.opencv.opencv_core.GpuMat;
@@ -59,9 +61,20 @@ public class OCVClassifier implements Function<ByteBufferImage, ArrayList<Classi
 
     @Override
     public ArrayList<ClassifierResult> apply(ByteBufferImage image) {
-        var imageMat = new Mat(image.height, image.width, CV_8UC4, new BytePointer(image.buffer));
         // Convert frame to grayscale for better detection and efficiency
-        cvtColor(imageMat, grayMat, COLOR_BGR2GRAY);
+        switch (image.format) {
+            case BGR -> {
+                var imageMat = new Mat(image.height, image.width, CV_8UC3, new BytePointer(image.buffer));
+                cvtColor(imageMat, grayMat, COLOR_BGR2GRAY);
+            }
+            case BGRA -> {
+                var imageMat = new Mat(image.height, image.width, CV_8UC4, new BytePointer(image.buffer));
+                cvtColor(imageMat, grayMat, COLOR_BGRA2GRAY);
+            }
+            default -> {
+                throw new IllegalArgumentException("Only BGR and BGRA images are supported");
+            }
+        }
 
         int minSize = Math.round(grayMat.rows() * minSizeFactor);
         var detectedObjs = new RectVector();
