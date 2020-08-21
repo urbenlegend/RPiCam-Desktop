@@ -43,8 +43,7 @@ public class ConfigManager {
         var configStr = Files.readString(configPath, StandardCharsets.US_ASCII);
         try {
             configRoot = gson.fromJson(configStr, ConfigRoot.class);
-        }
-        catch (JsonSyntaxException e) {
+        } catch (JsonSyntaxException e) {
             throw new ConfigException(configPath.toString() + "is an invalid config file", e);
         }
     }

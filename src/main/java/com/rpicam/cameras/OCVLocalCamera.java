@@ -9,12 +9,16 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2BGRA;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
 import org.bytedeco.opencv.global.opencv_videoio;
@@ -33,9 +37,10 @@ public class OCVLocalCamera extends CameraWorker {
     private int procInterval;
 
     private ScheduledExecutorService schedulePool;
+    private ExecutorService classifierPool;
     private final Mat capMat = new Mat();
     private final Mat bgraMat = new Mat();
-    private int totalFrames = 0;
+    private final ByteBufferImage classifierFrame = new ByteBufferImage();
     private int fpsFrameCount = 0;
     private LocalTime fpsLastCheck = LocalTime.now();
 
@@ -69,6 +74,7 @@ public class OCVLocalCamera extends CameraWorker {
 
     private void open() {
         setCameraName(String.format("%s: Camera %d", this.getClass().getSimpleName(), camIndex));
+        setCameraStatus("Camera OK");
 
         int api;
         try {
@@ -98,12 +104,14 @@ public class OCVLocalCamera extends CameraWorker {
 
     @Override
     public void start() {
-        if (schedulePool != null || capture.isOpened()) {
+        if (schedulePool != null || classifierPool != null) {
             return;
         }
         open();
-        schedulePool = Executors.newScheduledThreadPool(1);
+        schedulePool = Executors.newScheduledThreadPool(2);
+        classifierPool = Executors.newSingleThreadExecutor();
         schedulePool.scheduleAtFixedRate(this::processFrame, 0, capRate, TimeUnit.MILLISECONDS);
+        schedulePool.scheduleAtFixedRate(this::processClassifiers, 0, procInterval, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -112,31 +120,39 @@ public class OCVLocalCamera extends CameraWorker {
             schedulePool.shutdownNow();
             try {
                 schedulePool.awaitTermination(1, TimeUnit.SECONDS);
-            } catch (InterruptedException ex) {}
+            } catch (InterruptedException ex) {
+            }
             schedulePool = null;
+        }
+        if (classifierPool != null) {
+            classifierPool.shutdownNow();
+            try {
+                classifierPool.awaitTermination(1, TimeUnit.SECONDS);
+            } catch (InterruptedException ex) {
+            }
+            classifierPool = null;
         }
         close();
     }
 
     private void processFrame() {
         try {
-            // Grab frame
-            if (!capture.read(capMat)) {
-                throw new VideoIOException("could not grab next frame from camera");
+            // Grab frame. Synchronize with classifier thread to make sure we
+            // are not writing to buffer while classifiers are running
+            synchronized (capMat) {
+                if (!capture.read(capMat)) {
+                    throw new VideoIOException("could not grab next frame from camera");
+                }
             }
+
             // Convert to bgra for display
             cvtColor(capMat, bgraMat, COLOR_BGR2BGRA);
-            var newFrame = new ByteBufferImage(bgraMat.createBuffer(), bgraMat.cols(), bgraMat.rows(), ByteBufferImage.Format.BGRA);
-            setFrame(newFrame);
-
-            // Run classifiers
-            if (totalFrames % procInterval == 0) {
-                    var newClassifierResults = new ArrayList<ClassifierResult>();
-                    getClassifiers().forEach(c -> {
-                        newClassifierResults.addAll(c.apply(newFrame));
-                    });
-                    setClassifierResults(newClassifierResults);
-            }
+            var displayFrame = new ByteBufferImage(
+                    bgraMat.createBuffer(),
+                    bgraMat.cols(),
+                    bgraMat.rows(),
+                    ByteBufferImage.Format.BGRA);
+            setFrame(displayFrame);
 
             // Calculate FPS
             var currentTime = LocalTime.now();
@@ -149,17 +165,55 @@ public class OCVLocalCamera extends CameraWorker {
                 fpsFrameCount = 0;
             }
 
-            setCameraStatus("Camera OK");
             setTimestamp(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
             fpsFrameCount++;
-            totalFrames++;
-        }
-        catch (Throwable t) {
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Camera did not finishing processing the next frame!", t);
+        } catch (Throwable t) {
+            // Log any exceptions and rethrow
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Camera did not finish processing the next frame!", t);
             setCameraStatus(String.format("Camera ERROR: %s", t));
+            throw t;
         }
     }
 
+    private void processClassifiers() {
+        try {
+            // Synchronize so that we don't copy buffer while it is being
+            // written to from the frame thread.
+            synchronized (capMat) {
+                if (capMat.empty()) return;
+                var image = new ByteBufferImage(capMat.createBuffer(), capMat.cols(), capMat.rows(), ByteBufferImage.Format.BGR);
+                image.copyTo(classifierFrame);
+            }
 
+            // Create classifier jobs
+            var classifierJobs = getClassifiers().stream()
+                    .map((c) -> {
+                        Callable<List<ClassifierResult>> classifierJob = () -> {
+                            return c.apply(classifierFrame);
+                        };
+                        return classifierJob;
+                    })
+                    .collect(Collectors.toList());
+
+            // Feed jobs into classifier executor and wait for results
+            var newClassifierResults = classifierPool.invokeAll(classifierJobs).stream()
+                    .flatMap(resultFuture -> {
+                        try {
+                            return resultFuture.get().stream();
+                        } catch (Exception e) {
+                            return Stream.empty();
+                        }
+                    })
+                    .collect(Collectors.toList());
+
+            setClassifierResults(newClassifierResults);
+        } catch (InterruptedException e) {
+        } catch (Throwable t) {
+            // Log any exceptions and rethrow
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Camera did not finish classifying the next frame!", t);
+            setCameraStatus(String.format("Camera ERROR: %s", t));
+            throw t;
+        }
+    }
 }

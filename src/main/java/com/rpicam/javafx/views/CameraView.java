@@ -69,8 +69,7 @@ public class CameraView extends StackPane implements View, Selectable {
             loader.setController(this);
             loader.setRoot(this);
             loader.load();
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             throw new UIException("Failed to load " + FXML_PATH, ex);
         }
     }
@@ -155,52 +154,6 @@ public class CameraView extends StackPane implements View, Selectable {
         });
     }
 
-    private void clearClassifierHud() {
-        var gc = classifierHud.getGraphicsContext2D();
-        gc.clearRect(0, 0, classifierHud.getWidth(), classifierHud.getHeight());
-    }
-
-    private void drawClassifierHud(ClassifierResult result) {
-        var gc = classifierHud.getGraphicsContext2D();
-        gc.save();
-        resizeCanvasGC(classifierHud);
-
-        // Draw classifier bounding box
-        Color classifierColor = Color.valueOf(result.color);
-        gc.setStroke(classifierColor);
-        gc.strokeRect(result.x, result.y, result.w, result.h);
-
-        // Draw classifier label
-        gc.setTextAlign(TextAlignment.RIGHT);
-        gc.setFill(classifierColor);
-        gc.fillText(result.title, result.x + result.w, result.y + result.h + 15);
-
-        gc.restore();
-    }
-
-    private void resizeCanvasGC(Canvas canvas) {
-        var gc = canvas.getGraphicsContext2D();
-
-        double imageWidth = frameWidth.get();
-        double imageHeight = frameHeight.get();
-        double hudWidth = canvas.getWidth();
-        double hudHeight = canvas.getHeight();
-
-        // Calculate aspect-ratio aware scale to match ImageView behavior
-        double scaleX = hudWidth / imageWidth;
-        double scaleY = hudHeight / imageHeight;
-        double scaleFactor = Math.min(scaleX, scaleY);
-        // Center the HUD drawing so it draws on top of ImageView after scaling
-        if (scaleX > scaleY) {
-            double viewWidth = imageWidth / imageHeight * hudHeight;
-            gc.translate(hudWidth / 2 - viewWidth / 2, 0);
-        } else {
-            double viewHeight = imageHeight / imageWidth * hudWidth;
-            gc.translate(0, hudHeight / 2 - viewHeight / 2);
-        }
-        gc.scale(scaleFactor, scaleFactor);
-    }
-
     public double getFrameWidth() {
         return frameWidth.get();
     }
@@ -252,5 +205,51 @@ public class CameraView extends StackPane implements View, Selectable {
     @Override
     public ObjectProperty<SelectionGroup> selectionGroupProperty() {
         return selectionGroup;
+    }
+
+    private void clearClassifierHud() {
+        var gc = classifierHud.getGraphicsContext2D();
+        gc.clearRect(0, 0, classifierHud.getWidth(), classifierHud.getHeight());
+    }
+
+    private void drawClassifierHud(ClassifierResult result) {
+        var gc = classifierHud.getGraphicsContext2D();
+        gc.save();
+        resizeCanvasGC(classifierHud);
+
+        // Draw classifier bounding box
+        Color classifierColor = Color.valueOf(result.color);
+        gc.setStroke(classifierColor);
+        gc.strokeRect(result.x, result.y, result.w, result.h);
+
+        // Draw classifier label
+        gc.setTextAlign(TextAlignment.RIGHT);
+        gc.setFill(classifierColor);
+        gc.fillText(result.title, result.x + result.w, result.y + result.h + 15);
+
+        gc.restore();
+    }
+
+    private void resizeCanvasGC(Canvas canvas) {
+        var gc = canvas.getGraphicsContext2D();
+
+        double imageWidth = frameWidth.get();
+        double imageHeight = frameHeight.get();
+        double hudWidth = canvas.getWidth();
+        double hudHeight = canvas.getHeight();
+
+        // Calculate aspect-ratio aware scale to match ImageView behavior
+        double scaleX = hudWidth / imageWidth;
+        double scaleY = hudHeight / imageHeight;
+        double scaleFactor = Math.min(scaleX, scaleY);
+        // Center the HUD drawing so it draws on top of ImageView after scaling
+        if (scaleX > scaleY) {
+            double viewWidth = imageWidth / imageHeight * hudHeight;
+            gc.translate(hudWidth / 2 - viewWidth / 2, 0);
+        } else {
+            double viewHeight = imageHeight / imageWidth * hudWidth;
+            gc.translate(0, hudHeight / 2 - viewHeight / 2);
+        }
+        gc.scale(scaleFactor, scaleFactor);
     }
 }

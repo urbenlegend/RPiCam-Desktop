@@ -60,8 +60,7 @@ public class CameraSettings extends VBox implements View {
             loader.setController(this);
             loader.setRoot(this);
             loader.load();
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             throw new UIException("Failed to load " + FXML_PATH, ex);
         }
     }
@@ -92,6 +91,11 @@ public class CameraSettings extends VBox implements View {
         settingsAccordion.setExpandedPane(cameraSettingsPane);
     }
 
+    @Override
+    public ViewModel getViewModel() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
     public ReadOnlyMapProperty<String, String> resultsProperty() {
         return results;
     }
@@ -117,10 +121,5 @@ public class CameraSettings extends VBox implements View {
         resultsMap.put("drawDetection", Boolean.toString(detectBoxToggle.isSelected()));
         resultsMap.put("drawStats", Boolean.toString(statsToggle.isSelected()));
         results.set(resultsMap);
-    }
-
-    @Override
-    public ViewModel getViewModel() {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

@@ -7,7 +7,7 @@
             </packagings>
             <goals>
                 <goal>javafx:run</goal>
-                
+
             </goals>
         </action>
         <action>

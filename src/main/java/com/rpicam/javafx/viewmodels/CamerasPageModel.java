@@ -41,6 +41,14 @@ public class CamerasPageModel implements ViewModel {
         scene.removePropertyChangeListener("views", scenePropertyListener);
     }
 
+    public List<ViewInfo> getViews() {
+        return views.get();
+    }
+
+    public ReadOnlyListProperty<ViewInfo> viewsProperty() {
+        return views;
+    }
+
     public void addNewCamera(Map<String, String> cameraPropMap) {
         // Add new camera to camera manager
         CameraWorker camera = createCamera(cameraPropMap);
@@ -87,13 +95,5 @@ public class CamerasPageModel implements ViewModel {
         scene.removeView(view);
         var cameraManager = App.cameraManager();
         cameraManager.removeCamera(view.cameraUUID);
-    }
-
-    public List<ViewInfo> getViews() {
-        return views.get();
-    }
-
-    public ReadOnlyListProperty<ViewInfo> viewsProperty() {
-        return views;
     }
 }

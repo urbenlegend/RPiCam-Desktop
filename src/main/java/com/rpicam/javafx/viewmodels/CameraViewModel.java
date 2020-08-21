@@ -124,13 +124,6 @@ public class CameraViewModel implements ViewModel {
         return viewInfo;
     }
 
-    private Image wrapByteBufferImage(ByteBufferImage image) {
-        if (image.format != ByteBufferImage.Format.BGRA) {
-            throw new IllegalArgumentException("Only BGRA images are supported");
-        }
-        return new WritableImage(new PixelBuffer<>(image.width, image.height, image.buffer, PixelFormat.getByteBgraPreInstance()));
-    }
-
     public List<ClassifierResult> getClassifierResults() {
         return classifierResults.get();
     }
@@ -201,5 +194,12 @@ public class CameraViewModel implements ViewModel {
 
     public StringProperty timestampProperty() {
         return timestamp;
+    }
+
+    private Image wrapByteBufferImage(ByteBufferImage image) {
+        if (image.getFormat() != ByteBufferImage.Format.BGRA) {
+            throw new IllegalArgumentException("Only BGRA images are supported");
+        }
+        return new WritableImage(new PixelBuffer<>(image.getWidth(), image.getHeight(), image.getBuffer(), PixelFormat.getByteBgraPreInstance()));
     }
 }

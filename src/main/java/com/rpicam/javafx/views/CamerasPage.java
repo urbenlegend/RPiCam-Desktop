@@ -90,6 +90,11 @@ public class CamerasPage extends BorderPane implements View {
         });
     }
 
+    @Override
+    public CamerasPageModel getViewModel() {
+        return viewModel;
+    }
+
     @FXML
     private void onAddCameraClicked() {
         addCameraPopOver.show(addCameraBtn);
@@ -116,10 +121,5 @@ public class CamerasPage extends BorderPane implements View {
         cameraView.setSelectionGroup(cameraSelectGroup);
 
         return cameraView;
-    }
-
-    @Override
-    public CamerasPageModel getViewModel() {
-        return viewModel;
     }
 }

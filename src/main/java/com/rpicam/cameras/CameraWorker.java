@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.function.Function;
 
 public abstract class CameraWorker {
-    private List<Function<ByteBufferImage, ArrayList<ClassifierResult>>> classifiers = Collections.synchronizedList(new ArrayList<>());
+    private List<Function<ByteBufferImage, List<ClassifierResult>>> classifiers = Collections.synchronizedList(new ArrayList<>());
     private transient PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     // Observable Properties
     private ByteBufferImage frame;
-    private ArrayList<ClassifierResult> classifierResults;
+    private List<ClassifierResult> classifierResults;
     private String cameraName;
     private String videoStatus;
     private String cameraStatus;
@@ -28,15 +28,15 @@ public abstract class CameraWorker {
 
     public abstract void stop();
 
-    public void addClassifier(Function<ByteBufferImage, ArrayList<ClassifierResult>> c) {
+    public void addClassifier(Function<ByteBufferImage, List<ClassifierResult>> c) {
         classifiers.add(c);
     }
 
-    public void removeClassifier(Function<ByteBufferImage, ArrayList<ClassifierResult>> c) {
+    public void removeClassifier(Function<ByteBufferImage, List<ClassifierResult>> c) {
         classifiers.remove(c);
     }
 
-    public List<Function<ByteBufferImage, ArrayList<ClassifierResult>>> getClassifiers() {
+    public List<Function<ByteBufferImage, List<ClassifierResult>>> getClassifiers() {
         return classifiers;
     }
 
@@ -61,11 +61,11 @@ public abstract class CameraWorker {
         pcs.firePropertyChange("frame", null, this.frame);
     }
 
-    public ArrayList<ClassifierResult> getClassifierResults() {
+    public List<ClassifierResult> getClassifierResults() {
         return classifierResults;
     }
 
-    protected void setClassifierResults(ArrayList<ClassifierResult> classifierResults) {
+    protected void setClassifierResults(List<ClassifierResult> classifierResults) {
         this.classifierResults = classifierResults;
         pcs.firePropertyChange("classifierResults", null, this.classifierResults);
     }

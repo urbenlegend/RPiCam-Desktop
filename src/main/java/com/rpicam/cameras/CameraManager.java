@@ -65,8 +65,7 @@ public class CameraManager {
         for (var c : cameras.values()) {
             try {
                 c.start();
-            }
-            catch (Throwable t) {
+            } catch (Throwable t) {
                 Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Camera failed to start", t);
             }
         }
@@ -76,8 +75,7 @@ public class CameraManager {
         for (var c : cameras.values()) {
             try {
                 c.stop();
-            }
-            catch (Throwable t) {
+            } catch (Throwable t) {
                 Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Camera failed to stop", t);
             }
         }
