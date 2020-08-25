@@ -1,6 +1,6 @@
 package com.rpicam.config;
 
-public class OCVCameraConfig {
+public class CameraConfig {
     public String type;
     public String uuid;
 }

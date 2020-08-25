@@ -1,24 +1,20 @@
 package com.rpicam.cameras;
 
-import com.rpicam.detection.ClassifierResult;
-import com.rpicam.config.OCVCameraConfig;
+import com.rpicam.config.CameraConfig;
 import com.rpicam.config.VlcjCameraConfig;
+import com.rpicam.detection.ClassifierService;
 import com.rpicam.exceptions.ConfigException;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
+import java.util.ServiceLoader;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter;
@@ -37,7 +33,7 @@ public class VlcjCamera extends CameraWorker {
     private int procInterval;
 
     private ScheduledExecutorService schedulePool;
-    private ExecutorService classifierPool;
+    private ClassifierService classifierService = ServiceLoader.load(ClassifierService.class).findFirst().get();
     private final ByteBufferImage classifierFrame = new ByteBufferImage();
     private final ByteBufferImage frameCopy = new ByteBufferImage();
     private int fpsFrameCount = 0;
@@ -53,7 +49,7 @@ public class VlcjCamera extends CameraWorker {
     }
 
     @Override
-    public void fromConfig(OCVCameraConfig conf) {
+    public void fromConfig(CameraConfig conf) {
         if (!(conf instanceof VlcjCameraConfig)) {
             throw new ConfigException("Invalid config for OCVLocalCamera");
         }
@@ -81,12 +77,11 @@ public class VlcjCamera extends CameraWorker {
 
     @Override
     public void start() {
-        if (schedulePool != null || classifierPool != null) {
+        if (schedulePool != null) {
             return;
         }
         open();
         schedulePool = Executors.newScheduledThreadPool(1);
-        classifierPool = Executors.newSingleThreadExecutor();
         player.media().play(url);
         schedulePool.scheduleAtFixedRate(this::processClassifiers, 0, procInterval, TimeUnit.MILLISECONDS);
     }
@@ -100,14 +95,6 @@ public class VlcjCamera extends CameraWorker {
             } catch (InterruptedException ex) {
             }
             schedulePool = null;
-        }
-        if (classifierPool != null) {
-            classifierPool.shutdownNow();
-            try {
-                classifierPool.awaitTermination(1, TimeUnit.SECONDS);
-            } catch (InterruptedException ex) {
-            }
-            classifierPool = null;
         }
         player.controls().stop();
         close();
@@ -151,27 +138,7 @@ public class VlcjCamera extends CameraWorker {
                 frameCopy.copyTo(classifierFrame);
             }
 
-            // Create classifier jobs
-            var classifierJobs = getClassifiers().stream()
-                    .map((c) -> {
-                        Callable<List<ClassifierResult>> classifierJob = () -> {
-                            return c.apply(classifierFrame);
-                        };
-                        return classifierJob;
-                    })
-                    .collect(Collectors.toList());
-
-            // Feed jobs into classifier executor and wait for results
-            var newClassifierResults = classifierPool.invokeAll(classifierJobs).stream()
-                    .flatMap(resultFuture -> {
-                        try {
-                            return resultFuture.get().stream();
-                        } catch (Exception e) {
-                            return Stream.empty();
-                        }
-                    })
-                    .collect(Collectors.toList());
-
+            var newClassifierResults = classifierService.submit(classifierFrame);
             setClassifierResults(newClassifierResults);
         } catch (InterruptedException e) {
         } catch (Throwable t) {

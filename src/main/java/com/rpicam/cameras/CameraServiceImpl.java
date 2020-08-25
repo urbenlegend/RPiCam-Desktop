@@ -1,27 +1,26 @@
 package com.rpicam.cameras;
 
-import com.rpicam.detection.OCVClassifier;
-import com.rpicam.config.OCVCameraConfig;
-import com.rpicam.config.OCVClassifierConfig;
+import com.rpicam.config.CameraConfig;
+import com.rpicam.config.ConfigService;
 import com.rpicam.config.OCVLocalCameraConfig;
 import com.rpicam.config.VlcjCameraConfig;
-import com.rpicam.javafx.App;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.ServiceLoader;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class CameraManager {
-    private HashMap<UUID, CameraWorker> cameras = new HashMap<>();
-    private ArrayList<OCVClassifier> classifiers = new ArrayList<>();
+public class CameraServiceImpl implements CameraService {
+    private static CameraServiceImpl instance;
 
-    public void loadConfig() {
-        var configRoot = App.configManager().getConfig();
-        for (var conf : configRoot.classifiers) {
-            var classifier = new OCVClassifier(conf.path, conf.title, conf.color, conf.scaleFactor, conf.minNeighbors, conf.minSizeFactor, conf.gpu);
-            classifiers.add(classifier);
-        }
+    private ConfigService configService;
+    
+    private HashMap<UUID, CameraWorker> cameras = new HashMap<>();
+
+    private CameraServiceImpl() {
+        configService = ServiceLoader.load(ConfigService.class).findFirst().get();
+        var configRoot = configService.getConfig();
 
         for (var conf : configRoot.cameras) {
             CameraWorker newCamera = null;
@@ -38,17 +37,18 @@ public class CameraManager {
         }
     }
 
-    public void saveConfig() {
-        var configRoot = App.configManager().getConfig();
-
-        ArrayList<OCVClassifierConfig> classifierConfs = new ArrayList<>();
-        for (var classifier : classifiers) {
-            classifierConfs.add(classifier.toConfig());
+    public static CameraServiceImpl provider() {
+        if (instance == null) {
+            instance = new CameraServiceImpl();
         }
-        configRoot.classifiers = new OCVClassifierConfig[classifierConfs.size()];
-        classifierConfs.toArray(configRoot.classifiers);
+        return instance;
+    }
 
-        ArrayList<OCVCameraConfig> cameraConfs = new ArrayList<>();
+    @Override
+    public void shutdown() {
+        stopCameras();
+
+        ArrayList<CameraConfig> cameraConfs = new ArrayList<>();
         for (var entry : cameras.entrySet()) {
             var cameraUUID = entry.getKey();
             var camera = entry.getValue();
@@ -57,10 +57,13 @@ public class CameraManager {
             conf.uuid = cameraUUID.toString();
             cameraConfs.add(conf);
         }
-        configRoot.cameras = new OCVCameraConfig[cameraConfs.size()];
+
+        var configRoot = configService.getConfig();
+        configRoot.cameras = new CameraConfig[cameraConfs.size()];
         cameraConfs.toArray(configRoot.cameras);
     }
 
+    @Override
     public void startCameras() {
         for (var c : cameras.values()) {
             try {
@@ -71,6 +74,7 @@ public class CameraManager {
         }
     }
 
+    @Override
     public void stopCameras() {
         for (var c : cameras.values()) {
             try {
@@ -81,27 +85,26 @@ public class CameraManager {
         }
     }
 
+    @Override
     public UUID addCamera(CameraWorker camera) {
         var cameraUUID = UUID.randomUUID();
         addCamera(camera, cameraUUID);
         return cameraUUID;
     }
 
+    @Override
     public void addCamera(CameraWorker camera, UUID cameraUUID) {
-        // TODO: Consider moving classifier adding elsewhere
-        for (var c : classifiers) {
-            camera.addClassifier(c.clone());
-        }
-
         cameras.put(cameraUUID, camera);
     }
 
+    @Override
     public void removeCamera(UUID cameraUUID) {
         CameraWorker camera = cameras.get(cameraUUID);
         camera.stop();
         cameras.remove(cameraUUID);
     }
 
+    @Override
     public CameraWorker getCamera(UUID cameraUUID) {
         return cameras.get(cameraUUID);
     }

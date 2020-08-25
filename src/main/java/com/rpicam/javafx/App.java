@@ -1,13 +1,15 @@
 package com.rpicam.javafx;
 
+import com.rpicam.cameras.CameraService;
+import com.rpicam.config.ConfigService;
 import com.rpicam.javafx.views.Dashboard;
-import com.rpicam.config.ConfigManager;
-import com.rpicam.cameras.CameraManager;
-import com.rpicam.scenes.SceneManager;
+import com.rpicam.detection.ClassifierService;
+import com.rpicam.scenes.SceneService;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ServiceLoader;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -16,31 +18,20 @@ import javafx.stage.Stage;
  * App is the JavaFX {@link javafx.application.Application} instance and serves
  * as the main "hub" for the rest of the program. It creates and initializes the
  * backend code
- * ({@link com.rpicam.config.ConfigManager}, {@link com.rpicam.cameras.CameraManager},
- * and {@link com.rpicam.scenes.SceneManager}), the JavaFX window
+ * ({@link com.rpicam.config.ConfigServiceImpl}, {@link com.rpicam.cameras.CameraServiceImpl},
+ * and {@link com.rpicam.scenes.SceneServiceImpl}), the JavaFX window
  * (javafx.stage.Stage and javafx.scene.Scene), and the frontend UI
  * ({@link com.rpicam.javafx.views.Dashboard})
  */
 public class App extends Application {
-    private static ConfigManager configManager = new ConfigManager();
-    private static CameraManager cameraManager = new CameraManager();
-    private static SceneManager sceneManager = new SceneManager();
-
-    public static CameraManager cameraManager() {
-        return cameraManager;
-    }
-
-    public static ConfigManager configManager() {
-        return configManager;
-    }
-
-    public static SceneManager sceneManager() {
-        return sceneManager;
-    }
-
     public static void main(String[] args) {
         launch(args);
     }
+
+    private ConfigService configService;
+    private ClassifierService classifierService;
+    private CameraService cameraService;
+    private SceneService sceneService;
 
     private Path configPath;
     private Path defaultsPath = Paths.get("data/defaults.json");
@@ -57,16 +48,19 @@ public class App extends Application {
             configPath = Paths.get(String.format("%s/.%s/%s", System.getProperty("user.home"), appName.toLowerCase(), configFileName));
         }
 
+        configService = ServiceLoader.load(ConfigService.class).findFirst().get();
         if (configPath.toFile().exists()) {
-            configManager.loadConfigFile(configPath);
+            configService.loadConfigFile(configPath);
         }
         else {
-            configManager.loadConfigFile(defaultsPath);
+            configService.loadConfigFile(defaultsPath);
         }
 
-        cameraManager.loadConfig();
-        sceneManager.loadConfig();
-        cameraManager.startCameras();
+        classifierService = ServiceLoader.load(ClassifierService.class).findFirst().get();
+        cameraService = ServiceLoader.load(CameraService.class).findFirst().get();
+        sceneService = ServiceLoader.load(SceneService.class).findFirst().get();
+
+        cameraService.startCameras();
 
         var dashboard = new Dashboard();
 
@@ -79,15 +73,15 @@ public class App extends Application {
 
     @Override
     public void stop() throws IOException {
-        cameraManager.stopCameras();
-        sceneManager.saveConfig();
-        cameraManager.saveConfig();
+        sceneService.shutdown();
+        cameraService.shutdown();
+        classifierService.shutdown();
 
         // Before saving, make application config directory if it doesn't exist
         File configDir = configPath.getParent().toFile();
         if (!configDir.exists()) {
             configDir.mkdir();
         }
-        configManager.saveConfigFile(configPath);
+        configService.saveConfigFile(configPath);
     }
 }

@@ -1,6 +1,7 @@
 package com.rpicam.javafx.viewmodels;
 
 import com.rpicam.cameras.ByteBufferImage;
+import com.rpicam.cameras.CameraService;
 import com.rpicam.detection.ClassifierResult;
 import com.rpicam.scenes.ViewInfo;
 import java.util.List;
@@ -13,10 +14,10 @@ import javafx.scene.image.PixelBuffer;
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.WritableImage;
 import com.rpicam.cameras.CameraWorker;
-import com.rpicam.javafx.App;
 import com.rpicam.javafx.util.ViewModel;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.ServiceLoader;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyListProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -25,6 +26,8 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 public class CameraViewModel implements ViewModel {
+    private CameraService cameraService;
+
     private ViewInfo viewInfo;
     private CameraWorker camera;
 
@@ -44,6 +47,8 @@ public class CameraViewModel implements ViewModel {
     private PropertyChangeListener timestampListener;
 
     public CameraViewModel() {
+        cameraService = ServiceLoader.load(CameraService.class).findFirst().get();
+
         // NOTE: Camera listeners are called from the camera thread rather than
         // the UI thread so use Platform.runLater() to avoid updating UI from a
         // non-JavaFX thread
@@ -88,7 +93,7 @@ public class CameraViewModel implements ViewModel {
 
     public void init(ViewInfo info) {
         viewInfo = info;
-        camera = App.cameraManager().getCamera(viewInfo.cameraUUID);
+        camera = cameraService.getCamera(viewInfo.cameraUUID);
         drawDetection.set(viewInfo.drawDetection);
         drawStats.set(viewInfo.drawStats);
     }

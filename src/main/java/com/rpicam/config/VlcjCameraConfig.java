@@ -1,6 +1,6 @@
 package com.rpicam.config;
 
-public class VlcjCameraConfig extends OCVCameraConfig {
+public class VlcjCameraConfig extends CameraConfig {
     public String url;
     public int procInterval;
 

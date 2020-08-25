@@ -4,7 +4,6 @@ import com.rpicam.cameras.ByteBufferImage;
 import com.rpicam.config.OCVClassifierConfig;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bytedeco.javacpp.BytePointer;
@@ -22,7 +21,7 @@ import org.bytedeco.opencv.opencv_core.RectVector;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
 
-public class OCVClassifier implements Function<ByteBufferImage, List<ClassifierResult>>, Cloneable {
+public class OCVClassifier implements Classifier, Cloneable {
     private Mat grayMat = new Mat();
     private UMat gpuMat;
     private GpuMat cudaMat;
@@ -120,6 +119,7 @@ public class OCVClassifier implements Function<ByteBufferImage, List<ClassifierR
         return results;
     }
 
+    @Override
     public OCVClassifierConfig toConfig() {
         var conf = new OCVClassifierConfig();
         conf.path = path;

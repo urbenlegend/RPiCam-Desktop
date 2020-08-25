@@ -1,7 +1,7 @@
 package com.rpicam.config;
 
 public class ConfigRoot {
-    public OCVClassifierConfig[] classifiers;
-    public OCVCameraConfig[] cameras;
+    public ClassifierConfig[] classifiers;
+    public CameraConfig[] cameras;
     public SceneConfig[] scenes;
 }

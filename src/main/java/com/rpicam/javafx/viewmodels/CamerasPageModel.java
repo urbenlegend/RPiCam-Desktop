@@ -1,16 +1,18 @@
 package com.rpicam.javafx.viewmodels;
 
 import com.rpicam.Constants;
+import com.rpicam.cameras.CameraService;
 import com.rpicam.javafx.util.ViewModel;
 import com.rpicam.scenes.SceneInfo;
 import com.rpicam.scenes.ViewInfo;
 import com.rpicam.cameras.CameraWorker;
 import com.rpicam.cameras.OCVLocalCamera;
 import com.rpicam.cameras.VlcjCamera;
-import com.rpicam.javafx.App;
+import com.rpicam.scenes.SceneService;
 import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.UUID;
 import javafx.beans.property.ReadOnlyListProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -18,13 +20,18 @@ import javafx.collections.FXCollections;
 import org.apache.commons.lang3.math.NumberUtils;
 
 public class CamerasPageModel implements ViewModel {
+    private CameraService cameraService;
+    private SceneService sceneService;
+
     private SceneInfo scene;
 
     private SimpleListProperty<ViewInfo> views = new SimpleListProperty<>(FXCollections.observableArrayList());
     private PropertyChangeListener scenePropertyListener;
 
     public CamerasPageModel() {
-        scene = App.sceneManager().getScene("_ALL_CAMERAS_");
+        cameraService = ServiceLoader.load(CameraService.class).findFirst().get();
+        sceneService = ServiceLoader.load(SceneService.class).findFirst().get();
+        scene = sceneService.getScene("_ALL_CAMERAS_");
         scenePropertyListener = event -> {
             views.setAll(scene.getViews());
         };
@@ -52,7 +59,7 @@ public class CamerasPageModel implements ViewModel {
     public void addNewCamera(Map<String, String> cameraPropMap) {
         // Add new camera to camera manager
         CameraWorker camera = createCamera(cameraPropMap);
-        UUID cameraUUID = App.cameraManager().addCamera(camera);
+        UUID cameraUUID = cameraService.addCamera(camera);
 
         // Create new view for camera
         var viewInfo = new ViewInfo();
@@ -93,7 +100,6 @@ public class CamerasPageModel implements ViewModel {
 
     public void removeCameraByViewInfo(ViewInfo view) {
         scene.removeView(view);
-        var cameraManager = App.cameraManager();
-        cameraManager.removeCamera(view.cameraUUID);
+        cameraService.removeCamera(view.cameraUUID);
     }
 }

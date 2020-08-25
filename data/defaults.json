@@ -1,6 +1,7 @@
 {
   "classifiers": [
     {
+      "type": "opencv",
       "path": "./data/haarcascade_upperbody.xml",
       "title": "Upper Body",
       "color": "rgb(255,0,0)",
@@ -10,6 +11,7 @@
       "gpu": true
     },
     {
+      "type": "opencv",
       "path": "./data/haarcascade_frontalface_alt.xml",
       "title": "Face",
       "color": "rgb(0,255,0)",
@@ -19,6 +21,7 @@
       "gpu": true
     },
     {
+      "type": "opencv",
       "path": "./data/haarcascade_fullbody.xml",
       "title": "Full Body",
       "color": "rgb(0,0,255)",

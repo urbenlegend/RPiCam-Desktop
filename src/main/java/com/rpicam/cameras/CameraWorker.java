@@ -1,16 +1,12 @@
 package com.rpicam.cameras;
 
 import com.rpicam.detection.ClassifierResult;
-import com.rpicam.config.OCVCameraConfig;
+import com.rpicam.config.CameraConfig;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 
 public abstract class CameraWorker {
-    private List<Function<ByteBufferImage, List<ClassifierResult>>> classifiers = Collections.synchronizedList(new ArrayList<>());
     private transient PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     // Observable Properties
     private ByteBufferImage frame;
@@ -20,25 +16,13 @@ public abstract class CameraWorker {
     private String cameraStatus;
     private String timestamp;
 
-    public abstract OCVCameraConfig toConfig();
+    public abstract CameraConfig toConfig();
 
-    public abstract void fromConfig(OCVCameraConfig conf);
+    public abstract void fromConfig(CameraConfig conf);
 
     public abstract void start();
 
     public abstract void stop();
-
-    public void addClassifier(Function<ByteBufferImage, List<ClassifierResult>> c) {
-        classifiers.add(c);
-    }
-
-    public void removeClassifier(Function<ByteBufferImage, List<ClassifierResult>> c) {
-        classifiers.remove(c);
-    }
-
-    public List<Function<ByteBufferImage, List<ClassifierResult>>> getClassifiers() {
-        return classifiers;
-    }
 
     public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
         pcs.addPropertyChangeListener(propertyName, listener);

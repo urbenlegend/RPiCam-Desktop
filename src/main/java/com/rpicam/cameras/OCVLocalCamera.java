@@ -1,24 +1,20 @@
 package com.rpicam.cameras;
 
-import com.rpicam.config.OCVCameraConfig;
+import com.rpicam.config.CameraConfig;
 import com.rpicam.config.OCVLocalCameraConfig;
-import com.rpicam.detection.ClassifierResult;
+import com.rpicam.detection.ClassifierService;
 import com.rpicam.exceptions.ConfigException;
 import com.rpicam.exceptions.VideoIOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
+import java.util.ServiceLoader;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2BGRA;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
 import org.bytedeco.opencv.global.opencv_videoio;
@@ -37,7 +33,7 @@ public class OCVLocalCamera extends CameraWorker {
     private int procInterval;
 
     private ScheduledExecutorService schedulePool;
-    private ExecutorService classifierPool;
+    private ClassifierService classifierService = ServiceLoader.load(ClassifierService.class).findFirst().get();
     private final Mat capMat = new Mat();
     private final Mat bgraMat = new Mat();
     private final ByteBufferImage classifierFrame = new ByteBufferImage();
@@ -58,7 +54,7 @@ public class OCVLocalCamera extends CameraWorker {
     }
 
     @Override
-    public void fromConfig(OCVCameraConfig conf) {
+    public void fromConfig(CameraConfig conf) {
         if (!(conf instanceof OCVLocalCameraConfig)) {
             throw new ConfigException("Invalid config for OCVLocalCamera");
         }
@@ -104,12 +100,11 @@ public class OCVLocalCamera extends CameraWorker {
 
     @Override
     public void start() {
-        if (schedulePool != null || classifierPool != null) {
+        if (schedulePool != null) {
             return;
         }
         open();
         schedulePool = Executors.newScheduledThreadPool(2);
-        classifierPool = Executors.newSingleThreadExecutor();
         schedulePool.scheduleAtFixedRate(this::processFrame, 0, capRate, TimeUnit.MILLISECONDS);
         schedulePool.scheduleAtFixedRate(this::processClassifiers, 0, procInterval, TimeUnit.MILLISECONDS);
     }
@@ -123,14 +118,6 @@ public class OCVLocalCamera extends CameraWorker {
             } catch (InterruptedException ex) {
             }
             schedulePool = null;
-        }
-        if (classifierPool != null) {
-            classifierPool.shutdownNow();
-            try {
-                classifierPool.awaitTermination(1, TimeUnit.SECONDS);
-            } catch (InterruptedException ex) {
-            }
-            classifierPool = null;
         }
         close();
     }
@@ -186,27 +173,7 @@ public class OCVLocalCamera extends CameraWorker {
                 image.copyTo(classifierFrame);
             }
 
-            // Create classifier jobs
-            var classifierJobs = getClassifiers().stream()
-                    .map((c) -> {
-                        Callable<List<ClassifierResult>> classifierJob = () -> {
-                            return c.apply(classifierFrame);
-                        };
-                        return classifierJob;
-                    })
-                    .collect(Collectors.toList());
-
-            // Feed jobs into classifier executor and wait for results
-            var newClassifierResults = classifierPool.invokeAll(classifierJobs).stream()
-                    .flatMap(resultFuture -> {
-                        try {
-                            return resultFuture.get().stream();
-                        } catch (Exception e) {
-                            return Stream.empty();
-                        }
-                    })
-                    .collect(Collectors.toList());
-
+            var newClassifierResults = classifierService.submit(classifierFrame);
             setClassifierResults(newClassifierResults);
         } catch (InterruptedException e) {
         } catch (Throwable t) {
