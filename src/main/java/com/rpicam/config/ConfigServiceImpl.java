@@ -9,20 +9,27 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.JsonSyntaxException;
+import static com.rpicam.Constants.APP_NAME;
+import static com.rpicam.Constants.CONFIG_FILE_NAME;
+import static com.rpicam.Constants.DEFAULT_CONFIG_PATH;
 import com.rpicam.exceptions.ConfigException;
+import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.TreeMap;
 
 public class ConfigServiceImpl implements ConfigService {
     private static ConfigServiceImpl instance;
 
-    private ConfigRoot configRoot;
     private Gson gson;
+    private ConfigRoot configRoot;
+    private Path configPath;
 
     private ConfigServiceImpl() {
         var builder = new GsonBuilder();
@@ -32,6 +39,21 @@ public class ConfigServiceImpl implements ConfigService {
                 .registerTypeAdapter(ClassifierConfig.class, new ClassifierConfigDeserializer())
                 .registerTypeAdapter(ClassifierConfig.class, new ClassifierConfigSerializer())
                 .create();
+
+        // Detect configuration path based on OS
+        if (System.getProperty("os.name").startsWith("Windows")) {
+            configPath = Paths.get(String.format("%s\\%s\\%s", System.getenv("APPDATA"), APP_NAME, CONFIG_FILE_NAME));
+        } else {
+            configPath = Paths.get(String.format("%s/.%s/%s", System.getProperty("user.home"), APP_NAME.toLowerCase(), CONFIG_FILE_NAME));
+        }
+
+        // Load config file if it exists, otherwise load defaults
+        if (configPath.toFile().exists()) {
+            loadConfigFile(configPath);
+        }
+        else {
+            loadConfigFile(Paths.get(DEFAULT_CONFIG_PATH));
+        }
     }
 
     public static ConfigServiceImpl provider() {
@@ -42,19 +64,35 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     @Override
-    public void loadConfigFile(Path configPath) throws IOException {
-        var configStr = Files.readString(configPath, StandardCharsets.US_ASCII);
+    public void shutdown() {
+        // Before saving, make application config directory if it doesn't exist
+        File configDir = configPath.getParent().toFile();
+        if (!configDir.exists()) {
+            configDir.mkdir();
+        }
+        saveConfigFile(configPath);
+    }
+
+    @Override
+    public void loadConfigFile(Path configPath) {
         try {
+            var configStr = Files.readString(configPath, StandardCharsets.US_ASCII);
             configRoot = gson.fromJson(configStr, ConfigRoot.class);
         } catch (JsonSyntaxException e) {
             throw new ConfigException(configPath.toString() + "is an invalid config file", e);
+        } catch (IOException ex) {
+            throw new UncheckedIOException(ex);
         }
     }
 
     @Override
-    public void saveConfigFile(Path configPath) throws IOException {
-        String configStr = gson.toJson(configRoot);
-        Files.writeString(configPath, configStr);
+    public void saveConfigFile(Path configPath) {
+        try {
+            String configStr = gson.toJson(configRoot);
+            Files.writeString(configPath, configStr);
+        } catch (IOException ex) {
+            throw new UncheckedIOException(ex);
+        }
     }
 
     @Override

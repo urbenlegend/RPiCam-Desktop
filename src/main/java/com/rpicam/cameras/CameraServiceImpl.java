@@ -15,16 +15,14 @@ public class CameraServiceImpl implements CameraService {
     private static CameraServiceImpl instance;
 
     private ConfigService configService;
-    
+
     private HashMap<UUID, CameraWorker> cameras = new HashMap<>();
 
     private CameraServiceImpl() {
         configService = ServiceLoader.load(ConfigService.class).findFirst().get();
         var configRoot = configService.getConfig();
-
         for (var conf : configRoot.cameras) {
             CameraWorker newCamera = null;
-            // TODO: Add other camera types
             if (conf instanceof OCVLocalCameraConfig) {
                 newCamera = new OCVLocalCamera();
             }
